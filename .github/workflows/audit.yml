@@ -1,0 +1,77 @@
+name: Run Audit
+
+# On-demand deployment of the auditor: trigger from the Actions tab, enter a URL,
+# and download the JSON + HTML report as a build artifact. No local machine needed.
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Website URL to audit (e.g. https://example.com)"
+        required: true
+        type: string
+      max_pages:
+        description: "Max pages to sample"
+        required: false
+        default: "12"
+        type: string
+      render:
+        description: "Use headless Chromium to measure the JS fact-gap"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Playwright + Chromium (for --render)
+        if: ${{ inputs.render }}
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Run audit
+        run: |
+          cd brand-ai-readiness-audit
+          ARGS="--max-pages ${{ inputs.max_pages }} --out ../report.json --html ../report.html"
+          if [ "${{ inputs.render }}" = "true" ]; then ARGS="$ARGS --render"; fi
+          python skills/audit-orchestrator/scripts/run_audit.py "${{ inputs.url }}" $ARGS
+
+      - name: Write job summary
+        if: always()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os
+          try:
+              r = json.load(open("report.json"))
+          except Exception as e:
+              print(f"No report produced: {e}"); raise SystemExit(0)
+          s = r["summary"]
+          print(f"## Audit — {r.get('site','?')}")
+          print(f"Pages crawled: {r['scope']['pages_crawled']} · render used: {r['scope']['render_used']}\n")
+          print(f"**{s['total_findings']} findings** — "
+                f"🔴 {s['critical']} critical · 🟠 {s['high']} high · 🟡 {s['medium']} medium · ⚪ {s['low']} low")
+          print(f"(discoverability {s['by_dimension']['discoverability']} · engagement {s['by_dimension']['engagement']})\n")
+          print("| Sev | Finding | Fix |")
+          print("|-----|---------|-----|")
+          for f in r["findings"]:
+              fix = f["suggested_action"]["summary"].replace("|", "\\|")
+              title = f["title"].replace("|", "\\|")
+              print(f"| {f['severity']} | {title} | {fix} |")
+          PY
+
+      - name: Upload report artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-report
+          path: |
+            report.json
+            report.html
+          if-no-files-found: warn

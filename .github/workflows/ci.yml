@@ -1,0 +1,29 @@
+name: CI
+
+# Quality gate: validate the marketplace and run the test suite on every push/PR.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  validate-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: brand-ai-readiness-audit
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate marketplace (manifest + SKILL.md compliance)
+        run: python scripts/validate.py
+
+      - name: Compile all scripts
+        run: python -m py_compile $(find . -name '*.py')
+
+      - name: Run test suite (offline fixtures)
+        run: python tests/run_tests.py
