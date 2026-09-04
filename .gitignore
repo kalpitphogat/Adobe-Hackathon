@@ -2,6 +2,11 @@
 audit_*/
 *.report.json
 report.json
+sample-audit-report.json
+
+# Packaged submission (build artifact — regenerated from source)
+submission.zip
+*.zip
 
 # Python
 __pycache__/
