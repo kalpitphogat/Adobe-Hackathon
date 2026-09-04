@@ -1,0 +1,13 @@
+# Audit runtime artifacts
+audit_*/
+*.report.json
+report.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store

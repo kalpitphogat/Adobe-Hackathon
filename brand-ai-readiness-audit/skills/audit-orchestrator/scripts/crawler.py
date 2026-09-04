@@ -1,0 +1,206 @@
+#!/usr/bin/env python3
+"""
+Crawl a site politely and build the shared cache the sub-audits read.
+
+  python crawler.py <site> <cache_dir> [--max-pages N] [--render]
+
+Respects robots.txt, stays on-host, samples up to --max-pages pages (default 12),
+and optionally renders each page with Playwright (headless Chromium) to enable the
+static-vs-rendered fact-gap check. Read-only: GET only, no forms, no auth.
+"""
+import argparse
+import collections
+import json
+import os
+import sys
+import urllib.parse
+import urllib.robotparser
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import auditlib as A  # noqa: E402
+
+
+def discover_from_sitemap(site, robots_txt):
+    """Return (sitemap_urls_found, page_urls) from sitemap.xml if reachable."""
+    candidates = []
+    for line in (robots_txt or "").splitlines():
+        if line.lower().startswith("sitemap:"):
+            candidates.append(line.split(":", 1)[1].strip())
+    candidates.append(site + "/sitemap.xml")
+    urls, sitemaps = [], []
+    for sm in dict.fromkeys(candidates):
+        r = A.fetch(sm)
+        if r["status"] == 200 and ("<urlset" in r["body"] or "<sitemapindex" in r["body"]):
+            sitemaps.append(sm)
+            import re
+            for loc in re.findall(r"<loc>\s*([^<\s]+)\s*</loc>", r["body"]):
+                urls.append(loc.strip())
+    return sitemaps, urls
+
+
+def _find_chromium():
+    """Locate a Chromium executable: explicit env var, or scan PLAYWRIGHT_BROWSERS_PATH."""
+    exe = os.environ.get("PLAYWRIGHT_CHROMIUM_EXECUTABLE")
+    if exe and os.path.exists(exe):
+        return exe
+    import glob
+    base = os.environ.get("PLAYWRIGHT_BROWSERS_PATH", "")
+    for pat in ("chromium-*/chrome-linux/chrome", "chromium_headless_shell-*/chrome-linux/headless_shell"):
+        hits = sorted(glob.glob(os.path.join(base, pat))) if base else []
+        if hits:
+            return hits[-1]
+    return None
+
+
+def try_render(url):
+    """Return rendered visible text via Playwright, or None if unavailable."""
+    try:
+        from playwright.sync_api import sync_playwright
+    except Exception:
+        return None
+    try:
+        with sync_playwright() as pw:
+            exe = _find_chromium()
+            launch = {"headless": True, "args": ["--no-sandbox", "--disable-dev-shm-usage"]}
+            if exe:
+                launch["executable_path"] = exe
+            browser = pw.chromium.launch(**launch)
+            page = browser.new_page(user_agent=A.DEFAULT_UA)
+            page.goto(url, wait_until="networkidle", timeout=20000)
+            text = page.evaluate("() => document.body ? document.body.innerText : ''")
+            browser.close()
+            return text
+    except Exception:
+        return None
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("site")
+    ap.add_argument("cache_dir")
+    ap.add_argument("--max-pages", type=int, default=12)
+    ap.add_argument("--render", action="store_true")
+    args = ap.parse_args()
+
+    site = A.normalize_site(args.site)
+    host = urllib.parse.urlparse(site).netloc
+    os.makedirs(os.path.join(args.cache_dir, "pages"), exist_ok=True)
+
+    # robots.txt
+    robots = A.fetch(site + "/robots.txt")
+    robots_txt = robots["body"] if robots["status"] == 200 else ""
+    rp = urllib.robotparser.RobotFileParser()
+    rp.parse(robots_txt.splitlines())
+
+    def allowed(url, ua="*"):
+        if not robots_txt:
+            return True
+        try:
+            return rp.can_fetch(ua, url)
+        except Exception:
+            return True
+
+    # AI crawler directives (explicit allow/deny per bot)
+    ai_bots = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-Web",
+               "anthropic-ai", "PerplexityBot", "Google-Extended", "Applebot-Extended",
+               "CCBot", "Bytespider"]
+    ai_bot_status = {}
+    for bot in ai_bots:
+        rp_bot = urllib.robotparser.RobotFileParser()
+        rp_bot.parse(robots_txt.splitlines())
+        ai_bot_status[bot] = "allowed" if (not robots_txt or rp_bot.can_fetch(bot, site + "/")) else "blocked"
+
+    # sitemap discovery
+    sitemaps, sm_urls = discover_from_sitemap(site, robots_txt)
+
+    # Seed BFS from homepage; supplement with sitemap URLs
+    queue = collections.deque([site + "/"])
+    seen = set()
+    seeded = [u for u in sm_urls if A.same_host(site, u)][:args.max_pages * 3]
+    for u in seeded:
+        queue.append(u)
+
+    pages = []
+    while queue and len(pages) < args.max_pages:
+        url = queue.popleft()
+        url = url.split("#")[0]
+        if url in seen:
+            continue
+        seen.add(url)
+        if not A.same_host(site, url):
+            continue
+        blocked = not allowed(url)
+        r = A.fetch(url)
+        parsed = A.parse_html(r["body"]) if r["body"] else A.parse_html("")
+        sl = A.slug(url)
+        rec = {
+            "url": url,
+            "slug": sl,
+            "status": r["status"],
+            "error": r["error"],
+            "bytes": r["bytes"],
+            "elapsed_ms": r["elapsed_ms"],
+            "robots_blocked": blocked,
+            "content_type": r["headers"].get("content-type", ""),
+            "x_robots_tag": r["headers"].get("x-robots-tag", ""),
+            "title": parsed.title.strip(),
+            "canonical": parsed.canonical,
+            "html_lang": parsed.html_lang,
+            "has_viewport": parsed.has_viewport,
+            "n_headings": len(parsed.headings),
+            "n_h1": sum(1 for lvl, _ in parsed.headings if lvl == 1),
+            "n_links": len(parsed.links),
+            "n_imgs": len(parsed.imgs),
+            "n_imgs_no_alt": sum(1 for im in parsed.imgs if not (im.get("alt") or "").strip()),
+            "n_ldjson_blocks": len(parsed.ldjson),
+            "text_len": len(parsed.visible_text),
+        }
+        # persist raw html + extracted text
+        if r["body"]:
+            with open(os.path.join(args.cache_dir, "pages", sl + ".html"), "w", encoding="utf-8") as f:
+                f.write(r["body"])
+        with open(os.path.join(args.cache_dir, "pages", sl + ".txt"), "w", encoding="utf-8") as f:
+            f.write(parsed.visible_text)
+
+        # optional render
+        if args.render and r["status"] == 200:
+            rendered = try_render(url)
+            if rendered is not None:
+                rec["rendered"] = True
+                rec["rendered_len"] = len(rendered)
+                with open(os.path.join(args.cache_dir, "pages", sl + ".rendered.txt"), "w", encoding="utf-8") as f:
+                    f.write(rendered)
+            else:
+                rec["rendered"] = False
+        pages.append(rec)
+
+        # enqueue internal links from homepage & early pages to broaden the sample
+        if len(pages) <= 3 and r["body"]:
+            for href in parsed.links:
+                nu = A.absolutize(url, href).split("#")[0]
+                if A.same_host(site, nu) and nu not in seen and nu.startswith("http"):
+                    queue.append(nu)
+
+    meta = {
+        "site": site,
+        "host": host,
+        "robots": {
+            "present": robots["status"] == 200,
+            "status": robots["status"],
+            "text": robots_txt[:20000],
+            "ai_bots": ai_bot_status,
+        },
+        "sitemaps": sitemaps,
+        "sitemap_url_count": len(sm_urls),
+        "render_enabled": args.render,
+        "render_available": any(p.get("rendered") for p in pages),
+        "pages": pages,
+        "pages_crawled": len(pages),
+    }
+    with open(os.path.join(args.cache_dir, "meta.json"), "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
+    print(f"crawled {len(pages)} pages -> {args.cache_dir}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()
