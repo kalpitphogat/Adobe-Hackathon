@@ -1,0 +1,138 @@
+================================================================================
+ BRAND AI-READINESS AUDIT  —  HOW TO RUN
+ Adobe University Hackathon 2026 · Round 3 · Agent Skill Marketplace
+================================================================================
+
+All commands are run from the repository root unless a `cd` says otherwise.
+The marketplace itself lives in the `brand-ai-readiness-audit/` folder.
+
+
+--------------------------------------------------------------------------------
+0) REQUIREMENTS
+--------------------------------------------------------------------------------
+- Python 3.8 or newer.
+- The audit uses ONLY the Python standard library for crawling/parsing/checks,
+  so no install is needed for the basic run.
+- OPTIONAL: for the `--render` JavaScript fact-gap check you need Playwright +
+  headless Chromium:
+
+    pip install playwright
+    python -m playwright install --with-deps chromium
+
+  Without Playwright the audit still runs and degrades gracefully (it keeps a
+  thin-HTML heuristic and notes that the direct render check was skipped).
+
+Check your Python:
+
+    python3 --version
+
+
+--------------------------------------------------------------------------------
+1) RUN AN AUDIT  (the main thing)
+--------------------------------------------------------------------------------
+Enter the marketplace folder first:
+
+    cd brand-ai-readiness-audit
+
+Basic audit of a website (prints the JSON report to the screen):
+
+    python3 skills/audit-orchestrator/scripts/run_audit.py https://example.com
+
+Save the JSON report to a file:
+
+    python3 skills/audit-orchestrator/scripts/run_audit.py https://example.com --out report.json
+
+Full audit: add --render (JS fact-gap) and --html (readable report page):
+
+    python3 skills/audit-orchestrator/scripts/run_audit.py https://example.com \
+        --render --out report.json --html report.html
+
+Then open report.html in any browser.
+
+Available flags:
+    --max-pages N     how many pages to sample (default 12)
+    --render          use headless Chromium to measure the raw-vs-rendered gap
+    --out FILE        write the JSON report to FILE
+    --html FILE       also write a human-readable HTML report to FILE
+
+Exit code is 0 on success; non-zero if the site is unreachable, the crawl
+fails, or a sub-audit could not run (so an incomplete report is never silent).
+
+
+--------------------------------------------------------------------------------
+2) VALIDATE THE MARKETPLACE (structure / spec compliance)
+--------------------------------------------------------------------------------
+    cd brand-ai-readiness-audit
+    python3 scripts/validate.py
+
+Expected: "OK: 7 skills, 1 entrypoint (audit-orchestrator), all SKILL.md ..."
+
+
+--------------------------------------------------------------------------------
+3) RUN THE TEST SUITE (offline, no network)
+--------------------------------------------------------------------------------
+    cd brand-ai-readiness-audit
+    python3 tests/run_tests.py
+
+Add --render to also exercise the headless-browser path:
+
+    python3 tests/run_tests.py --render
+
+Expected: "Ran 9 tests ... OK"
+
+
+--------------------------------------------------------------------------------
+4) RENDER A REPORT TO HTML SEPARATELY (optional)
+--------------------------------------------------------------------------------
+If you already have a report.json and just want the HTML page:
+
+    cd brand-ai-readiness-audit
+    python3 skills/audit-orchestrator/scripts/render_report.py report.json report.html
+
+
+--------------------------------------------------------------------------------
+5) PACKAGE THE SUBMISSION ZIP
+--------------------------------------------------------------------------------
+    cd brand-ai-readiness-audit
+    zip -r ../submission.zip . -x '*__pycache__*' -x '*.pyc' -x 'tests/*cache*'
+
+The zip lands at the repo root as submission.zip (well under the 50 MB limit).
+
+
+--------------------------------------------------------------------------------
+6) RUN IT IN GITHUB ACTIONS (no local machine needed)
+--------------------------------------------------------------------------------
+CI (validate + tests) runs automatically on every push/pull request.
+
+To audit a URL in the cloud on demand:
+  1. Open the repo on GitHub -> "Actions" tab.
+  2. Select the "Run Audit" workflow -> "Run workflow".
+  3. Enter the URL (and optionally max_pages / render).
+  4. When it finishes, a findings table appears in the run summary, and
+     report.json + report.html are attached as a downloadable artifact.
+
+
+--------------------------------------------------------------------------------
+7) QUICK LOCAL DEMO (audit a site you serve yourself)
+--------------------------------------------------------------------------------
+The repo ships fixture sites used by the tests; you can audit one directly:
+
+    cd brand-ai-readiness-audit
+    python3 -m http.server 8000 --directory tests/fixtures/badsite &
+    NO_PROXY=127.0.0.1 python3 skills/audit-orchestrator/scripts/run_audit.py \
+        http://127.0.0.1:8000 --render --out demo.json --html demo.html
+    # stop the server when done:
+    kill %1
+
+badsite is deliberately broken (expect many findings); goodsite is healthy
+(expect very few).
+
+
+--------------------------------------------------------------------------------
+NOTES
+--------------------------------------------------------------------------------
+- Read-only: the audit never modifies the site, only fetches (GET) and reports.
+- Respects robots.txt: URLs disallowed for the crawler are never fetched.
+- Runs in well under 5 minutes for a typical site.
+- More detail: see README.md (repo root) and brand-ai-readiness-audit/README.md.
+================================================================================
