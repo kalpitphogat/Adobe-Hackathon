@@ -65,16 +65,35 @@ def main():
     cmd = [sys.executable, crawler, site, cache_dir, "--max-pages", str(args.max_pages)]
     if args.render:
         cmd.append("--render")
-    subprocess.run(cmd, timeout=240)
-
+    try:
+        crawl = subprocess.run(cmd, timeout=240)
+    except subprocess.TimeoutExpired:
+        print(f"error: crawl of {site} timed out after 240s; no report produced.", file=sys.stderr)
+        return 1
+    meta_path = os.path.join(cache_dir, "meta.json")
+    if crawl.returncode != 0 or not os.path.exists(meta_path):
+        print(f"error: crawl failed (exit {crawl.returncode}); no cache produced, no report.",
+              file=sys.stderr)
+        return 1
     meta = A.load_meta(cache_dir)
+
+    # A valid cache with nothing actually reachable (DNS/connection failure, all errors)
+    # is not an auditable site — say so clearly instead of emitting a hollow report.
+    if not any(p.get("status") for p in meta.get("pages", [])):
+        print(f"error: {site} was unreachable — no page returned a response. No report produced.",
+              file=sys.stderr)
+        return 1
 
     # 2. fan out sub-audits, tag findings with their source skill
     all_findings = []
+    skill_errors = []
     disc, eng = {"crawl-access", "render-extraction", "structured-data",
                  "freshness", "corroboration", "answerability"}, {"engagement"}
     for skill_id, script_rel in SUB_AUDITS:
         res = run_sub(skill_id, script_rel, cache_dir)
+        if res.get("error"):
+            skill_errors.append({"skill": skill_id, "error": res["error"]})
+            print(f"warning: sub-audit {skill_id} did not run: {res['error']}", file=sys.stderr)
         for f in res.get("findings", []):
             f["skill"] = skill_id
             cat = f.get("category", "")
@@ -99,6 +118,8 @@ def main():
             "pages_crawled": meta["pages_crawled"],
             "render_used": meta["render_available"],
             "robots_respected": True,
+            "skills_run": len(SUB_AUDITS) - len(skill_errors),
+            "skills_errored": skill_errors,
         },
         "summary": {
             "total_findings": len(all_findings),
@@ -136,7 +157,9 @@ def main():
             fh.write(render_report.render(report))
         print(f"wrote HTML report -> {args.html}", file=sys.stderr)
     print(text)
+    # Non-zero exit if any sub-audit failed to run, so callers/CI notice an incomplete report.
+    return 1 if skill_errors else 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

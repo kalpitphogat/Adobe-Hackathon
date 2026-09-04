@@ -134,6 +134,28 @@ class TestBadSite(unittest.TestCase):
         self.assertIn("AI-Readiness Audit", doc)
 
 
+class TestRobotsGuardrail(unittest.TestCase):
+    """A URL disallowed by robots.txt must be recorded as blocked and never fetched."""
+
+    def test_disallowed_url_not_fetched(self):
+        base, stop = serve(os.path.join(FIXTURES, "robotssite"))
+        cache = tempfile.mkdtemp(prefix="robots_")
+        try:
+            subprocess.run(
+                [sys.executable, os.path.join(SCRIPTS, "crawler.py"), base, cache, "--max-pages", "5"],
+                capture_output=True, text=True, timeout=60, env=os.environ)
+            meta = json.load(open(os.path.join(cache, "meta.json"), encoding="utf-8"))
+        finally:
+            stop()
+        blocked = [p for p in meta["pages"] if "/private/" in p["url"]]
+        self.assertTrue(blocked, "disallowed URL should still be recorded")
+        for p in blocked:
+            self.assertTrue(p["robots_blocked"])
+            self.assertIsNone(p["status"], "disallowed URL must not be fetched")
+            html = os.path.join(cache, "pages", p["slug"] + ".html")
+            self.assertFalse(os.path.exists(html), "no body may be cached for a disallowed URL")
+
+
 class TestGoodSite(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

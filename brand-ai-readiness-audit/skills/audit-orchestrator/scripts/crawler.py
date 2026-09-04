@@ -66,11 +66,12 @@ def try_render(url):
             if exe:
                 launch["executable_path"] = exe
             browser = pw.chromium.launch(**launch)
-            page = browser.new_page(user_agent=A.DEFAULT_UA)
-            page.goto(url, wait_until="networkidle", timeout=20000)
-            text = page.evaluate("() => document.body ? document.body.innerText : ''")
-            browser.close()
-            return text
+            try:
+                page = browser.new_page(user_agent=A.DEFAULT_UA)
+                page.goto(url, wait_until="networkidle", timeout=20000)
+                return page.evaluate("() => document.body ? document.body.innerText : ''")
+            finally:
+                browser.close()  # always close, even if goto()/evaluate() raised
     except Exception:
         return None
 
@@ -93,7 +94,7 @@ def main():
     rp = urllib.robotparser.RobotFileParser()
     rp.parse(robots_txt.splitlines())
 
-    def allowed(url, ua="*"):
+    def allowed(url, ua=A.DEFAULT_UA):
         if not robots_txt:
             return True
         try:
@@ -137,9 +138,24 @@ def main():
         if not A.same_host(site, url):
             continue
         blocked = not allowed(url)
-        r = A.fetch(url)
-        parsed = A.parse_html(r["body"]) if r["body"] else A.parse_html("")
         sl = A.slug(url)
+        if blocked:
+            # Respect robots.txt: never fetch a disallowed URL. Record it as blocked
+            # (that is what crawl-access-audit reports on) without requesting the body.
+            pages.append({
+                "url": url, "slug": sl, "status": None, "error": "robots_disallow",
+                "bytes": 0, "elapsed_ms": 0, "robots_blocked": True,
+                "content_type": "", "x_robots_tag": "", "title": "", "canonical": None,
+                "html_lang": None, "has_viewport": False, "n_headings": 0, "n_h1": 0,
+                "n_links": 0, "n_imgs": 0, "n_imgs_no_alt": 0, "n_ldjson_blocks": 0,
+                "text_len": 0, "n_mixed_content": 0,
+            })
+            continue
+        r = A.fetch(url)
+        # If the response redirected off-host, don't treat its body as this site's content.
+        if r["final_url"] and not A.same_host(site, r["final_url"]):
+            r = {**r, "body": "", "bytes": 0}
+        parsed = A.parse_html(r["body"]) if r["body"] else A.parse_html("")
         rec = {
             "url": url,
             "slug": sl,
