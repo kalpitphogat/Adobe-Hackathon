@@ -123,6 +123,44 @@ def run(cache_dir):
             "down-ranked and distrusted by crawlers and assistants.",
             "high", "crawl-access"))
 
+    # 7. Broken internal links
+    broken = [lc for lc in meta.get("link_check", [])
+              if lc["status"] is None or lc["status"] >= 400]
+    if broken:
+        sample = ", ".join(f"{lc['url']} ({lc['status']})" for lc in broken[:5])
+        findings.append(A.finding(
+            "Broken internal links from the homepage",
+            "medium",
+            f"{len(broken)}/{len(meta.get('link_check', []))} sampled homepage links return "
+            f"an error or no response: {sample}.",
+            "Fix or redirect broken links. Dead links waste crawl budget, break the path "
+            "crawlers use to discover pages, and erode visitor trust.",
+            "medium", "crawl-access", checked=len(meta.get("link_check", []))))
+
+    # 8. Mixed content (http sub-resources on an https page)
+    mixed = [p["url"] for p in pages if p.get("n_mixed_content", 0) > 0]
+    if mixed:
+        findings.append(A.finding(
+            "Mixed content: insecure resources on secure pages",
+            "medium",
+            f"{len(mixed)}/{len(pages)} pages reference http:// sub-resources from an https "
+            f"page: {', '.join(mixed[:4])}.",
+            "Load all scripts, styles, images, and fonts over https. Browsers block or warn "
+            "on mixed content, breaking layout and signalling an insecure page.",
+            "medium", "crawl-access", checked=len(pages)))
+
+    # 9. llms.txt (emerging AI-assistant guidance file) — proactive improvement
+    if not meta.get("llms_txt", {}).get("present"):
+        findings.append(A.finding(
+            "No llms.txt guidance file for AI assistants",
+            "low",
+            f"GET {meta['site']}/llms.txt returned status "
+            f"{meta.get('llms_txt', {}).get('status')}.",
+            "Consider adding an llms.txt (an emerging convention) that points AI assistants to "
+            "your most important, quotable pages in plain markdown — a proactive discoverability "
+            "signal even though it is not yet universally consumed.",
+            "low", "crawl-access"))
+
     return findings
 
 

@@ -169,6 +169,44 @@ def run(cache_dir):
             "Use exactly one H1 per page and nest sub-topics under H2/H3 for an unambiguous outline.",
             "low", "structured-data", checked=total))
 
+    # 5. duplicate titles / descriptions across pages
+    if total >= 3:
+        titles = {}
+        for p in pages:
+            t = (p.get("title") or "").strip().lower()
+            if t:
+                titles.setdefault(t, []).append(p["url"])
+        dup_titles = {t: us for t, us in titles.items() if len(us) > 1}
+        if dup_titles:
+            worst = max(dup_titles.values(), key=len)
+            findings.append(A.finding(
+                "Duplicate page titles across the site",
+                "medium",
+                f"{sum(len(u) for u in dup_titles.values())} pages share {len(dup_titles)} "
+                f"repeated <title>(s); e.g. {len(worst)} pages titled "
+                f"\"{[t for t, u in dup_titles.items() if u == worst][0][:60]}\".",
+                "Give every page a unique, descriptive title. Duplicate titles make pages "
+                "indistinguishable to engines and assistants and cause the wrong page to be cited.",
+                "medium", "structured-data", checked=total))
+
+        descs = {}
+        for p in pages:
+            html = A.read_page(cache_dir, p, "html") or ""
+            m = re.search(r'<meta[^>]+name=["\']description["\'][^>]+content=["\']([^"\']{20,})',
+                          html, re.I)
+            if m:
+                descs.setdefault(m.group(1).strip().lower(), []).append(p["url"])
+        dup_desc = {d: us for d, us in descs.items() if len(us) > 1}
+        if dup_desc:
+            findings.append(A.finding(
+                "Duplicate meta descriptions across the site",
+                "low",
+                f"{sum(len(u) for u in dup_desc.values())} pages share {len(dup_desc)} "
+                "repeated meta description(s).",
+                "Write a unique meta description per page; duplicates dilute the snippet signal "
+                "and are often ignored.",
+                "low", "structured-data", checked=total))
+
     return findings
 
 

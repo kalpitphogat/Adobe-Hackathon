@@ -34,6 +34,9 @@ reports findings for:
 6. 4xx/5xx error pages.
 7. No `rel=canonical` anywhere.
 8. Site served over HTTP.
+9. Broken internal links (bounded homepage-link sweep).
+10. Mixed content (http sub-resources on https pages).
+11. No `llms.txt` (proactive AI-guidance signal).
 
 See `references/crawl-checks.md` for the full check catalog and severity logic.
 

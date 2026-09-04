@@ -12,10 +12,13 @@ recommendations, not changes applied to the site.
 ## Quick start
 ```bash
 # audit a site (add --render to measure the JS fact gap with headless Chromium)
-python skills/audit-orchestrator/scripts/run_audit.py https://example.com --render --out report.json
+python skills/audit-orchestrator/scripts/run_audit.py https://example.com --render \
+    --out report.json --html report.html
 ```
 The entrypoint crawls the site once, runs every other skill against a shared page cache,
-and prints the final JSON report. Runs in well under 5 minutes for a typical site.
+and prints the final JSON report. `--out` writes the JSON, `--html` additionally writes a
+readable, severity-ranked HTML report a non-expert can act on. Runs in well under 5
+minutes for a typical site.
 
 ## Why these skills (concern → skill map)
 The report's reasoning is decomposed into one focused skill per **mechanism** behind AI
@@ -79,11 +82,17 @@ live in each skill's `references/` (progressive disclosure).
 - Optional: `playwright` + Chromium for `--render` (the static-vs-rendered fact gap). The
   audit degrades gracefully without it, keeping the thin-HTML heuristic.
 
-## Validate
+## Validate & test
 ```bash
-python scripts/validate.py          # checks manifest well-formedness + one entrypoint + each SKILL.md
+python scripts/validate.py          # manifest well-formedness + one entrypoint + each SKILL.md
+python tests/run_tests.py           # full offline test suite (add --render for the browser path)
 # or, if available:  skills-ref validate ./skills/<folder>
 ```
+`tests/` ships two local fixture sites — a deliberately-broken one (`badsite`) and a
+healthy one (`goodsite`). The suite boots each, runs the real end-to-end audit, and
+asserts that the expected problems are detected on the broken site and *not* falsely
+raised on the healthy one — plus schema-floor conformance, severity sorting, and the HTML
+renderer. Standard-library `unittest`; no network required.
 
 ## Scope & guardrails
 Read-only; GET only; no destructive, authenticated, or rate-abusing actions; respects

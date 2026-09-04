@@ -41,8 +41,11 @@ the marketplace entrypoint: it drives the other skills and emits the one final r
 
 The whole flow is one command:
 ```
-python scripts/run_audit.py <site> [--max-pages 12] [--render] [--out report.json]
+python scripts/run_audit.py <site> [--max-pages 12] [--render] [--out report.json] [--html report.html]
 ```
+`--out` writes the JSON report; `--html` additionally renders a readable, severity-ranked
+HTML page via `scripts/render_report.py` (also usable standalone). The suite in
+`../../tests/run_tests.py` exercises the whole pipeline against local fixture sites.
 
 ## Output (fixed schema — floor, not ceiling)
 ```json

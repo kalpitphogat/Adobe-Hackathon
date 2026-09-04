@@ -75,13 +75,14 @@ in the report is tagged with its dimension, so both halves are summarized separa
 ### What each skill actually checks (highlights)
 
 - **crawl-access** — robots.txt, whether the major AI bots (GPTBot, ClaudeBot,
-  PerplexityBot, Google-Extended…) are blocked, sitemap, `noindex`, HTTP errors, HTTPS.
+  PerplexityBot, Google-Extended…) are blocked, sitemap, `noindex`, HTTP errors, HTTPS,
+  broken internal links, mixed content (http resources on https pages), and `llms.txt`.
 - **render-extraction** — our highest-signal check: it fetches the **raw HTML** and the
   **JavaScript-rendered** page (headless Chromium) and measures the *gap*. If the price,
   hours, or headline only appears after JS, assistants that read raw HTML miss it.
 - **structured-data** — JSON-LD / schema.org coverage and **validity**, Organization
   identity + `sameAs` (so the brand isn't confused with same-named entities), titles,
-  meta descriptions, Open Graph, heading structure.
+  meta descriptions, Open Graph, heading structure, duplicate titles/descriptions.
 - **freshness-corroboration** — stale copyright/dates, machine-readable publish dates,
   weak external corroboration, unattributed superlative claims.
 - **answerability** — FAQ/Q&A markup, thin pages, and whether the homepage plainly says
@@ -129,11 +130,15 @@ we've never seen, which is exactly how the round is graded.
 ```bash
 cd brand-ai-readiness-audit
 
-# audit a site — add --render to measure the JavaScript fact-gap with headless Chromium
-python skills/audit-orchestrator/scripts/run_audit.py https://example.com --render --out report.json
+# audit a site — --render measures the JS fact-gap; --html writes a readable report page
+python skills/audit-orchestrator/scripts/run_audit.py https://example.com \
+    --render --out report.json --html report.html
 
 # sanity-check the marketplace structure
 python scripts/validate.py
+
+# run the full offline test suite (broken + healthy fixture sites)
+python tests/run_tests.py
 ```
 
 **Requirements:** Python 3.8+ (standard library only for crawling/parsing).
@@ -193,10 +198,12 @@ paste (see `structured-data-audit/references/schema-templates.md`).
 Where we take this beyond the submission:
 
 ### Near-term (polish & coverage)
-- [ ] **Human-readable report renderer** — an HTML/Markdown view on top of the JSON, so a
-      non-expert sees a ranked, color-coded checklist instead of raw JSON.
-- [ ] **More discoverability checks** — `llms.txt` detection, `hreflang`/i18n signals,
-      broken internal links, duplicate-title/description detection, mixed-content warnings.
+- [x] **Human-readable report renderer** — `--html` writes a ranked, color-coded,
+      theme-aware HTML report on top of the JSON (`render_report.py`).
+- [x] **More discoverability checks** — `llms.txt` detection, broken internal links,
+      duplicate-title/description detection, and mixed-content warnings shipped.
+- [x] **Automated test suite** — `tests/run_tests.py` with broken/healthy fixture sites.
+- [ ] **`hreflang`/i18n signals** — detect missing or inconsistent language alternates.
 - [ ] **Richer engagement signals** — optional Lighthouse/Core-Web-Vitals pass for real
       LCP/TTFB numbers (today we use fast first-response proxies and say so honestly).
 - [ ] **Per-finding confidence score** alongside severity, so borderline heuristics are

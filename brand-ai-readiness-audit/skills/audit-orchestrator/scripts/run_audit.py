@@ -53,7 +53,8 @@ def main():
     ap.add_argument("--max-pages", type=int, default=12)
     ap.add_argument("--render", action="store_true")
     ap.add_argument("--cache", default=None)
-    ap.add_argument("--out", default=None)
+    ap.add_argument("--out", default=None, help="write the JSON report to this file")
+    ap.add_argument("--html", default=None, help="also write a human-readable HTML report here")
     args = ap.parse_args()
 
     site = A.normalize_site(args.site)
@@ -129,6 +130,11 @@ def main():
     if args.out:
         with open(args.out, "w", encoding="utf-8") as fh:
             fh.write(text)
+    if args.html:
+        import render_report
+        with open(args.html, "w", encoding="utf-8") as fh:
+            fh.write(render_report.render(report))
+        print(f"wrote HTML report -> {args.html}", file=sys.stderr)
     print(text)
 
 

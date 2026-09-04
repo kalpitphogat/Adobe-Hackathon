@@ -1,0 +1,4 @@
+# Acme Widgets
+Durable industrial widgets for manufacturers.
+- [Products](/products.html): our widget catalog
+- [FAQ](/faq.html): common questions

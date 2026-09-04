@@ -12,6 +12,7 @@ import argparse
 import collections
 import json
 import os
+import re
 import sys
 import urllib.parse
 import urllib.robotparser
@@ -110,6 +111,11 @@ def main():
         rp_bot.parse(robots_txt.splitlines())
         ai_bot_status[bot] = "allowed" if (not robots_txt or rp_bot.can_fetch(bot, site + "/")) else "blocked"
 
+    # llms.txt discovery (emerging convention for AI-assistant guidance)
+    llms = A.fetch(site + "/llms.txt")
+    llms_txt = {"present": llms["status"] == 200 and "<html" not in llms["body"][:500].lower(),
+                "status": llms["status"]}
+
     # sitemap discovery
     sitemaps, sm_urls = discover_from_sitemap(site, robots_txt)
 
@@ -121,6 +127,7 @@ def main():
         queue.append(u)
 
     pages = []
+    homepage_links = []
     while queue and len(pages) < args.max_pages:
         url = queue.popleft()
         url = url.split("#")[0]
@@ -154,6 +161,9 @@ def main():
             "n_imgs_no_alt": sum(1 for im in parsed.imgs if not (im.get("alt") or "").strip()),
             "n_ldjson_blocks": len(parsed.ldjson),
             "text_len": len(parsed.visible_text),
+            # mixed content: http:// sub-resources referenced from an https page
+            "n_mixed_content": (len(re.findall(r'(?:src|href)=["\']http://', r["body"]))
+                                if site.startswith("https://") and r["body"] else 0),
         }
         # persist raw html + extracted text
         if r["body"]:
@@ -174,12 +184,29 @@ def main():
                 rec["rendered"] = False
         pages.append(rec)
 
+        # capture homepage links for a broken-link sweep (first page only)
+        if len(pages) == 1 and r["body"]:
+            for href in parsed.links:
+                nu = A.absolutize(url, href).split("#")[0]
+                if A.same_host(site, nu) and nu.startswith("http"):
+                    homepage_links.append(nu)
+
         # enqueue internal links from homepage & early pages to broaden the sample
         if len(pages) <= 3 and r["body"]:
             for href in parsed.links:
                 nu = A.absolutize(url, href).split("#")[0]
                 if A.same_host(site, nu) and nu not in seen and nu.startswith("http"):
                     queue.append(nu)
+
+    # Bounded broken-internal-link sweep: HEAD up to 15 distinct homepage links.
+    link_check = []
+    for lu in list(dict.fromkeys(homepage_links))[:15]:
+        hr = A.fetch(lu, method="HEAD")
+        st = hr["status"]
+        if st is None or st >= 400:  # retry once with GET (some servers reject HEAD)
+            hr = A.fetch(lu, method="GET")
+            st = hr["status"]
+        link_check.append({"url": lu, "status": st})
 
     meta = {
         "site": site,
@@ -190,8 +217,10 @@ def main():
             "text": robots_txt[:20000],
             "ai_bots": ai_bot_status,
         },
+        "llms_txt": llms_txt,
         "sitemaps": sitemaps,
         "sitemap_url_count": len(sm_urls),
+        "link_check": link_check,
         "render_enabled": args.render,
         "render_available": any(p.get("rendered") for p in pages),
         "pages": pages,

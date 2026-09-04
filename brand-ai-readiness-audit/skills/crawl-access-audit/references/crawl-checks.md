@@ -13,6 +13,9 @@ the page, and able to **pick out the fact**. This skill owns gate 1.
 | 6 | HTTP errors | sampled URL returns 4xx/5xx | high |
 | 7 | canonical | no `rel=canonical` on any successful page | low |
 | 8 | HTTPS | base URL is `http://` | high |
+| 9 | broken internal links | HEAD/GET sweep of up to 15 homepage links returns 4xx/5xx/none | medium |
+| 10 | mixed content | http:// sub-resources referenced from an https page | medium |
+| 11 | llms.txt | no `/llms.txt` guidance file (proactive AI-guidance signal) | low |
 
 ## AI crawler user-agents checked
 GPTBot, OAI-SearchBot, ChatGPT-User (OpenAI); ClaudeBot, Claude-Web, anthropic-ai
