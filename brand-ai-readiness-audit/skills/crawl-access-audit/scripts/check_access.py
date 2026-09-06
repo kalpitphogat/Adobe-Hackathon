@@ -149,6 +149,20 @@ def run(cache_dir):
             "on mixed content, breaking layout and signalling an insecure page.",
             "medium", "crawl-access", checked=len(pages)))
 
+    # 8b. Edge/CDN blocks the AI crawler even though robots.txt allows it
+    rb = meta.get("ai_bot_reachability", {})
+    if rb.get("blocked"):
+        findings.append(A.finding(
+            "AI crawler blocked at the edge (CDN/WAF), not in robots.txt",
+            "critical",
+            f"Homepage returned {rb.get('reference_status')} to a normal browser but "
+            f"{rb.get('ai_status')} to the {rb.get('ua')} user-agent — an edge/CDN/WAF rule is "
+            "refusing the AI crawler regardless of what robots.txt permits.",
+            "Allow-list the AI assistant user-agents (GPTBot, ClaudeBot, PerplexityBot, "
+            "OAI-SearchBot, Google-Extended) at your CDN/WAF (Cloudflare, Akamai, Vercel). "
+            "robots.txt permission is moot if the edge returns 403 to the bot.",
+            "critical", "crawl-access"))
+
     # 9. llms.txt (emerging AI-assistant guidance file) — proactive improvement
     if not meta.get("llms_txt", {}).get("present"):
         findings.append(A.finding(

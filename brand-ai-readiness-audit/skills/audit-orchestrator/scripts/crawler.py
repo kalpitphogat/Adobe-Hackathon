@@ -117,6 +117,22 @@ def main():
     llms_txt = {"present": llms["status"] == 200 and "<html" not in llms["body"][:500].lower(),
                 "status": llms["status"]}
 
+    # Edge/CDN reachability: robots.txt may allow an AI crawler, but a WAF/CDN can still
+    # block its User-Agent at the edge (403/challenge). Probe the homepage as GPTBot and
+    # compare to a normal browser UA.
+    GPTBOT_UA = "Mozilla/5.0 (compatible; GPTBot/1.1; +https://openai.com/gptbot)"
+    BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122 Safari/537.36"
+    ai_probe = A.fetch(site + "/", ua=GPTBOT_UA)
+    ref_probe = A.fetch(site + "/", ua=BROWSER_UA)
+    ai_bot_reachability = {
+        "ua": "GPTBot",
+        "ai_status": ai_probe["status"],
+        "reference_status": ref_probe["status"],
+        # blocked = a normal browser is served but the AI bot UA is refused at the edge
+        "blocked": ref_probe["status"] == 200
+                   and (ai_probe["status"] in (401, 403, 406, 429, 451) or ai_probe["error"] is not None),
+    }
+
     # sitemap discovery
     sitemaps, sm_urls = discover_from_sitemap(site, robots_txt)
 
@@ -149,6 +165,7 @@ def main():
                 "html_lang": None, "has_viewport": False, "n_headings": 0, "n_h1": 0,
                 "n_links": 0, "n_imgs": 0, "n_imgs_no_alt": 0, "n_ldjson_blocks": 0,
                 "text_len": 0, "n_mixed_content": 0,
+                "heading_levels": [], "n_question_headings": 0, "n_lists": 0, "n_tables": 0,
             })
             continue
         r = A.fetch(url)
@@ -180,6 +197,11 @@ def main():
             # mixed content: http:// sub-resources referenced from an https page
             "n_mixed_content": (len(re.findall(r'(?:src|href)=["\']http://', r["body"]))
                                 if site.startswith("https://") and r["body"] else 0),
+            # answer-formatting / chunkability signals
+            "heading_levels": [lvl for lvl, _ in parsed.headings],
+            "n_question_headings": sum(1 for _, t in parsed.headings if t.strip().endswith("?")),
+            "n_lists": len(re.findall(r"<(?:ul|ol)\b", r["body"], re.I)) if r["body"] else 0,
+            "n_tables": len(re.findall(r"<table\b", r["body"], re.I)) if r["body"] else 0,
         }
         # persist raw html + extracted text
         if r["body"]:
@@ -234,6 +256,7 @@ def main():
             "ai_bots": ai_bot_status,
         },
         "llms_txt": llms_txt,
+        "ai_bot_reachability": ai_bot_reachability,
         "sitemaps": sitemaps,
         "sitemap_url_count": len(sm_urls),
         "link_check": link_check,

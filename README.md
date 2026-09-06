@@ -61,11 +61,11 @@ independently testable and swappable.
 | Skill | Answers | Maps to |
 |-------|---------|---------|
 | **audit-orchestrator** *(entrypoint)* | Crawl once, run the rest, emit the report | — |
-| **crawl-access-audit** | Can an AI crawler reach & index it? robots, AI-bot rules, sitemap, `noindex`, status, HTTPS, broken links, mixed content, `llms.txt` | Gate 1 |
+| **crawl-access-audit** | Can an AI crawler reach & index it? robots, AI-bot rules, **edge/CDN bot blocks**, sitemap, `noindex`, status, HTTPS, broken links, mixed content, `llms.txt` | Gate 1 |
 | **render-extraction-audit** | Are facts in raw HTML or only after JS? (raw-vs-rendered gap, thin SPA shells, image-locked facts) | Gate 2 |
 | **structured-data-audit** | Can a machine extract & attribute the fact? JSON-LD coverage/validity, Organization + `sameAs`, metadata, headings, duplicates | Gate 3 |
 | **freshness-corroboration-audit** | Is it current & cross-verifiable? stale dates, machine-readable dates, `sameAs`, unattributed claims | Trust |
-| **answerability-audit** | Is the key fact short, self-contained, quotable? FAQ markup, thin content, clear homepage | Quotability |
+| **answerability-audit** | Is the key fact short, self-contained, quotable? FAQ markup, thin content, clear homepage, **chunkable structure (lists/tables/Q-headings)** | Quotability |
 | **engagement-audit** | Will an arriving visitor stay? viewport, weight/latency, CTA, nav, interstitials | Retention |
 
 First five → **discoverability**; last → **engagement**. Every finding is tagged with its
@@ -154,5 +154,15 @@ Each skill folder is an independent agentskills.io skill: lean `SKILL.md`, execu
 ```bash
 cd brand-ai-readiness-audit && zip -r ../submission.zip . -x '*__pycache__*' -x '*.pyc' -x 'tests/*cache*'
 ```
+
+## Related work
+The check design was informed by open-source AEO/GEO auditors — notably
+[geo-optimizer-skill](https://github.com/Auriti-Labs/geo-optimizer-skill) and
+[ai-seo-auditor](https://github.com/ngstcf/ai-seo-auditor). Ideas adopted here include the
+**edge/CDN AI-bot reachability** probe (a WAF can block GPTBot even when robots.txt allows
+it) and **answer-formatting / chunkability** checks (lists, tables, question-style
+headings). Our take stays decomposed into concern-scoped skills, computes severity from
+evidence, covers the engagement half explicitly, and enforces read-only + robots.txt as a
+hard guardrail.
 
 *License: MIT (declared per-skill).*

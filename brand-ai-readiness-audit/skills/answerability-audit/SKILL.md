@@ -29,7 +29,9 @@ Run `scripts/check_answerability.py <cache_dir>`. It reports:
 2. **Thin pages** — little quotable body text (<500 chars) (medium/low by prevalence).
 3. **Unclear homepage** — the first screen doesn't plainly say what the brand is / who
    it's for (high) — this is the sentence assistants quote to describe the brand.
-4. **Missing contact facts** — no email/phone as extractable text (low).
+4. **Unstructured content** — substantial pages that are walls of text with no lists,
+   tables, or question-style headings, so there's nothing discrete to quote (medium).
+5. **Missing contact facts** — no email/phone as extractable text (low).
 
 See `references/answerability-checks.md` for how to write self-contained, extractable
 claims.

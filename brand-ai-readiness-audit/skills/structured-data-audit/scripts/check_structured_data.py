@@ -169,6 +169,39 @@ def run(cache_dir):
             "Use exactly one H1 per page and nest sub-topics under H2/H3 for an unambiguous outline.",
             "low", "structured-data", checked=total))
 
+    # 4b. Title length outside the useful range (truncated or too thin to be descriptive)
+    bad_title_len = [p["url"] for p in pages
+                     if p.get("title") and not (10 <= len(p["title"]) <= 65)]
+    if bad_title_len:
+        findings.append(A.finding(
+            "Page titles outside the useful length range",
+            "low",
+            f"{len(bad_title_len)}/{total} pages have a <title> shorter than 10 or longer than "
+            f"65 characters: {', '.join(bad_title_len[:4])}.",
+            "Aim for descriptive ~10-60 character titles; very short titles under-describe the "
+            "page and very long ones get truncated in results and citations.",
+            "low", "structured-data", checked=total))
+
+    # 4c. Broken heading hierarchy (a level is skipped, e.g. H1 -> H3)
+    skipped = []
+    for p in pages:
+        levels = p.get("heading_levels") or []
+        prev = 0
+        for lvl in levels:
+            if prev and lvl > prev + 1:
+                skipped.append(p["url"])
+                break
+            prev = lvl
+    if skipped:
+        findings.append(A.finding(
+            "Skipped heading levels break the document outline",
+            "low",
+            f"{len(skipped)}/{total} pages jump more than one heading level (e.g. H1 -> H3), "
+            f"e.g. {', '.join(skipped[:4])}.",
+            "Use headings in order (H1 -> H2 -> H3) without skipping levels so machines can "
+            "reconstruct a correct topical outline of the page.",
+            "low", "structured-data", checked=total))
+
     # 5. duplicate titles / descriptions across pages
     if total >= 3:
         titles = {}

@@ -10,7 +10,15 @@ be stated plainly and self-containedly.
 | 1 | FAQ/Q&A markup | no FAQPage/Question schema anywhere | medium |
 | 2 | Thin pages | body text <500 chars | medium if majority, else low |
 | 3 | Unclear homepage | first ~600 chars don't say what/who-for | high |
+| 3b | Unstructured content | substantial pages (>=800 chars) with no lists, tables, or question headings | medium |
 | 4 | Contact as text | no email/phone as extractable text | low |
+
+## Chunkability / answer-formatting (check 3b)
+Assistants extract and quote discrete *chunks* — a bulleted list item, a table row, a
+question heading and its answer — far more readily than a long paragraph. A substantial
+page that is a wall of prose, with no lists, tables, or question-style (`…?`) headings,
+gives them little to lift cleanly. The fix is structural, not more words: turn key content
+into question-led H2/H3 sections, bullets, and comparison tables.
 
 ## What "answerable" means
 - **Self-contained**: each key sentence stands alone — "The Widget Pro 3000 is rated for

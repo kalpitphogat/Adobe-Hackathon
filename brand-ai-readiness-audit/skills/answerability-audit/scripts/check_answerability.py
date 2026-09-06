@@ -69,6 +69,23 @@ def run(cache_dir):
             "the sentence assistants quote to describe the brand.",
             "high", "answerability"))
 
+    # 3b. Answer-formatting / chunkability: substantial pages that are walls of text
+    # (no lists, tables, or question-style headings) are hard for assistants to extract from.
+    substantial = [p for p in pages if p.get("text_len", 0) >= 800]
+    unstructured = [p["url"] for p in substantial
+                    if p.get("n_lists", 0) == 0 and p.get("n_tables", 0) == 0
+                    and p.get("n_question_headings", 0) == 0]
+    if substantial and len(unstructured) >= max(1, len(substantial) // 2):
+        findings.append(A.finding(
+            "Content isn't structured for extraction (walls of text)",
+            "medium",
+            f"{len(unstructured)}/{len(substantial)} substantial pages (>=800 chars) use no "
+            "lists, tables, or question-style headings, e.g. " + ", ".join(unstructured[:3]) + ".",
+            "Break key content into scannable structure: question-style H2/H3 headings, bulleted "
+            "lists, and comparison tables. Assistants extract and quote discrete chunks far more "
+            "readily than long paragraphs.",
+            "medium", "answerability", checked=len(substantial)))
+
     # 4. Contact/NAP facts present as text (locally-important, highly-queried facts)
     joined = " ".join((A.read_page(cache_dir, p, "text") or "") for p in pages[:5]).lower()
     has_email = bool(re.search(r"[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}", joined))

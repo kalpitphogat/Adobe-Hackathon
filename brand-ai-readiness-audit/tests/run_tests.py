@@ -156,6 +156,34 @@ class TestRobotsGuardrail(unittest.TestCase):
             self.assertFalse(os.path.exists(html), "no body may be cached for a disallowed URL")
 
 
+class TestEdgeBlock(unittest.TestCase):
+    """A CDN/WAF that serves a browser but 403s an AI-bot UA must be flagged, even
+    when robots.txt says nothing."""
+
+    def test_edge_block_detected(self):
+        directory = os.path.join(FIXTURES, "goodsite")
+
+        class Handler(_QuietHandler):
+            def do_GET(self):  # noqa: N802
+                if "GPTBot" in self.headers.get("User-Agent", ""):
+                    self.send_response(403)
+                    self.end_headers()
+                    self.wfile.write(b"blocked")
+                    return
+                return super().do_GET()
+
+        httpd = http.server.ThreadingHTTPServer(
+            ("127.0.0.1", 0), functools.partial(Handler, directory=directory))
+        base = f"http://127.0.0.1:{httpd.server_address[1]}"
+        threading.Thread(target=httpd.serve_forever, daemon=True).start()
+        try:
+            report, _ = run_audit(base, max_pages=4)
+        finally:
+            httpd.shutdown()
+        self.assertTrue(has(report, "blocked at the edge"),
+                        "edge/CDN AI-bot block should be detected")
+
+
 class TestGoodSite(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

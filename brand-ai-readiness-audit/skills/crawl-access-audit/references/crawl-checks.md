@@ -15,7 +15,16 @@ the page, and able to **pick out the fact**. This skill owns gate 1.
 | 8 | HTTPS | base URL is `http://` | high |
 | 9 | broken internal links | HEAD/GET sweep of up to 15 homepage links returns 4xx/5xx/none | medium |
 | 10 | mixed content | http:// sub-resources referenced from an https page | medium |
-| 11 | llms.txt | no `/llms.txt` guidance file (proactive AI-guidance signal) | low |
+| 11 | edge/CDN AI-bot block | homepage serves a browser UA (200) but refuses the GPTBot UA (403/challenge) | critical |
+| 12 | llms.txt | no `/llms.txt` guidance file (proactive AI-guidance signal) | low |
+
+## Why the edge/CDN check matters (beyond robots.txt)
+robots.txt is only a *request*. A CDN or WAF (Cloudflare, Akamai, Vercel bot-management)
+can refuse an AI crawler's User-Agent at the edge with a 403 or a JS challenge even when
+robots.txt explicitly allows it — so the page is unreachable to the assistant regardless.
+This skill probes the homepage twice, once as a normal browser and once as `GPTBot`, and
+flags a block that only the bot UA hits. This is a common, invisible cause of "we allow
+the bot but it still never cites us."
 
 ## AI crawler user-agents checked
 GPTBot, OAI-SearchBot, ChatGPT-User (OpenAI); ClaudeBot, Claude-Web, anthropic-ai

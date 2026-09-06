@@ -36,7 +36,8 @@ reports findings for:
 8. Site served over HTTP.
 9. Broken internal links (bounded homepage-link sweep).
 10. Mixed content (http sub-resources on https pages).
-11. No `llms.txt` (proactive AI-guidance signal).
+11. Edge/CDN block of the AI-bot user-agent (GPTBot 403 while a browser gets 200).
+12. No `llms.txt` (proactive AI-guidance signal).
 
 See `references/crawl-checks.md` for the full check catalog and severity logic.
 
