@@ -31,6 +31,7 @@ SUB_AUDITS = [
     ("structured-data-audit",        "scripts/check_structured_data.py"),
     ("freshness-corroboration-audit","scripts/check_freshness.py"),
     ("answerability-audit",          "scripts/check_answerability.py"),
+    ("integrity-audit",              "scripts/check_integrity.py"),
     ("engagement-audit",             "scripts/check_engagement.py"),
 ]
 

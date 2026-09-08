@@ -69,8 +69,8 @@ finding `dimension`, `skill`, and `checked` — all additive to the required flo
 
 ## Composition
 The marketplace decomposes the reasoning into one skill per mechanism (crawl access,
-JS render/extraction, structured data, freshness/corroboration, answerability,
-engagement). This entrypoint owns only orchestration and report assembly — it holds no
+JS render/extraction, structured data, freshness/corroboration, answerability, content
+integrity, engagement). This entrypoint owns only orchestration and report assembly — it holds no
 checks of its own, so each concern stays independently testable and swappable. See the
 root `README.md` for the concern→skill map.
 

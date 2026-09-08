@@ -32,10 +32,12 @@ and the entrypoint just composes them:
 | **render-extraction-audit** | C — *read the page* | Are the facts in raw HTML, or only after JS? (static-vs-rendered gap, thin shells, image-locked facts) |
 | **structured-data-audit** | A/C — *pick out the fact* | Can a machine extract & attribute the fact? (JSON-LD coverage/validity, entity identity, metadata, headings) |
 | **freshness-corroboration-audit** | D — *agreement across the web* | Is the fact current & cross-verifiable? (stale dates, sameAs, identity collision, unattributed claims) |
-| **answerability-audit** | B — *easy to quote* | Is the key fact stated as short, self-contained, quotable text? (FAQ markup, thin content, clear homepage) |
+| **answerability-audit** | B — *easy to quote* | Is the key fact stated as short, self-contained, quotable text? (FAQ markup, thin content, clear homepage, chunkable structure) |
+| **integrity-audit** | trust / safety | Does the page manipulate the machine? (prompt-injection, hidden/cloaked text, invisible Unicode) |
 | **engagement-audit** | on-site retention | Will an arriving visitor stay? (viewport, weight/latency, CTA, navigation, interstitials) |
 
-Discoverability is covered by the first five; engagement by the last. The report tags
+Discoverability is covered by the first six (integrity is a trust signal on that side);
+engagement by the last. The report tags
 every finding with its `dimension` and summarizes both halves separately.
 
 ## How the entrypoint composes the others
@@ -71,6 +73,7 @@ brand-ai-readiness-audit/
     structured-data-audit/
     freshness-corroboration-audit/
     answerability-audit/
+    integrity-audit/
     engagement-audit/
 ```
 Each skill folder is an independent, agentskills.io-compliant skill (SKILL.md with YAML

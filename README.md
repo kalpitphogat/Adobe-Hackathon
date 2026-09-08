@@ -38,10 +38,10 @@ assistant. A separate axis, **engagement**, decides whether the visitor AI *does
   └──────────────┘
         │  (all sub-audits read this cache — never re-fetch)
         ▼
-  ┌───────────────┬──────────────────┬─────────────────┬──────────────────────┬────────────────┬──────────────┐
-  │ crawl-access  │ render-extraction│ structured-data │ freshness-corrob.    │ answerability  │ engagement   │
-  │ gate 1        │ gate 2           │ gate 3          │ trust                │ quotability    │ retention    │
-  └───────────────┴──────────────────┴─────────────────┴──────────────────────┴────────────────┴──────────────┘
+  ┌──────────────┬─────────────────┬───────────────┬────────────────────┬──────────────┬────────────┬────────────┐
+  │ crawl-access │ render-extract. │ structured-data│ freshness-corrob.  │ answerability│ integrity  │ engagement │
+  │ gate 1       │ gate 2          │ gate 3        │ trust              │ quotability  │ trust/safety│ retention │
+  └──────────────┴─────────────────┴───────────────┴────────────────────┴──────────────┴────────────┴────────────┘
         │  each returns { skill, findings[] }
         ▼
   ┌────────────────────┐   merge · tag dimension · sort by severity · assign F-001…
@@ -56,7 +56,7 @@ independently testable and swappable.
 
 ---
 
-## The seven skills (one concern each)
+## The eight skills (one concern each)
 
 | Skill | Answers | Maps to |
 |-------|---------|---------|
@@ -66,10 +66,11 @@ independently testable and swappable.
 | **structured-data-audit** | Can a machine extract & attribute the fact? JSON-LD coverage/validity, Organization + `sameAs`, metadata, headings, duplicates | Gate 3 |
 | **freshness-corroboration-audit** | Is it current & cross-verifiable? stale dates, machine-readable dates, `sameAs`, unattributed claims | Trust |
 | **answerability-audit** | Is the key fact short, self-contained, quotable? FAQ markup, thin content, clear homepage, **chunkable structure (lists/tables/Q-headings)** | Quotability |
+| **integrity-audit** | Is it trustworthy? prompt-injection / hidden LLM directives, visually-hidden (cloaked) text, invisible/zero-width Unicode | Trust/safety |
 | **engagement-audit** | Will an arriving visitor stay? viewport, weight/latency, CTA, nav, interstitials | Retention |
 
-First five → **discoverability**; last → **engagement**. Every finding is tagged with its
-dimension; the report summarizes both halves.
+First six → **discoverability** (integrity is a trust signal on that side); last →
+**engagement**. Every finding is tagged with its dimension; the report summarizes both halves.
 
 ---
 
@@ -118,7 +119,7 @@ Playwright + Chromium; without it the audit degrades gracefully (thin-HTML heuri
 | Requirement (from the brief) | ✓ |
 |---|---|
 | Marketplace + `marketplace.json` with **exactly one** entrypoint | ✅ |
-| Every skill folder = valid agentskills.io `SKILL.md` (name/description/license) | ✅ 7/7 |
+| Every skill folder = valid agentskills.io `SKILL.md` (name/description/license) | ✅ 8/8 |
 | Entrypoint composes the rest into **one** report | ✅ |
 | Report floor: `site`, `audited_at`, counts-by-severity; per finding `id`, `title`, `severity`, `evidence`, `suggested_action` | ✅ |
 | Detects **both** discoverability and engagement | ✅ |
@@ -145,6 +146,7 @@ Adobe-Hackathon/
       ├─ structured-data-audit/
       ├─ freshness-corroboration-audit/
       ├─ answerability-audit/
+      ├─ integrity-audit/
       └─ engagement-audit/
 ```
 Each skill folder is an independent agentskills.io skill: lean `SKILL.md`, executable

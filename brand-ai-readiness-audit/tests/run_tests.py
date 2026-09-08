@@ -184,6 +184,26 @@ class TestEdgeBlock(unittest.TestCase):
                         "edge/CDN AI-bot block should be detected")
 
 
+class TestIntegrity(unittest.TestCase):
+    """Prompt-injection, hidden/cloaked text, and zero-width Unicode must be detected."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.base, cls.stop = serve(os.path.join(FIXTURES, "integritysite"))
+        cls.report, _ = run_audit(cls.base, max_pages=3)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.stop()
+
+    def test_injection_detected(self):
+        self.assertTrue(has(self.report, "Prompt-injection"))
+
+    def test_hidden_and_zerowidth_detected(self):
+        self.assertTrue(has(self.report, "visually-hidden text"))
+        self.assertTrue(has(self.report, "zero-width Unicode"))
+
+
 class TestGoodSite(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

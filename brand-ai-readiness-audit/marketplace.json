@@ -10,6 +10,7 @@
     { "id": "structured-data-audit",       "path": "skills/structured-data-audit",      "concern": "Can it pick out the fact? (JSON-LD / schema, metadata, entity clarity)" },
     { "id": "freshness-corroboration-audit","path": "skills/freshness-corroboration-audit","concern": "Is it trusted? (stale facts, single-source claims, identity collision)" },
     { "id": "answerability-audit",         "path": "skills/answerability-audit",        "concern": "Is it easy to quote? (self-contained, extractable claims / FAQ)" },
+    { "id": "integrity-audit",             "path": "skills/integrity-audit",            "concern": "Is it trustworthy? (prompt-injection, hidden/cloaked text, invisible Unicode)" },
     { "id": "engagement-audit",            "path": "skills/engagement-audit",           "concern": "Do arriving visitors stay? (orientation, CTA, speed, mobile)" }
   ]
 }
