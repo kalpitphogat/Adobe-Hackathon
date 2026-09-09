@@ -1,0 +1,343 @@
+{
+  "audit_status": "complete",
+  "audited_at": "2026-05-28T20:26:40Z",
+  "evidence_bundle": {
+    "degraded_capabilities": [],
+    "pages_fetched": 8,
+    "pages_rendered": 4,
+    "path": "evidence"
+  },
+  "findings": [
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://northwind-analytics.test/pricing"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "extract.ans.fact_coverage_gap",
+      "confidence": "likely",
+      "evidence": "https://northwind-analytics.test/pricing: the page makes 9 derivable claims about 'Northwind Analytics Team'. Segmenting the 180 words a no-JS reader sees into 1 overlapping windows of about 300 tokens, 8 of 9 claims survive inside at least one window that still makes sense on its own. The misses: \"Northwind Analytics pipeline monitoring\" (from title) - no window contains the claim at all.",
+      "id": "F-001",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A passage that is quoted away from its page loses whatever its pronouns and back-references pointed at, so a claim that depends on them cannot be reproduced as an answer.",
+        "patch": "<!-- Make each claim self-contained IN PROSE. Do not split the page into\n     smaller blocks: Google Search Central states there is no requirement\n     to break content into tiny pieces for AI to understand it. -->\n\n<!-- claim: Northwind Analytics pipeline monitoring  (no window contains the claim at all) -->\n<p>Northwind Analytics Team __FILL_IN__:state_this_claim_in_one_sentence_that_names_the_subject.</p>",
+        "patch_path": "fix_patches/F-001.extract.ans.fact_coverage_gap.txt",
+        "priority": "medium",
+        "source": "Handout appendix, How assistants like ChatGPT use sources; Aggarwal et al., GEO: Generative Engine Optimization, KDD 2024 (arXiv:2311.09735)",
+        "summary": "State each key claim in a sentence that names the subject and stands on its own. Do NOT split the page into smaller blocks.",
+        "verification": "Copy any single paragraph out of the page and read it cold: does it still name what it is about, without the paragraphs around it?"
+      },
+      "title": "fact_coverage 8/9: 1 claim(s) cannot be quoted from this page"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://northwind-analytics.test/blog/measuring-pipeline-latency"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://northwind-analytics.test/blog/measuring-pipeline-latency: the first five sentences are \"Home \u203a Blog \u203a Measuring pipeline latency Measuring pipeline latency without instrumenting every job \" | \"Pipeline latency is the time between a source system recording a fact and that fact becoming queryab\" | \"Most teams try to measure pipeline latency by adding timing code to every scheduled job, which is ac\". None is a definitional statement of at most 50 words that names 'Priya Raman' and says what it is. A system answering \"what is Priya Raman\" has nothing short and quotable to lift.",
+      "id": "F-002",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>Priya Raman is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-002.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"Priya Raman is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://northwind-analytics.test/blog/measuring-pipeline-latency: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what Priya Raman is"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://northwind-analytics.test/docs/getting-started"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://northwind-analytics.test/docs/getting-started: the first five sentences are \"Home \u203a Docs \u203a Getting started Getting started with Northwind Analytics This guide connects a warehou\" | \"It takes about ten minutes and needs a read-only warehouse role.\" | \"Step 1: create a read-only role Northwind Analytics reads table metadata only.\". None is a definitional statement of at most 50 words that names 'Northwind Analytics' and says what it is. A system answering \"what is Northwind Analytics\" has nothing short and quotable to lift.",
+      "id": "F-003",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>Northwind Analytics is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-003.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"Northwind Analytics is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://northwind-analytics.test/docs/getting-started: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what Northwind Analytics is"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://northwind-analytics.test/pricing"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://northwind-analytics.test/pricing: the first five sentences are \"Home \u203a Pricing Northwind Analytics pricing Northwind Analytics costs 49 USD per month on the Team pl\" | \"Both plans are billed monthly, include unlimited users, and start with a 14-day trial that does not \" | \"Team \u2014 49 USD per month Up to 50 monitored tables, email and Slack alerts, 30 days of run history.\". None is a definitional statement of at most 50 words that names 'Northwind Analytics Team' and says what it is. A system answering \"what is Northwind Analytics Team\" has nothing short and quotable to lift.",
+      "id": "F-004",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>Northwind Analytics Team is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-004.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"Northwind Analytics Team is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://northwind-analytics.test/pricing: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what Northwind Analytics Team is"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://northwind-analytics.test/pricing"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.trust.no_social_proof",
+      "confidence": "likely",
+      "evidence": "https://northwind-analytics.test/pricing (159 words) contains none of: review or rating language, a customer or user count, a case study reference, or an attributed quotation. A visitor deciding whether to act has only the brand's own claims to go on.",
+      "id": "F-005",
+      "severity": "medium",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "An attributed third-party statement is evidence a visitor can weigh; a first-party claim is not, so it does not reduce the risk of acting.",
+        "patch": "<blockquote>\n  <p>__FILL_IN__:specific_outcome_in_the_customers_words</p>\n  <cite>__FILL_IN__:name, __FILL_IN__:role, __FILL_IN__:company</cite>\n</blockquote>",
+        "patch_path": "fix_patches/F-005.act.trust.no_social_proof.txt",
+        "priority": "medium",
+        "source": "references/cro-frameworks.md",
+        "summary": "Add one specific, attributed piece of evidence near the primary action.",
+        "verification": "Open https://northwind-analytics.test/pricing: is there evidence from someone other than the brand?"
+      },
+      "title": "A pricing page offers no evidence that anyone else has trusted this"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://northwind-analytics.test/blog/measuring-pipeline-latency"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "extract.ans.thin_content_for_page_type",
+      "confidence": "confirmed",
+      "evidence": "https://northwind-analytics.test/blog/measuring-pipeline-latency has 277 words of main content against a floor of 300 for a article page on a saas-marketing site. Navigation, header and footer were excluded from the count. There is not enough here for a retrieval system to find an answer to anything specific.",
+      "id": "F-006",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "medium",
+        "ice": 6.3,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 5.0,
+          "impact": 5.0
+        },
+        "mechanism": "A page with little text offers few facts to extract, so it is rarely the best available source for any question.",
+        "patch": "<h2>__FILL_IN__:question_visitors_actually_ask</h2>\n<p>Priya Raman __FILL_IN__:specific_answer_with_a_number_or_name.</p>",
+        "patch_path": "fix_patches/F-006.extract.ans.thin_content_for_page_type.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Answer the questions a visitor arrives with, in specifics.",
+        "verification": "curl -s https://northwind-analytics.test/blog/measuring-pipeline-latency | sed -e 's/<[^>]*>//g' | wc -w"
+      },
+      "title": "A article page carries only 277 words"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://northwind-analytics.test/"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "reach.robots.ai_training_bot_blocked",
+      "confidence": "confirmed",
+      "evidence": "Blocked: GPTBot. These collect content for model training corpora, not for answering questions at retrieval time. Blocking them does not reduce whether this brand is found or cited by AI assistants. The retrieval crawlers that do affect citation are allowed. Classification from a snapshot dated 2026-09-09 (upstream commit 0e111dcc24cb).",
+      "id": "F-007",
+      "severity": "info",
+      "stage": "reach",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.3,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 1.0
+        },
+        "mechanism": "Training-corpus collection and answer-time retrieval are separate pipelines with separate user-agent tokens; blocking the former does not affect the latter.",
+        "patch": "",
+        "priority": "low",
+        "source": "references/bot-taxonomy.md",
+        "summary": "No change required. This is a content-licensing decision, and we report it only so it is visible.",
+        "verification": "No action to verify. Revisit only if the site's licensing stance changes."
+      },
+      "title": "robots.txt blocks 1 training-only crawler(s) \u2014 recorded as an observation, not a defect"
+    }
+  ],
+  "generator": {
+    "ai_bots_snapshot_date": "2026-09-09",
+    "ai_bots_source_commit": "0e111dcc24cbcdf4e609edde70f9f9184eac8b02",
+    "checks_available": 61,
+    "checks_run": 5,
+    "name": "brand-ai-readiness-audit",
+    "tool_versions": {
+      "collector": "1.0.0",
+      "python": "3.11.9",
+      "renderer": "offline-fixture",
+      "transport": "offline"
+    },
+    "version": "1.0.0"
+  },
+  "limitations": [
+    {
+      "checks_not_run": [
+        "reach.edge.bot_ua_blocked",
+        "reach.edge.bot_ua_challenged"
+      ],
+      "confidence_effect": "not assessed; re-run with --probe-bot-ua to close this gap",
+      "optional_feature": true,
+      "reason": "Edge and CDN reachability for named AI crawlers was not assessed, because --probe-bot-ua was not set. This is the highest-value check in this marketplace: a CDN or WAF rule that returns 403 to OAI-SearchBot, PerplexityBot or Claude-SearchBot removes a brand from those assistants entirely, and leaves no trace in robots.txt or in what a human sees. If you own this site, re-run the orchestrator with the --probe-bot-ua flag:\n    orchestrate.py <url> --out ./audit-output --probe-bot-ua\nThat sends ONE request per crawler, to the homepage only, with an auditor token appended to the user-agent string so it is identifiable in your logs. It is off by default because sending named-crawler user-agents to a site you do not own is not something an audit should do without being asked.",
+      "scope": "site"
+    }
+  ],
+  "proactive_recommendations": [
+    {
+      "applies_to_archetype": [
+        "saas-marketing"
+      ],
+      "id": "P-001",
+      "rationale": "Comparison questions are among the most common commercial queries, and a brand that has not written its own comparison is described using someone else's. This is a gap in coverage rather than a defect on any page, which is why it appears here and not as a finding.",
+      "suggested_action": {
+        "effort": "medium",
+        "mechanism": "A page that names both sides of a comparison is the only page on your domain that can be quoted when the comparison is asked about.",
+        "patch": "<h1>__FILL_IN__:product vs __FILL_IN__:alternative</h1>\n<p>__FILL_IN__:one_sentence_honest_summary_including_where_you_lose.</p>",
+        "priority": "low",
+        "source": "references/geo-methods.md",
+        "summary": "Write an honest comparison page naming the real alternatives.",
+        "verification": "Confirm the page names the alternative in its title and H1."
+      },
+      "title": "Publish a comparison page for the alternatives buyers already weigh you against"
+    }
+  ],
+  "schema_version": "1.0",
+  "site": "northwind-analytics.test",
+  "summary": {
+    "blocked_findings": 0,
+    "by_category": {
+      "discoverability": 6,
+      "engagement": 1
+    },
+    "by_stage": {
+      "act": 1,
+      "extract": 5,
+      "reach": 1
+    },
+    "critical": 0,
+    "high": 0,
+    "info": 1,
+    "low": 0,
+    "medium": 6,
+    "suppressed_by_rule": [
+      {
+        "check_id": "act.trust.no_cost_signal",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "extract.ans.no_evidence_markers",
+        "count": 4,
+        "reason": "suppressed by threshold",
+        "rule": "suppressed by threshold"
+      },
+      {
+        "check_id": "extract.sd.absent_on_eligible_page",
+        "count": 6,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "reach.agent.llms_txt_absent",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "reach.edge.bot_ua_blocked",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "reach.edge.bot_ua_challenged",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "trust.authorship.unattributed",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "trust.entity.no_external_corroboration",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      }
+    ],
+    "total_findings": 7
+  }
+}

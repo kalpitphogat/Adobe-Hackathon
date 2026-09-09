@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Northwind Analytics — pipeline monitoring for data engineering teams</title>
+<meta name="description" content="Northwind Analytics monitors data pipeline latency and freshness for data engineering teams, and alerts you before stakeholders notice a stale dashboard.">
+<link rel="canonical" href="https://taxonomy-demo.test/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://taxonomy-demo.test/#org",
+      "name": "Northwind Analytics",
+      "url": "https://taxonomy-demo.test/",
+      "description": "Pipeline monitoring software for data engineering teams.",
+      "email": "hello@taxonomy-demo.test",
+      "sameAs": [
+        "https://en.wikipedia.org/wiki/Data_observability",
+        "https://github.com/northwind-analytics",
+        "https://www.linkedin.com/company/northwind-analytics"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://taxonomy-demo.test/#website",
+      "url": "https://taxonomy-demo.test/",
+      "name": "Northwind Analytics",
+      "publisher": { "@id": "https://taxonomy-demo.test/#org" }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<header>
+  <a href="/">Northwind Analytics</a>
+  <nav aria-label="Main">
+    <a href="/pricing">Pricing</a>
+    <a href="/docs/getting-started">Docs</a>
+    <a href="/blog/">Blog</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Pipeline monitoring for data engineering teams</h1>
+  <p>Northwind Analytics is monitoring software for data engineering teams. It watches the latency
+  and freshness of your data pipelines and tells you a table has gone stale before a stakeholder
+  opens a dashboard and finds yesterday&rsquo;s numbers.</p>
+  <p><a href="/pricing">Start a 14-day trial</a></p>
+
+  <h2>What Northwind Analytics does</h2>
+  <p>Northwind Analytics connects to Snowflake, BigQuery and Postgres, records how long each pipeline
+  run takes, and learns the normal completion window for every table. When a run finishes late or a
+  table stops updating, Northwind Analytics raises an alert that names the table, the pipeline and
+  the last good run. Teams using Northwind Analytics reduced their median time to detect a stale
+  table from 4 hours to 11 minutes across the 2025 customer cohort.</p>
+
+  <h2>Who it is for</h2>
+  <p>Northwind Analytics is built for data engineering teams of three to fifty people who already run
+  scheduled pipelines and need to know when those pipelines silently stop producing fresh data.</p>
+
+  <h2>Customers</h2>
+  <blockquote>&ldquo;We found a broken nightly load within nine minutes instead of the next morning.&rdquo;
+  &mdash; Priya Raman, Head of Data, Halden Logistics</blockquote>
+  <p>Used by 340 data teams, including Halden Logistics, Corvus Retail and Ministry Bank.</p>
+</main>
+
+<footer>
+  <a href="/privacy">Privacy</a>
+  <a href="/contact">Contact</a>
+  <a href="/about">About</a>
+  <p>&copy; 2026 Northwind Analytics Ltd, 14 Fenchurch Avenue, London EC3M 5BN. +44 20 7946 0102.</p>
+</footer>
+</body>
+</html>

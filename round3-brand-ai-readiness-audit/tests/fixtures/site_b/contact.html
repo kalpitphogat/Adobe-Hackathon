@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact</title>
+</head>
+<body>
+<header>
+  <a href="/">Harborview Clinic</a>
+  <nav><a href="/services">Services</a><a href="/team">Team</a><a href="/contact">Contact</a></nav>
+</header>
+<main>
+  <h1>Contact</h1>
+  <p>Get in touch and we will get back to you as soon as we can.</p>
+  <form action="/send" method="post">
+    <input name="first_name" type="text" required placeholder="First name">
+    <input name="last_name" type="text" required placeholder="Last name">
+    <input name="email" type="email" required placeholder="Email">
+    <input name="phone" type="tel" required placeholder="Phone">
+    <input name="company" type="text" required placeholder="Company">
+    <input name="job_title" type="text" required placeholder="Job title">
+    <input name="dob" type="date" required placeholder="Date of birth">
+    <input name="address1" type="text" required placeholder="Address line 1">
+    <input name="address2" type="text" placeholder="Address line 2">
+    <input name="city" type="text" required placeholder="City">
+    <input name="postcode" type="text" required placeholder="Postcode">
+    <input name="referrer" type="text" placeholder="How did you hear about us?">
+    <textarea name="message" placeholder="Message"></textarea>
+    <button type="submit">Submit</button>
+  </form>
+</main>
+<footer><p>Harborview Clinic</p></footer>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pricing — Northwind Analytics pipeline monitoring</title>
+<meta name="description" content="Northwind Analytics pricing: Team at 49 USD per month and Scale at 199 USD per month, both billed monthly with a 14-day trial.">
+<link rel="canonical" href="https://northwind-analytics.test/pricing">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Northwind Analytics Team",
+  "description": "Pipeline monitoring for data engineering teams, up to 50 monitored tables.",
+  "brand": { "@type": "Organization", "name": "Northwind Analytics" },
+  "offers": {
+    "@type": "Offer",
+    "price": "49.00",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock",
+    "url": "https://northwind-analytics.test/pricing"
+  }
+}
+</script>
+</head>
+<body>
+<header>
+  <a href="/">Northwind Analytics</a>
+  <nav aria-label="Main">
+    <a href="/pricing">Pricing</a><a href="/docs/getting-started">Docs</a>
+    <a href="/blog/">Blog</a><a href="/about">About</a><a href="/contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <nav aria-label="Breadcrumb"><a href="/">Home</a> &rsaquo; <span>Pricing</span></nav>
+  <h1>Northwind Analytics pricing</h1>
+  <p>Northwind Analytics costs 49 USD per month on the Team plan and 199 USD per month on the Scale
+  plan. Both plans are billed monthly, include unlimited users, and start with a 14-day trial that
+  does not require a card.</p>
+
+  <h2>Team &mdash; 49 USD per month</h2>
+  <p>Up to 50 monitored tables, email and Slack alerts, 30 days of run history. Suited to a single
+  data engineering team running scheduled pipelines in one warehouse.</p>
+
+  <h2>Scale &mdash; 199 USD per month</h2>
+  <p>Up to 500 monitored tables, PagerDuty and webhook alerts, 12 months of run history, and
+  per-team alert routing. Suited to organisations running pipelines across several warehouses.</p>
+
+  <h2>Start a trial</h2>
+  <form action="/trial" method="post">
+    <label for="email">Work email</label>
+    <input id="email" name="email" type="email" required>
+    <button type="submit">Start a 14-day trial</button>
+  </form>
+
+  <h2>Questions about pricing</h2>
+  <p>Every plan includes the same alerting engine; the plans differ only in monitored table count and
+  history retention. If you need more than 500 tables, <a href="/contact">contact the team</a> and we
+  will quote against your table count.</p>
+</main>
+
+<footer>
+  <a href="/privacy">Privacy</a><a href="/contact">Contact</a><a href="/about">About</a>
+  <p>&copy; 2026 Northwind Analytics Ltd, 14 Fenchurch Avenue, London EC3M 5BN. +44 20 7946 0102.</p>
+</footer>
+</body>
+</html>

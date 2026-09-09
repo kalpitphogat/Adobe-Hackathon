@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blog — data pipeline monitoring notes from Northwind Analytics</title>
+<meta name="description" content="Notes on measuring data pipeline latency, freshness and stale-table detection from the Northwind Analytics team.">
+<link rel="canonical" href="https://northwind-analytics.test/blog/">
+</head>
+<body>
+<header>
+  <a href="/">Northwind Analytics</a>
+  <nav aria-label="Main">
+    <a href="/pricing">Pricing</a><a href="/docs/getting-started">Docs</a>
+    <a href="/blog/">Blog</a><a href="/about">About</a><a href="/contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <nav aria-label="Breadcrumb"><a href="/">Home</a> &rsaquo; <span>Blog</span></nav>
+  <h1>Northwind Analytics blog</h1>
+  <p>Notes on pipeline latency, table freshness and how data teams find out that something broke.</p>
+  <ul>
+    <li>
+      <a href="/blog/measuring-pipeline-latency">Measuring pipeline latency without instrumenting every job</a>
+      <p>Warehouse metadata already records when each table was written. Read it on a schedule and you
+      get latency for every table without touching a job definition. Published 28 March 2026.</p>
+    </li>
+  </ul>
+</main>
+
+<footer>
+  <a href="/privacy">Privacy</a><a href="/contact">Contact</a><a href="/about">About</a>
+  <p>&copy; 2026 Northwind Analytics Ltd, 14 Fenchurch Avenue, London EC3M 5BN. +44 20 7946 0102.</p>
+</footer>
+</body>
+</html>

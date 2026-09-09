@@ -1,0 +1,77 @@
+{
+  "_comment": [
+    "site_e: THE BOT TAXONOMY FIXTURE. Content is identical to site_a (healthy).",
+    "Its robots.txt exercises all three bot categories WITHOUT blocking any",
+    "retrieval crawler, so the taxonomy classification is proved in isolation:",
+    "",
+    "  GPTBot, CCBot        -> training only    -> INFO, an observation not a defect",
+    "  Google-Extended,     -> dual purpose     -> MEDIUM, reported as a contested trade-off",
+    "  Applebot-Extended",
+    "  (no retrieval bot blocked)               -> NO critical, and therefore NO cascade",
+    "",
+    "Kept deliberately separate from site_b, which proves the gate cascade. A",
+    "change to the bot taxonomy must not be able to silently alter the cascade",
+    "proof, and a change to the cascade must not alter the taxonomy proof."
+  ],
+  "origin": "https://taxonomy-demo.test",
+  "default_status": 404,
+  "not_found_file": "404.html",
+  "ttfb_ms": [
+    118.0,
+    131.0,
+    124.0
+  ],
+  "routes": {
+    "/": {
+      "status": 200,
+      "file": "index.html",
+      "headers": {
+        "last-modified": "Wed, 02 Apr 2026 09:15:00 GMT"
+      }
+    },
+    "/robots.txt": {
+      "status": 200,
+      "content_type": "text/plain; charset=utf-8",
+      "file": "robots.txt"
+    },
+    "/sitemap.xml": {
+      "status": 200,
+      "content_type": "application/xml",
+      "file": "sitemap.xml"
+    },
+    "/about": {
+      "status": 200,
+      "file": "about.html"
+    },
+    "/contact": {
+      "status": 200,
+      "file": "contact.html"
+    },
+    "/pricing": {
+      "status": 200,
+      "file": "pricing.html"
+    },
+    "/blog/": {
+      "status": 200,
+      "file": "blog-index.html"
+    },
+    "/blog/measuring-pipeline-latency": {
+      "status": 200,
+      "file": "blog-post.html"
+    },
+    "/docs/getting-started": {
+      "status": 200,
+      "file": "docs.html"
+    },
+    "/privacy": {
+      "status": 200,
+      "file": "privacy.html"
+    }
+  },
+  "rendered": {
+    "/": "index.html",
+    "/pricing": "pricing.html",
+    "/blog/measuring-pipeline-latency": "blog-post.html",
+    "/docs/getting-started": "docs.html"
+  }
+}

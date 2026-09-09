@@ -1,0 +1,755 @@
+{
+  "audit_status": "complete",
+  "audited_at": "2026-05-28T20:26:40Z",
+  "evidence_bundle": {
+    "degraded_capabilities": [],
+    "pages_fetched": 4,
+    "pages_rendered": 4,
+    "path": "evidence"
+  },
+  "findings": [
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "reach.robots.ai_search_bot_blocked",
+      "confidence": "confirmed",
+      "evidence": "Claude-SearchBot blocked by \"Disallow: /\" (line 12); OAI-SearchBot blocked by \"Disallow: /\" (line 6); PerplexityBot blocked by \"Disallow: /\" (line 9). Each of these fetches pages at answer time to ground or cite a response, so blocking them removes this brand from those assistants' answers entirely. 4 of 4 discovered paths are disallowed for these agents. Bot classification from a snapshot dated 2026-09-09 (upstream commit 0e111dcc24cb).",
+      "id": "F-001",
+      "severity": "critical",
+      "stage": "reach",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 9.3,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 10.0
+        },
+        "mechanism": "Retrieval crawlers fetch the page at the moment a user asks a question; if they are refused, the brand cannot appear as a source no matter how good the page is.",
+        "patch": "User-agent: Claude-SearchBot\nAllow: /\n\nUser-agent: OAI-SearchBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n",
+        "patch_path": "fix_patches/F-001.reach.robots.ai_search_bot_blocked.txt",
+        "priority": "critical",
+        "source": "RFC 9309 section 2.2.2; vendor crawler documentation per references/ai-bots.json",
+        "summary": "Allow Claude-SearchBot, OAI-SearchBot, PerplexityBot in robots.txt, keeping any training-bot policy separate.",
+        "verification": "curl -s https://harborview-clinic.test/robots.txt and confirm each of Claude-SearchBot, OAI-SearchBot, PerplexityBot has an Allow rule that is at least as specific as any Disallow"
+      },
+      "title": "robots.txt blocks 3 AI retrieval crawler(s) that cite sources at answer time"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.orient.no_value_proposition",
+      "confidence": "likely",
+      "evidence": "https://harborview-clinic.test/ (page type home). H1 is 'Welcome'. The first 400 characters of observed content read: \"Welcome We are proud to serve the community with care and compassion.\" | \"Our doors have been open for many years and we continue that tradition every single day.\" | \"It has always been our belief that patients deserve better.\". None of these names an audience or an outcome - no phrase of the form \"for <who>\", \"helps <who> <do what>\", or \"<product> is a <category>\" appears. A first-time visitor has to infer what this is.",
+      "id": "F-002",
+      "severity": "high",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 8.0
+        },
+        "mechanism": "A visitor decides whether to stay from the first screen; without a sentence that names them, they have to do the work of inferring relevance, and most leave instead.",
+        "patch": "<h1>Welcome</h1>\n<p>__FILL_IN__:product_name is __FILL_IN__:category for __FILL_IN__:audience. It __FILL_IN__:primary_outcome.</p>",
+        "patch_path": "fix_patches/F-002.act.orient.no_value_proposition.txt",
+        "priority": "high",
+        "source": "references/cro-frameworks.md",
+        "summary": "Open with one sentence naming the audience and the outcome.",
+        "verification": "Open https://harborview-clinic.test/ and read only the first screen: can a stranger say who it is for and what it does?"
+      },
+      "title": "The first screen never says who this is for or what it does"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/services"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.orient.no_value_proposition",
+      "confidence": "likely",
+      "evidence": "https://harborview-clinic.test/services (page type other). H1 is 'Our Services'. The first 400 characters of observed content read: \"Our Services We offer a comprehensive range of services designed around you.\" | \"Each one is delivered by experienced practitioners in a comfortable setting.\" | \"It is tailored to your needs.\". None of these names an audience or an outcome - no phrase of the form \"for <who>\", \"helps <who> <do what>\", or \"<product> is a <category>\" appears. A first-time visitor has to infer what this is.",
+      "id": "F-003",
+      "severity": "high",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 8.0
+        },
+        "mechanism": "A visitor decides whether to stay from the first screen; without a sentence that names them, they have to do the work of inferring relevance, and most leave instead.",
+        "patch": "<h1>Our Services</h1>\n<p>__FILL_IN__:product_name is __FILL_IN__:category for __FILL_IN__:audience. It __FILL_IN__:primary_outcome.</p>",
+        "patch_path": "fix_patches/F-003.act.orient.no_value_proposition.txt",
+        "priority": "high",
+        "source": "references/cro-frameworks.md",
+        "summary": "Open with one sentence naming the audience and the outcome.",
+        "verification": "Open https://harborview-clinic.test/services and read only the first screen: can a stranger say who it is for and what it does?"
+      },
+      "title": "The first screen never says who this is for or what it does"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.title_not_entity_bearing",
+      "confidence": "confirmed",
+      "evidence": "https://harborview-clinic.test/ has <title>Home</title> (4 characters). It is a generic template value. The H1 says 'Welcome'. The title is the strongest single signal of what a page is about, and it is often the only text shown beside a citation.",
+      "id": "F-004",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "The title is used as the page's label wherever it is referenced, so a generic title makes the page indistinguishable from every other page.",
+        "patch": "<title>Welcome \u2014 __FILL_IN__:what_this_page_says_about_it</title>",
+        "patch_path": "fix_patches/F-004.extract.ans.title_not_entity_bearing.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Write a title that names the subject and what the page says about it.",
+        "verification": "curl -s https://harborview-clinic.test/ | grep -o '<title>[^<]*</title>'"
+      },
+      "title": "The page title is 'Home', which does not say what the page is about"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/contact"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.title_not_entity_bearing",
+      "confidence": "confirmed",
+      "evidence": "https://harborview-clinic.test/contact has <title>Contact</title> (7 characters). It is too short to carry both the subject and a descriptor. The H1 says 'Contact'. The title is the strongest single signal of what a page is about, and it is often the only text shown beside a citation.",
+      "id": "F-005",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "The title is used as the page's label wherever it is referenced, so a generic title makes the page indistinguishable from every other page.",
+        "patch": "<title>Contact \u2014 __FILL_IN__:what_this_page_says_about_it</title>",
+        "patch_path": "fix_patches/F-005.extract.ans.title_not_entity_bearing.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Write a title that names the subject and what the page says about it.",
+        "verification": "curl -s https://harborview-clinic.test/contact | grep -o '<title>[^<]*</title>'"
+      },
+      "title": "The page title is 'Contact', which does not say what the page is about"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/services"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.title_not_entity_bearing",
+      "confidence": "confirmed",
+      "evidence": "https://harborview-clinic.test/services has <title>Services</title> (8 characters). It is too short to carry both the subject and a descriptor. The H1 says 'Our Services'. The title is the strongest single signal of what a page is about, and it is often the only text shown beside a citation.",
+      "id": "F-006",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "The title is used as the page's label wherever it is referenced, so a generic title makes the page indistinguishable from every other page.",
+        "patch": "<title>Our Services \u2014 __FILL_IN__:what_this_page_says_about_it</title>",
+        "patch_path": "fix_patches/F-006.extract.ans.title_not_entity_bearing.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Write a title that names the subject and what the page says about it.",
+        "verification": "curl -s https://harborview-clinic.test/services | grep -o '<title>[^<]*</title>'"
+      },
+      "title": "The page title is 'Services', which does not say what the page is about"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/team"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.title_not_entity_bearing",
+      "confidence": "confirmed",
+      "evidence": "https://harborview-clinic.test/team has <title>Team</title> (4 characters). It is too short to carry both the subject and a descriptor. The H1 says 'Team'. The title is the strongest single signal of what a page is about, and it is often the only text shown beside a citation.",
+      "id": "F-007",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "The title is used as the page's label wherever it is referenced, so a generic title makes the page indistinguishable from every other page.",
+        "patch": "<title>Team \u2014 __FILL_IN__:what_this_page_says_about_it</title>",
+        "patch_path": "fix_patches/F-007.extract.ans.title_not_entity_bearing.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Write a title that names the subject and what the page says about it.",
+        "verification": "curl -s https://harborview-clinic.test/team | grep -o '<title>[^<]*</title>'"
+      },
+      "title": "The page title is 'Team', which does not say what the page is about"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.sd.identity_graph_weak",
+      "confidence": "confirmed",
+      "evidence": "On https://harborview-clinic.test/: the homepage declares no structured data and none of it is an Organization, LocalBusiness or Person node, so nothing states who runs this site.",
+      "id": "F-008",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A named, linked entity lets a consumer connect statements on this site to the same entity elsewhere; without it the brand is an unlinked string that may collide with other things sharing the name.",
+        "patch": "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"Organization\",\n  \"@id\": \"https://harborview-clinic.test/#organization\",\n  \"name\": \"Home\",\n  \"url\": \"https://harborview-clinic.test/\",\n  \"description\": \"__FILL_IN__:one_line_description\",\n  \"sameAs\": [\n    \"__FILL_IN__:your_wikipedia_or_wikidata_url\",\n    \"__FILL_IN__:your_linkedin_url\",\n    \"__FILL_IN__:your_primary_social_or_github_url\"\n  ]\n}\n</script>",
+        "patch_path": "fix_patches/F-008.extract.sd.identity_graph_weak.txt",
+        "priority": "medium",
+        "source": "schema.org/Organization; handout appendix, Why agreement across the web matters",
+        "summary": "Publish an Organization node on the homepage with sameAs links to your real profiles.",
+        "verification": "curl -s https://harborview-clinic.test/ | grep -o '\"sameAs\"[^]]*]'"
+      },
+      "title": "The site does not clearly state who publishes it"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.cta.ambiguous_primary_label",
+      "confidence": "confirmed",
+      "evidence": "https://harborview-clinic.test/: the most prominent action is 'Learn more' pointing at '/contact'. The label carries a verb but no object, so it does not say what the visitor gets by clicking. Other actions on the page: 'Contact'.",
+      "id": "F-009",
+      "severity": "medium",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A label that names the outcome lets the visitor evaluate the click before making it, which removes the hesitation a bare verb creates.",
+        "patch": "<!-- was: <a href=\"/contact\">Learn more</a> -->\n<a href=\"/contact\">__FILL_IN__:verb_plus_what_they_get</a>",
+        "patch_path": "fix_patches/F-009.act.cta.ambiguous_primary_label.txt",
+        "priority": "medium",
+        "source": "references/cro-frameworks.md",
+        "summary": "Relabel with a verb and its object.",
+        "verification": "Read the label alone, out of context: is it clear what happens next?"
+      },
+      "title": "The main action is labelled 'Learn more', which names no outcome"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/services"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.cta.ambiguous_primary_label",
+      "confidence": "confirmed",
+      "evidence": "https://harborview-clinic.test/services: the most prominent action is 'Submit' pointing at '/contact'. The label carries a verb but no object, so it does not say what the visitor gets by clicking. Other actions on the page: 'Contact'.",
+      "id": "F-010",
+      "severity": "medium",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A label that names the outcome lets the visitor evaluate the click before making it, which removes the hesitation a bare verb creates.",
+        "patch": "<!-- was: <a href=\"/contact\">Submit</a> -->\n<a href=\"/contact\">__FILL_IN__:verb_plus_what_they_get</a>",
+        "patch_path": "fix_patches/F-010.act.cta.ambiguous_primary_label.txt",
+        "priority": "medium",
+        "source": "references/cro-frameworks.md",
+        "summary": "Relabel with a verb and its object.",
+        "verification": "Read the label alone, out of context: is it clear what happens next?"
+      },
+      "title": "The main action is labelled 'Submit', which names no outcome"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/contact"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.form.high_friction_required_fields",
+      "confidence": "confirmed",
+      "evidence": "https://harborview-clinic.test/contact (page type contact) marks these as required: phone, company, job_title, dob, address1, postcode. A visitor at this stage has not yet been given anything, so personal or organisational detail is being demanded before any value is delivered. On a checkout or application page these same fields would be necessary and this check does not fire there.",
+      "id": "F-011",
+      "severity": "medium",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "Fields that feel invasive relative to what is being offered cause abandonment at the field itself, not at submission.",
+        "patch": "<input name=\"phone\" type=\"tel\">  <!-- required attribute removed -->\n<input name=\"company\" type=\"text\">  <!-- required attribute removed -->\n<input name=\"job_title\" type=\"text\">  <!-- required attribute removed -->\n<input name=\"dob\" type=\"date\">  <!-- required attribute removed -->\n<input name=\"address1\" type=\"text\">  <!-- required attribute removed -->\n<input name=\"postcode\" type=\"text\">  <!-- required attribute removed -->",
+        "patch_path": "fix_patches/F-011.act.form.high_friction_required_fields.txt",
+        "priority": "medium",
+        "source": "references/cro-frameworks.md",
+        "summary": "Make phone, company, job_title, dob, address1, postcode optional, or move them to a later step.",
+        "verification": "curl -s https://harborview-clinic.test/contact | grep -E 'name=\"(phone|company|job_title|dob|address1|postcode)\"'"
+      },
+      "title": "A top-of-funnel form requires 6 high-friction field(s)"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "trust.entity.name_collision",
+      "confidence": "likely",
+      "evidence": "The brand name 'Home' is a single short generic word. Within 10 words of the name on https://harborview-clinic.test/ there is no descriptor saying what kind of thing it is, and no schema description supplies one. A system that encounters this name elsewhere has nothing to tie it back to this organisation.",
+      "id": "F-012",
+      "severity": "medium",
+      "stage": "trust",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A descriptor beside the name gives a disambiguating anchor, so statements about this entity can be separated from statements about others sharing the name.",
+        "patch": "<p>Home is a __FILL_IN__:category for __FILL_IN__:audience, based in __FILL_IN__:location.</p>\n<!-- and in the Organization node: -->\n\"description\": \"__FILL_IN__:one_line_category_description\",\n\"sameAs\": [\"__FILL_IN__:wikidata_or_wikipedia_url\", \"__FILL_IN__:linkedin_url\"]",
+        "patch_path": "fix_patches/F-012.trust.entity.name_collision.txt",
+        "priority": "medium",
+        "source": "Handout appendix, Why agreement across the web matters",
+        "summary": "Put a category descriptor next to the name, and add sameAs links.",
+        "verification": "Search the exact name and see whether this organisation is the first unambiguous result; if not, the descriptor is doing no work yet."
+      },
+      "title": "The name 'Home' is ambiguous and nothing on the homepage distinguishes it"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "trust.entity.no_external_corroboration",
+      "confidence": "likely",
+      "evidence": "https://harborview-clinic.test/ declares 0 sameAs link(s), of which 0 point at an independent identity source such as Wikipedia, Wikidata, Companies House, LinkedIn or GitHub. Across 4 crawled pages the site links outward to 0 distinct external host(s). This says what we observed ON THIS SITE. It is not evidence that no one else mentions the brand, which cannot be established from the site alone, so this finding is reported at likely confidence and never as confirmed.",
+      "id": "F-013",
+      "severity": "medium",
+      "stage": "trust",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "sameAs states that this site and an independent record describe one entity, which lets a checker corroborate a claim here against a source elsewhere instead of taking it on trust.",
+        "patch": "\"sameAs\": [\n  \"__FILL_IN__:wikidata_or_wikipedia_url\",\n  \"__FILL_IN__:linkedin_company_url\",\n  \"__FILL_IN__:github_or_crunchbase_url\"\n]\n<!-- Only list profiles that genuinely describe this same entity. -->",
+        "patch_path": "fix_patches/F-013.trust.entity.no_external_corroboration.txt",
+        "priority": "medium",
+        "source": "schema.org/sameAs; handout appendix, Why agreement across the web matters",
+        "summary": "Add sameAs links from your Organization node to profiles you already control.",
+        "verification": "curl -s https://harborview-clinic.test/ | grep -o '\"sameAs\"[^]]*]'"
+      },
+      "title": "Nothing connects this site to an independent record of the same entity"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/services"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.context.assumes_prior_context",
+      "confidence": "likely",
+      "evidence": "https://harborview-clinic.test/services: \"Physiotherapy As mentioned above, this is delivered by our experienced team.\" (assumes an earlier conversation via 'As mentioned above'). Most visitors arrive on a deep page from search or a shared link with no prior session, so copy written for someone mid-journey reads as though they have missed something.",
+      "id": "F-014",
+      "severity": "medium",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A reference to state the visitor does not hold cannot be resolved, so the sentence carries no information and signals the page was not meant for them.",
+        "patch": "<!-- was: Physiotherapy As mentioned above, this is delivered by our experienced team. -->\n<p>__FILL_IN__:restate_without_assuming_prior_context</p>",
+        "patch_path": "fix_patches/F-014.act.context.assumes_prior_context.txt",
+        "priority": "medium",
+        "source": "Handout appendix, Personalization and prior context",
+        "summary": "Rewrite these passages so they stand on their own for a first-time reader.",
+        "verification": "Read each passage cold, as a stranger: does it depend on something you were never told?"
+      },
+      "title": "1 passage(s) assume context a first-time visitor does not have"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.thin_content_for_page_type",
+      "confidence": "confirmed",
+      "evidence": "https://harborview-clinic.test/ has 48 words of main content against a floor of 120 for a home page on a other site. Navigation, header and footer were excluded from the count. There is not enough here for a retrieval system to find an answer to anything specific.",
+      "id": "F-015",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "medium",
+        "ice": 6.3,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 5.0,
+          "impact": 5.0
+        },
+        "mechanism": "A page with little text offers few facts to extract, so it is rarely the best available source for any question.",
+        "patch": "<h2>__FILL_IN__:question_visitors_actually_ask</h2>\n<p>Home __FILL_IN__:specific_answer_with_a_number_or_name.</p>",
+        "patch_path": "fix_patches/F-015.extract.ans.thin_content_for_page_type.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Answer the questions a visitor arrives with, in specifics.",
+        "verification": "curl -s https://harborview-clinic.test/ | sed -e 's/<[^>]*>//g' | wc -w"
+      },
+      "title": "A home page carries only 48 words"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/contact"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.thin_content_for_page_type",
+      "confidence": "confirmed",
+      "evidence": "https://harborview-clinic.test/contact has 17 words of main content against a floor of 40 for a contact page on a other site. Navigation, header and footer were excluded from the count. There is not enough here for a retrieval system to find an answer to anything specific.",
+      "id": "F-016",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "medium",
+        "ice": 6.3,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 5.0,
+          "impact": 5.0
+        },
+        "mechanism": "A page with little text offers few facts to extract, so it is rarely the best available source for any question.",
+        "patch": "<h2>__FILL_IN__:question_visitors_actually_ask</h2>\n<p>Home __FILL_IN__:specific_answer_with_a_number_or_name.</p>",
+        "patch_path": "fix_patches/F-016.extract.ans.thin_content_for_page_type.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Answer the questions a visitor arrives with, in specifics.",
+        "verification": "curl -s https://harborview-clinic.test/contact | sed -e 's/<[^>]*>//g' | wc -w"
+      },
+      "title": "A contact page carries only 17 words"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/services"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.thin_content_for_page_type",
+      "confidence": "confirmed",
+      "evidence": "https://harborview-clinic.test/services has 70 words of main content against a floor of 150 for a other page on a other site. Navigation, header and footer were excluded from the count. There is not enough here for a retrieval system to find an answer to anything specific.",
+      "id": "F-017",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "medium",
+        "ice": 6.3,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 5.0,
+          "impact": 5.0
+        },
+        "mechanism": "A page with little text offers few facts to extract, so it is rarely the best available source for any question.",
+        "patch": "<h2>__FILL_IN__:question_visitors_actually_ask</h2>\n<p>Home __FILL_IN__:specific_answer_with_a_number_or_name.</p>",
+        "patch_path": "fix_patches/F-017.extract.ans.thin_content_for_page_type.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Answer the questions a visitor arrives with, in specifics.",
+        "verification": "curl -s https://harborview-clinic.test/services | sed -e 's/<[^>]*>//g' | wc -w"
+      },
+      "title": "A other page carries only 70 words"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/team"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.thin_content_for_page_type",
+      "confidence": "confirmed",
+      "evidence": "https://harborview-clinic.test/team has 8 words of main content against a floor of 100 for a about page on a other site. Navigation, header and footer were excluded from the count. There is not enough here for a retrieval system to find an answer to anything specific.",
+      "id": "F-018",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "medium",
+        "ice": 6.3,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 5.0,
+          "impact": 5.0
+        },
+        "mechanism": "A page with little text offers few facts to extract, so it is rarely the best available source for any question.",
+        "patch": "<h2>__FILL_IN__:question_visitors_actually_ask</h2>\n<p>Home __FILL_IN__:specific_answer_with_a_number_or_name.</p>",
+        "patch_path": "fix_patches/F-018.extract.ans.thin_content_for_page_type.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Answer the questions a visitor arrives with, in specifics.",
+        "verification": "curl -s https://harborview-clinic.test/team | sed -e 's/<[^>]*>//g' | wc -w"
+      },
+      "title": "A about page carries only 8 words"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/contact"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.form.field_count_excessive",
+      "confidence": "confirmed",
+      "evidence": "https://harborview-clinic.test/contact (page type contact) posts to /send with 13 visible fields against a threshold of 8 for this site type. Fields, with * marking required: first_name:text*, last_name:text*, email:email*, phone:tel*, company:text*, job_title:text*, dob:date*, address1:text*, address2:text, city:text*, postcode:text*, referrer:text, message:text. Hidden and submit inputs were excluded from the count.",
+      "id": "F-019",
+      "severity": "medium",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "medium",
+        "ice": 6.3,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 5.0,
+          "impact": 5.0
+        },
+        "mechanism": "Every field is a separate decision and a separate chance to abandon; fields that are not needed to fulfil the request cost completions without returning anything.",
+        "patch": "<form action=\"/send\" method=\"post\">\n  <label for=\"email\">__FILL_IN__:label_text</label>\n  <input id=\"email\" name=\"email\" type=\"email\" required>\n  <button type=\"submit\">__FILL_IN__:verb_plus_object</button>\n</form>\n<!-- Collect the remaining detail after the visitor has received something. -->",
+        "patch_path": "fix_patches/F-019.act.form.field_count_excessive.txt",
+        "priority": "medium",
+        "source": "references/cro-frameworks.md",
+        "summary": "Ask only for what is needed to deliver the next step; collect the rest later.",
+        "verification": "curl -s https://harborview-clinic.test/contact | grep -cE '<(input|select|textarea)'"
+      },
+      "title": "A 13-field form stands between the visitor and the action"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/services"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.heading_structure_unusable",
+      "confidence": "confirmed",
+      "evidence": "https://harborview-clinic.test/services: heading levels skip from h1 to h3. Outline: h1:'Our Services', h3:'Physiotherapy', h3:'Podiatry'. Headings are where a reader decides which part of a page answers the question, so an outline that does not divide the content leaves it to guess.",
+      "id": "F-020",
+      "severity": "low",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.0,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 3.0
+        },
+        "mechanism": "Headings mark the boundaries a reader uses to locate the relevant part of a long page; without them the whole page is one undifferentiated block.",
+        "patch": "<h1>Our Services</h1>\n<h2>__FILL_IN__:question_this_section_answers</h2>",
+        "patch_path": "fix_patches/F-020.extract.ans.heading_structure_unusable.txt",
+        "priority": "low",
+        "source": "references/chunking-model.md",
+        "summary": "Give the page one H1 and H2 sections that name what each part answers.",
+        "verification": "curl -s https://harborview-clinic.test/services | grep -oE '<h[1-3][^>]*>' | sort | uniq -c"
+      },
+      "title": "The heading outline does not divide this page usefully"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://harborview-clinic.test/contact"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.form.unlabelled_inputs",
+      "confidence": "confirmed",
+      "evidence": "https://harborview-clinic.test/contact: 13 of 13 fields have no <label>, aria-label or aria-labelledby: first_name, last_name, email, phone, company, job_title, dob, address1. All of them do carry a placeholder, which disappears on focus and is not exposed as a label, so this is reported at low severity.",
+      "id": "F-021",
+      "severity": "low",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.0,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 3.0
+        },
+        "mechanism": "A placeholder vanishes as soon as the field is focused, so a visitor who pauses mid-form loses the only description of what the field wanted.",
+        "patch": "<label for=\"first_name\">First name</label>\n<input id=\"first_name\" name=\"first_name\" type=\"text\">\n<label for=\"last_name\">Last name</label>\n<input id=\"last_name\" name=\"last_name\" type=\"text\">\n<label for=\"email\">Email</label>\n<input id=\"email\" name=\"email\" type=\"email\">\n<label for=\"phone\">Phone</label>\n<input id=\"phone\" name=\"phone\" type=\"tel\">",
+        "patch_path": "fix_patches/F-021.act.form.unlabelled_inputs.txt",
+        "priority": "low",
+        "source": "WCAG 2.2 Success Criterion 3.3.2 Labels or Instructions",
+        "summary": "Give every field a visible, associated label.",
+        "verification": "curl -s https://harborview-clinic.test/contact | grep -c '<label'"
+      },
+      "title": "13 form field(s) have no programmatic label"
+    }
+  ],
+  "generator": {
+    "ai_bots_snapshot_date": "2026-09-09",
+    "ai_bots_source_commit": "0e111dcc24cbcdf4e609edde70f9f9184eac8b02",
+    "checks_available": 61,
+    "checks_run": 13,
+    "name": "brand-ai-readiness-audit",
+    "tool_versions": {
+      "collector": "1.0.0",
+      "python": "3.11.9",
+      "renderer": "offline-fixture",
+      "transport": "offline"
+    },
+    "version": "1.0.0"
+  },
+  "limitations": [
+    {
+      "checks_not_run": [
+        "reach.edge.bot_ua_blocked",
+        "reach.edge.bot_ua_challenged"
+      ],
+      "confidence_effect": "not assessed; re-run with --probe-bot-ua to close this gap",
+      "optional_feature": true,
+      "reason": "Edge and CDN reachability for named AI crawlers was not assessed, because --probe-bot-ua was not set. This is the highest-value check in this marketplace: a CDN or WAF rule that returns 403 to OAI-SearchBot, PerplexityBot or Claude-SearchBot removes a brand from those assistants entirely, and leaves no trace in robots.txt or in what a human sees. If you own this site, re-run the orchestrator with the --probe-bot-ua flag:\n    orchestrate.py <url> --out ./audit-output --probe-bot-ua\nThat sends ONE request per crawler, to the homepage only, with an auditor token appended to the user-agent string so it is identifiable in your logs. It is off by default because sending named-crawler user-agents to a site you do not own is not something an audit should do without being asked.",
+      "scope": "site"
+    }
+  ],
+  "proactive_recommendations": [],
+  "schema_version": "1.0",
+  "site": "harborview-clinic.test",
+  "summary": {
+    "blocked_findings": 12,
+    "by_category": {
+      "discoverability": 13,
+      "engagement": 8
+    },
+    "by_stage": {
+      "act": 8,
+      "extract": 10,
+      "reach": 1,
+      "trust": 2
+    },
+    "critical": 1,
+    "high": 2,
+    "info": 0,
+    "low": 2,
+    "medium": 16,
+    "suppressed_by_rule": [
+      {
+        "check_id": "extract.ans.fact_coverage_gap",
+        "count": 4,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "extract.ans.no_evidence_markers",
+        "count": 2,
+        "reason": "suppressed by threshold",
+        "rule": "suppressed by threshold"
+      },
+      {
+        "check_id": "extract.sd.absent_on_eligible_page",
+        "count": 4,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "reach.agent.llms_txt_absent",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "reach.edge.bot_ua_blocked",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "reach.edge.bot_ua_challenged",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "reach.sitemap.absent_or_invalid",
+        "count": 1,
+        "reason": "suppressed by threshold",
+        "rule": "suppressed by threshold"
+      }
+    ],
+    "total_findings": 21
+  }
+}

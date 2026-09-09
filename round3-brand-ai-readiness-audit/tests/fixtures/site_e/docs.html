@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started — connect a warehouse to Northwind Analytics</title>
+<meta name="description" content="Connect Snowflake, BigQuery or Postgres to Northwind Analytics and receive your first freshness alert in about ten minutes.">
+<link rel="canonical" href="https://taxonomy-demo.test/docs/getting-started">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Getting started with Northwind Analytics",
+  "datePublished": "2026-03-05",
+  "dateModified": "2026-03-05",
+  "author": { "@type": "Organization", "name": "Northwind Analytics" }
+}
+</script>
+</head>
+<body>
+<header>
+  <a href="/">Northwind Analytics</a>
+  <nav aria-label="Main">
+    <a href="/pricing">Pricing</a><a href="/docs/getting-started">Docs</a>
+    <a href="/blog/">Blog</a><a href="/about">About</a><a href="/contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <nav aria-label="Breadcrumb"><a href="/">Home</a> &rsaquo; <span>Docs</span> &rsaquo; <span>Getting started</span></nav>
+  <h1>Getting started with Northwind Analytics</h1>
+  <p>This guide connects a warehouse to Northwind Analytics and produces a first freshness alert.
+  It takes about ten minutes and needs a read-only warehouse role.</p>
+
+  <h2>Step 1: create a read-only role</h2>
+  <p>Northwind Analytics reads table metadata only. Create a role with USAGE on the database and
+  SELECT on INFORMATION_SCHEMA, and grant nothing else. Northwind Analytics never reads row data.</p>
+
+  <h2>Step 2: add the connection</h2>
+  <p>In Northwind Analytics, open Connections, choose Snowflake, BigQuery or Postgres, and paste the
+  host, database and role. The connection test reads one metadata row and reports success or the
+  exact permission that is missing.</p>
+
+  <h2>Step 3: choose tables to monitor</h2>
+  <p>Northwind Analytics lists every table it can see with its last write time. Select the tables
+  that feed dashboards. Start with ten; you can add more at any time up to your plan limit.</p>
+
+  <h2>Step 4: set the alert channel</h2>
+  <p>Add a Slack channel or an email address. Northwind Analytics sends the first alert as soon as a
+  monitored table misses its learned completion window, which usually happens within one day.</p>
+
+  <h2>Troubleshooting</h2>
+  <p>If the connection test fails with a permission error, the role is missing SELECT on
+  INFORMATION_SCHEMA. If tables are missing from the list, the role lacks USAGE on that schema.</p>
+
+  <p>Next: <a href="/blog/measuring-pipeline-latency">how latency is measured</a>, or
+  <a href="/pricing">review the plan limits</a>.</p>
+</main>
+
+<footer>
+  <a href="/privacy">Privacy</a><a href="/contact">Contact</a><a href="/about">About</a>
+  <p>&copy; 2026 Northwind Analytics Ltd, 14 Fenchurch Avenue, London EC3M 5BN. +44 20 7946 0102.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Measuring pipeline latency without instrumenting every job — Northwind Analytics</title>
+<meta name="description" content="How to measure data pipeline latency from warehouse metadata alone, without adding instrumentation to every scheduled job.">
+<link rel="canonical" href="https://northwind-analytics.test/blog/measuring-pipeline-latency">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Measuring pipeline latency without instrumenting every job",
+  "datePublished": "2026-03-28",
+  "dateModified": "2026-03-28",
+  "author": { "@type": "Person", "name": "Priya Raman" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Northwind Analytics",
+    "url": "https://northwind-analytics.test/"
+  },
+  "mainEntityOfPage": "https://northwind-analytics.test/blog/measuring-pipeline-latency"
+}
+</script>
+</head>
+<body>
+<header>
+  <a href="/">Northwind Analytics</a>
+  <nav aria-label="Main">
+    <a href="/pricing">Pricing</a><a href="/docs/getting-started">Docs</a>
+    <a href="/blog/">Blog</a><a href="/about">About</a><a href="/contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <nav aria-label="Breadcrumb"><a href="/">Home</a> &rsaquo; <a href="/blog/">Blog</a> &rsaquo; <span>Measuring pipeline latency</span></nav>
+  <article>
+    <h1>Measuring pipeline latency without instrumenting every job</h1>
+    <p>Published <time datetime="2026-03-28">28 March 2026</time> by Priya Raman.</p>
+
+    <p>Pipeline latency is the time between a source system recording a fact and that fact becoming
+    queryable in the warehouse. Most teams try to measure pipeline latency by adding timing code to
+    every scheduled job, which is accurate and almost never finished, because there is always one
+    more job nobody instrumented.</p>
+
+    <h2>Measure from warehouse metadata instead</h2>
+    <p>Every major warehouse already records when each table was last written. Snowflake exposes this
+    in INFORMATION_SCHEMA.TABLES as LAST_ALTERED, BigQuery in __TABLES__ as last_modified_time, and
+    Postgres through pg_stat_user_tables. Reading those columns on a schedule gives a latency figure
+    for every table in the warehouse without touching a single job definition.</p>
+
+    <h2>What the metadata approach misses</h2>
+    <p>Warehouse metadata records when a table was written, not whether the write was correct. A job
+    that runs on time and loads zero rows looks healthy by this measure. Pair the freshness signal
+    with a row-count delta so an empty load is caught as well as a late one.</p>
+
+    <h2>How much this catches in practice</h2>
+    <p>Across the 2025 Northwind Analytics customer cohort, 71 percent of stale-table incidents were
+    detectable from warehouse metadata alone, and median time to detection fell from 4 hours to 11
+    minutes. The remaining 29 percent required a row-count or schema check, which is why we ship
+    both.</p>
+
+    <h2>Further reading</h2>
+    <p>The freshness-versus-correctness distinction is set out well in
+    <a href="https://en.wikipedia.org/wiki/Data_quality">the data quality literature</a>, and the
+    warehouse metadata columns are documented in each vendor&rsquo;s own reference.</p>
+
+    <p>Next: <a href="/docs/getting-started">connect your first warehouse</a>, or read about
+    <a href="/pricing">how Northwind Analytics is priced</a>.</p>
+  </article>
+</main>
+
+<footer>
+  <a href="/privacy">Privacy</a><a href="/contact">Contact</a><a href="/about">About</a>
+  <p>&copy; 2026 Northwind Analytics Ltd, 14 Fenchurch Avenue, London EC3M 5BN. +44 20 7946 0102.</p>
+</footer>
+</body>
+</html>

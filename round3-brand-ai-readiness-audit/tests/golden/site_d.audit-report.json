@@ -1,0 +1,698 @@
+{
+  "audit_status": "partial",
+  "audited_at": "2026-05-28T20:26:40Z",
+  "evidence_bundle": {
+    "degraded_capabilities": [
+      {
+        "affects": [
+          "act.perf.above_fold_weight",
+          "read.render.nav_links_js_only",
+          "read.render.raw_text_gap"
+        ],
+        "capability": "rendered_dom",
+        "confidence_effect": "read.render.empty_spa_shell drops from critical/confirmed to high/likely",
+        "reason": "offline fixture declares no rendered pairs"
+      }
+    ],
+    "pages_fetched": 4,
+    "pages_rendered": 0,
+    "path": "evidence"
+  },
+  "findings": [
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "read.render.empty_spa_shell",
+      "confidence": "likely",
+      "evidence": "https://spa-only.test/ serves 0 words of body text. The framework mount point div#__next contains 0 words, 3 JavaScript bundle(s) are loaded (/_next/static/chunks/webpack-0f1a2b3c.js, /_next/static/chunks/framework-4d5e6f70.js), and the <noscript> fallback carries 9 words. A crawler that does not execute JavaScript receives an empty page. No renderer was available, so this is reported at high/likely rather than critical/confirmed: we can see the shell signature but cannot measure what the visitor would have seen.",
+      "id": "F-001",
+      "severity": "high",
+      "stage": "read",
+      "suggested_action": {
+        "effort": "high",
+        "ice": 5.3,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 2.0,
+          "impact": 8.0
+        },
+        "mechanism": "The mount point is empty in the served HTML, so every downstream signal - structured data, headings, facts - is absent at the moment the crawler reads the page.",
+        "patch": "# Enable SSR or static generation for this route.\n# Minimum viable stopgap: put the page's key facts in the initial HTML.\n<noscript>\n  <h1>__FILL_IN__:page_h1</h1>\n  <p>__FILL_IN__:one_paragraph_summary_of_this_page</p>\n</noscript>",
+        "patch_path": "fix_patches/F-001.read.render.empty_spa_shell.txt",
+        "priority": "high",
+        "source": "Handout appendix, How machines read a page",
+        "summary": "Server-render or pre-render this route so the initial HTML response carries the content.",
+        "verification": "curl -s https://spa-only.test/ | sed -e 's/<[^>]*>//g' | tr -s '[:space:]' ' ' | wc -w\n# currently about 0; expect the real content length"
+      },
+      "title": "The served HTML is an empty application shell with no content"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/about"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "read.render.empty_spa_shell",
+      "confidence": "likely",
+      "evidence": "https://spa-only.test/about serves 0 words of body text. The framework mount point div#__next contains 0 words, 3 JavaScript bundle(s) are loaded (/_next/static/chunks/webpack-0f1a2b3c.js, /_next/static/chunks/framework-4d5e6f70.js), and the <noscript> fallback carries 9 words. A crawler that does not execute JavaScript receives an empty page. No renderer was available, so this is reported at high/likely rather than critical/confirmed: we can see the shell signature but cannot measure what the visitor would have seen.",
+      "id": "F-002",
+      "severity": "high",
+      "stage": "read",
+      "suggested_action": {
+        "effort": "high",
+        "ice": 5.3,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 2.0,
+          "impact": 8.0
+        },
+        "mechanism": "The mount point is empty in the served HTML, so every downstream signal - structured data, headings, facts - is absent at the moment the crawler reads the page.",
+        "patch": "# Enable SSR or static generation for this route.\n# Minimum viable stopgap: put the page's key facts in the initial HTML.\n<noscript>\n  <h1>__FILL_IN__:page_h1</h1>\n  <p>__FILL_IN__:one_paragraph_summary_of_this_page</p>\n</noscript>",
+        "patch_path": "fix_patches/F-002.read.render.empty_spa_shell.txt",
+        "priority": "high",
+        "source": "Handout appendix, How machines read a page",
+        "summary": "Server-render or pre-render this route so the initial HTML response carries the content.",
+        "verification": "curl -s https://spa-only.test/about | sed -e 's/<[^>]*>//g' | tr -s '[:space:]' ' ' | wc -w\n# currently about 0; expect the real content length"
+      },
+      "title": "The served HTML is an empty application shell with no content"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/features"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "read.render.empty_spa_shell",
+      "confidence": "likely",
+      "evidence": "https://spa-only.test/features serves 0 words of body text. The framework mount point div#__next contains 0 words, 3 JavaScript bundle(s) are loaded (/_next/static/chunks/webpack-0f1a2b3c.js, /_next/static/chunks/framework-4d5e6f70.js), and the <noscript> fallback carries 9 words. A crawler that does not execute JavaScript receives an empty page. No renderer was available, so this is reported at high/likely rather than critical/confirmed: we can see the shell signature but cannot measure what the visitor would have seen.",
+      "id": "F-003",
+      "severity": "high",
+      "stage": "read",
+      "suggested_action": {
+        "effort": "high",
+        "ice": 5.3,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 2.0,
+          "impact": 8.0
+        },
+        "mechanism": "The mount point is empty in the served HTML, so every downstream signal - structured data, headings, facts - is absent at the moment the crawler reads the page.",
+        "patch": "# Enable SSR or static generation for this route.\n# Minimum viable stopgap: put the page's key facts in the initial HTML.\n<noscript>\n  <h1>__FILL_IN__:page_h1</h1>\n  <p>__FILL_IN__:one_paragraph_summary_of_this_page</p>\n</noscript>",
+        "patch_path": "fix_patches/F-003.read.render.empty_spa_shell.txt",
+        "priority": "high",
+        "source": "Handout appendix, How machines read a page",
+        "summary": "Server-render or pre-render this route so the initial HTML response carries the content.",
+        "verification": "curl -s https://spa-only.test/features | sed -e 's/<[^>]*>//g' | tr -s '[:space:]' ' ' | wc -w\n# currently about 0; expect the real content length"
+      },
+      "title": "The served HTML is an empty application shell with no content"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/pricing"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "read.render.empty_spa_shell",
+      "confidence": "likely",
+      "evidence": "https://spa-only.test/pricing serves 0 words of body text. The framework mount point div#__next contains 0 words, 3 JavaScript bundle(s) are loaded (/_next/static/chunks/webpack-0f1a2b3c.js, /_next/static/chunks/framework-4d5e6f70.js), and the <noscript> fallback carries 9 words. A crawler that does not execute JavaScript receives an empty page. No renderer was available, so this is reported at high/likely rather than critical/confirmed: we can see the shell signature but cannot measure what the visitor would have seen.",
+      "id": "F-004",
+      "severity": "high",
+      "stage": "read",
+      "suggested_action": {
+        "effort": "high",
+        "ice": 5.3,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 2.0,
+          "impact": 8.0
+        },
+        "mechanism": "The mount point is empty in the served HTML, so every downstream signal - structured data, headings, facts - is absent at the moment the crawler reads the page.",
+        "patch": "# Enable SSR or static generation for this route.\n# Minimum viable stopgap: put the page's key facts in the initial HTML.\n<noscript>\n  <h1>__FILL_IN__:page_h1</h1>\n  <p>__FILL_IN__:one_paragraph_summary_of_this_page</p>\n</noscript>",
+        "patch_path": "fix_patches/F-004.read.render.empty_spa_shell.txt",
+        "priority": "high",
+        "source": "Handout appendix, How machines read a page",
+        "summary": "Server-render or pre-render this route so the initial HTML response carries the content.",
+        "verification": "curl -s https://spa-only.test/pricing | sed -e 's/<[^>]*>//g' | tr -s '[:space:]' ' ' | wc -w\n# currently about 0; expect the real content length"
+      },
+      "title": "The served HTML is an empty application shell with no content"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.title_not_entity_bearing",
+      "confidence": "likely",
+      "evidence": "https://spa-only.test/ has <title>Vantage</title> (7 characters). It is too short to carry both the subject and a descriptor. The H1 says '(no H1)'. The title is the strongest single signal of what a page is about, and it is often the only text shown beside a citation.",
+      "id": "F-005",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "The title is used as the page's label wherever it is referenced, so a generic title makes the page indistinguishable from every other page.",
+        "patch": "<title>__FILL_IN__:subject \u2014 __FILL_IN__:what_this_page_says_about_it</title>",
+        "patch_path": "fix_patches/F-005.extract.ans.title_not_entity_bearing.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Write a title that names the subject and what the page says about it.",
+        "verification": "curl -s https://spa-only.test/ | grep -o '<title>[^<]*</title>'"
+      },
+      "title": "The page title is 'Vantage', which does not say what the page is about"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/about"
+      ],
+      "blocked_by": "F-002",
+      "category": "discoverability",
+      "check_id": "extract.ans.title_not_entity_bearing",
+      "confidence": "likely",
+      "evidence": "https://spa-only.test/about has <title>Vantage</title> (7 characters). It is too short to carry both the subject and a descriptor. The H1 says '(no H1)'. The title is the strongest single signal of what a page is about, and it is often the only text shown beside a citation.",
+      "id": "F-006",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "The title is used as the page's label wherever it is referenced, so a generic title makes the page indistinguishable from every other page.",
+        "patch": "<title>__FILL_IN__:subject \u2014 __FILL_IN__:what_this_page_says_about_it</title>",
+        "patch_path": "fix_patches/F-006.extract.ans.title_not_entity_bearing.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Write a title that names the subject and what the page says about it.",
+        "verification": "curl -s https://spa-only.test/about | grep -o '<title>[^<]*</title>'"
+      },
+      "title": "The page title is 'Vantage', which does not say what the page is about"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/features"
+      ],
+      "blocked_by": "F-003",
+      "category": "discoverability",
+      "check_id": "extract.ans.title_not_entity_bearing",
+      "confidence": "likely",
+      "evidence": "https://spa-only.test/features has <title>Vantage</title> (7 characters). It is too short to carry both the subject and a descriptor. The H1 says '(no H1)'. The title is the strongest single signal of what a page is about, and it is often the only text shown beside a citation.",
+      "id": "F-007",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "The title is used as the page's label wherever it is referenced, so a generic title makes the page indistinguishable from every other page.",
+        "patch": "<title>__FILL_IN__:subject \u2014 __FILL_IN__:what_this_page_says_about_it</title>",
+        "patch_path": "fix_patches/F-007.extract.ans.title_not_entity_bearing.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Write a title that names the subject and what the page says about it.",
+        "verification": "curl -s https://spa-only.test/features | grep -o '<title>[^<]*</title>'"
+      },
+      "title": "The page title is 'Vantage', which does not say what the page is about"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/pricing"
+      ],
+      "blocked_by": "F-004",
+      "category": "discoverability",
+      "check_id": "extract.ans.title_not_entity_bearing",
+      "confidence": "likely",
+      "evidence": "https://spa-only.test/pricing has <title>Vantage</title> (7 characters). It is too short to carry both the subject and a descriptor. The H1 says '(no H1)'. The title is the strongest single signal of what a page is about, and it is often the only text shown beside a citation.",
+      "id": "F-008",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "The title is used as the page's label wherever it is referenced, so a generic title makes the page indistinguishable from every other page.",
+        "patch": "<title>__FILL_IN__:subject \u2014 __FILL_IN__:what_this_page_says_about_it</title>",
+        "patch_path": "fix_patches/F-008.extract.ans.title_not_entity_bearing.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Write a title that names the subject and what the page says about it.",
+        "verification": "curl -s https://spa-only.test/pricing | grep -o '<title>[^<]*</title>'"
+      },
+      "title": "The page title is 'Vantage', which does not say what the page is about"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.sd.identity_graph_weak",
+      "confidence": "likely",
+      "evidence": "On https://spa-only.test/: the homepage declares no structured data and none of it is an Organization, LocalBusiness or Person node, so nothing states who runs this site.",
+      "id": "F-009",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A named, linked entity lets a consumer connect statements on this site to the same entity elsewhere; without it the brand is an unlinked string that may collide with other things sharing the name.",
+        "patch": "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"Organization\",\n  \"@id\": \"https://spa-only.test/#organization\",\n  \"name\": \"Vantage\",\n  \"url\": \"https://spa-only.test/\",\n  \"description\": \"__FILL_IN__:one_line_description\",\n  \"sameAs\": [\n    \"__FILL_IN__:your_wikipedia_or_wikidata_url\",\n    \"__FILL_IN__:your_linkedin_url\",\n    \"__FILL_IN__:your_primary_social_or_github_url\"\n  ]\n}\n</script>",
+        "patch_path": "fix_patches/F-009.extract.sd.identity_graph_weak.txt",
+        "priority": "medium",
+        "source": "schema.org/Organization; handout appendix, Why agreement across the web matters",
+        "summary": "Publish an Organization node on the homepage with sameAs links to your real profiles.",
+        "verification": "curl -s https://spa-only.test/ | grep -o '\"sameAs\"[^]]*]'"
+      },
+      "title": "The site does not clearly state who publishes it"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "trust.entity.name_collision",
+      "confidence": "hypothesis",
+      "evidence": "The brand name 'Vantage' contains the common term(s) vantage, which many unrelated organisations, products and places also use. Within 10 words of the name on https://spa-only.test/ there is no descriptor saying what kind of thing it is, and no schema description supplies one. A system that encounters this name elsewhere has nothing to tie it back to this organisation.",
+      "id": "F-010",
+      "severity": "medium",
+      "stage": "trust",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 5.7,
+        "ice_components": {
+          "confidence": 3.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A descriptor beside the name gives a disambiguating anchor, so statements about this entity can be separated from statements about others sharing the name.",
+        "patch": "<p>Vantage is a __FILL_IN__:category for __FILL_IN__:audience, based in __FILL_IN__:location.</p>\n<!-- and in the Organization node: -->\n\"description\": \"__FILL_IN__:one_line_category_description\",\n\"sameAs\": [\"__FILL_IN__:wikidata_or_wikipedia_url\", \"__FILL_IN__:linkedin_url\"]",
+        "patch_path": "fix_patches/F-010.trust.entity.name_collision.txt",
+        "priority": "medium",
+        "source": "Handout appendix, Why agreement across the web matters",
+        "summary": "Put a category descriptor next to the name, and add sameAs links.",
+        "verification": "Search the exact name and see whether this organisation is the first unambiguous result; if not, the descriptor is doing no work yet."
+      },
+      "title": "The name 'Vantage' is ambiguous and nothing on the homepage distinguishes it"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "trust.entity.no_external_corroboration",
+      "confidence": "hypothesis",
+      "evidence": "https://spa-only.test/ declares 0 sameAs link(s), of which 0 point at an independent identity source such as Wikipedia, Wikidata, Companies House, LinkedIn or GitHub. Across 4 crawled pages the site links outward to 0 distinct external host(s). This says what we observed ON THIS SITE. It is not evidence that no one else mentions the brand, which cannot be established from the site alone, so this finding is reported at likely confidence and never as confirmed.",
+      "id": "F-011",
+      "severity": "medium",
+      "stage": "trust",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 5.7,
+        "ice_components": {
+          "confidence": 3.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "sameAs states that this site and an independent record describe one entity, which lets a checker corroborate a claim here against a source elsewhere instead of taking it on trust.",
+        "patch": "\"sameAs\": [\n  \"__FILL_IN__:wikidata_or_wikipedia_url\",\n  \"__FILL_IN__:linkedin_company_url\",\n  \"__FILL_IN__:github_or_crunchbase_url\"\n]\n<!-- Only list profiles that genuinely describe this same entity. -->",
+        "patch_path": "fix_patches/F-011.trust.entity.no_external_corroboration.txt",
+        "priority": "medium",
+        "source": "schema.org/sameAs; handout appendix, Why agreement across the web matters",
+        "summary": "Add sameAs links from your Organization node to profiles you already control.",
+        "verification": "curl -s https://spa-only.test/ | grep -o '\"sameAs\"[^]]*]'"
+      },
+      "title": "Nothing connects this site to an independent record of the same entity"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/sitemap.xml"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "reach.sitemap.coverage_gap",
+      "confidence": "confirmed",
+      "evidence": "all 4 entries share 0 distinct lastmod value(s), so lastmod carries no information about what changed",
+      "id": "F-012",
+      "severity": "low",
+      "stage": "reach",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.0,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 3.0
+        },
+        "mechanism": "Crawlers use lastmod to decide what to re-fetch; a constant or absent value gives them nothing to prioritise, so changed pages are refreshed no sooner than unchanged ones.",
+        "patch": "",
+        "priority": "low",
+        "source": "sitemaps.org protocol 0.9",
+        "summary": "Regenerate the sitemap from the live route list with real lastmod values.",
+        "verification": "curl -s https://spa-only.test/sitemap.xml | grep -c '<loc>'"
+      },
+      "title": "The sitemap does not usefully describe the site"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.heading_structure_unusable",
+      "confidence": "likely",
+      "evidence": "https://spa-only.test/: no H1. Outline: (no headings). Headings are where a reader decides which part of a page answers the question, so an outline that does not divide the content leaves it to guess.",
+      "id": "F-013",
+      "severity": "low",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.0,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 3.0
+        },
+        "mechanism": "Headings mark the boundaries a reader uses to locate the relevant part of a long page; without them the whole page is one undifferentiated block.",
+        "patch": "<h1>__FILL_IN__:page_subject</h1>\n<h2>__FILL_IN__:question_this_section_answers</h2>",
+        "patch_path": "fix_patches/F-013.extract.ans.heading_structure_unusable.txt",
+        "priority": "low",
+        "source": "references/chunking-model.md",
+        "summary": "Give the page one H1 and H2 sections that name what each part answers.",
+        "verification": "curl -s https://spa-only.test/ | grep -oE '<h[1-3][^>]*>' | sort | uniq -c"
+      },
+      "title": "The heading outline does not divide this page usefully"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/about"
+      ],
+      "blocked_by": "F-002",
+      "category": "discoverability",
+      "check_id": "extract.ans.heading_structure_unusable",
+      "confidence": "likely",
+      "evidence": "https://spa-only.test/about: no H1. Outline: (no headings). Headings are where a reader decides which part of a page answers the question, so an outline that does not divide the content leaves it to guess.",
+      "id": "F-014",
+      "severity": "low",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.0,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 3.0
+        },
+        "mechanism": "Headings mark the boundaries a reader uses to locate the relevant part of a long page; without them the whole page is one undifferentiated block.",
+        "patch": "<h1>__FILL_IN__:page_subject</h1>\n<h2>__FILL_IN__:question_this_section_answers</h2>",
+        "patch_path": "fix_patches/F-014.extract.ans.heading_structure_unusable.txt",
+        "priority": "low",
+        "source": "references/chunking-model.md",
+        "summary": "Give the page one H1 and H2 sections that name what each part answers.",
+        "verification": "curl -s https://spa-only.test/about | grep -oE '<h[1-3][^>]*>' | sort | uniq -c"
+      },
+      "title": "The heading outline does not divide this page usefully"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/features"
+      ],
+      "blocked_by": "F-003",
+      "category": "discoverability",
+      "check_id": "extract.ans.heading_structure_unusable",
+      "confidence": "likely",
+      "evidence": "https://spa-only.test/features: no H1. Outline: (no headings). Headings are where a reader decides which part of a page answers the question, so an outline that does not divide the content leaves it to guess.",
+      "id": "F-015",
+      "severity": "low",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.0,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 3.0
+        },
+        "mechanism": "Headings mark the boundaries a reader uses to locate the relevant part of a long page; without them the whole page is one undifferentiated block.",
+        "patch": "<h1>__FILL_IN__:page_subject</h1>\n<h2>__FILL_IN__:question_this_section_answers</h2>",
+        "patch_path": "fix_patches/F-015.extract.ans.heading_structure_unusable.txt",
+        "priority": "low",
+        "source": "references/chunking-model.md",
+        "summary": "Give the page one H1 and H2 sections that name what each part answers.",
+        "verification": "curl -s https://spa-only.test/features | grep -oE '<h[1-3][^>]*>' | sort | uniq -c"
+      },
+      "title": "The heading outline does not divide this page usefully"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://spa-only.test/pricing"
+      ],
+      "blocked_by": "F-004",
+      "category": "discoverability",
+      "check_id": "extract.ans.heading_structure_unusable",
+      "confidence": "likely",
+      "evidence": "https://spa-only.test/pricing: no H1. Outline: (no headings). Headings are where a reader decides which part of a page answers the question, so an outline that does not divide the content leaves it to guess.",
+      "id": "F-016",
+      "severity": "low",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.0,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 3.0
+        },
+        "mechanism": "Headings mark the boundaries a reader uses to locate the relevant part of a long page; without them the whole page is one undifferentiated block.",
+        "patch": "<h1>__FILL_IN__:page_subject</h1>\n<h2>__FILL_IN__:question_this_section_answers</h2>",
+        "patch_path": "fix_patches/F-016.extract.ans.heading_structure_unusable.txt",
+        "priority": "low",
+        "source": "references/chunking-model.md",
+        "summary": "Give the page one H1 and H2 sections that name what each part answers.",
+        "verification": "curl -s https://spa-only.test/pricing | grep -oE '<h[1-3][^>]*>' | sort | uniq -c"
+      },
+      "title": "The heading outline does not divide this page usefully"
+    }
+  ],
+  "generator": {
+    "ai_bots_snapshot_date": "2026-09-09",
+    "ai_bots_source_commit": "0e111dcc24cbcdf4e609edde70f9f9184eac8b02",
+    "checks_available": 61,
+    "checks_run": 7,
+    "name": "brand-ai-readiness-audit",
+    "tool_versions": {
+      "collector": "1.0.0",
+      "python": "3.11.9",
+      "renderer": "none",
+      "transport": "offline"
+    },
+    "version": "1.0.0"
+  },
+  "limitations": [
+    {
+      "checks_not_run": [
+        "reach.edge.bot_ua_blocked",
+        "reach.edge.bot_ua_challenged"
+      ],
+      "confidence_effect": "not assessed; re-run with --probe-bot-ua to close this gap",
+      "optional_feature": true,
+      "reason": "Edge and CDN reachability for named AI crawlers was not assessed, because --probe-bot-ua was not set. This is the highest-value check in this marketplace: a CDN or WAF rule that returns 403 to OAI-SearchBot, PerplexityBot or Claude-SearchBot removes a brand from those assistants entirely, and leaves no trace in robots.txt or in what a human sees. If you own this site, re-run the orchestrator with the --probe-bot-ua flag:\n    orchestrate.py <url> --out ./audit-output --probe-bot-ua\nThat sends ONE request per crawler, to the homepage only, with an auditor token appended to the user-agent string so it is identifiable in your logs. It is off by default because sending named-crawler user-agents to a site you do not own is not something an audit should do without being asked.",
+      "scope": "site"
+    },
+    {
+      "checks_not_run": [
+        "act.blocker.content_gated_by_interaction",
+        "act.context.assumes_prior_context",
+        "act.context.no_onward_path",
+        "act.cta.absent_for_page_type",
+        "act.cta.ambiguous_primary_label",
+        "act.cta.competing_primaries",
+        "act.form.field_count_excessive",
+        "act.form.high_friction_required_fields",
+        "act.form.unlabelled_inputs",
+        "act.orient.h1_cta_mismatch",
+        "act.orient.no_value_proposition",
+        "act.orient.no_wayfinding",
+        "act.trust.no_cost_signal",
+        "act.trust.no_policy_or_contact_path",
+        "act.trust.no_social_proof"
+      ],
+      "confidence_effect": "suppressed entirely; not downgraded",
+      "reason": "Every one of the 4 crawled pages serves an unhydrated application shell, and no rendered DOM was captured for any of them, so the page a visitor actually sees was never observed. All engagement checks are suppressed site-wide rather than reported at reduced confidence, because there is no evidence to reduce. This includes the normally site-scoped act.trust.no_policy_or_contact_path, which would otherwise be evidenced from other pages: on this site there are no other pages either. Re-run with a renderer available to assess engagement.",
+      "scope": "site"
+    }
+  ],
+  "proactive_recommendations": [
+    {
+      "applies_to_archetype": [
+        "saas-marketing"
+      ],
+      "id": "P-001",
+      "rationale": "Comparison questions are among the most common commercial queries, and a brand that has not written its own comparison is described using someone else's. This is a gap in coverage rather than a defect on any page, which is why it appears here and not as a finding.",
+      "suggested_action": {
+        "effort": "medium",
+        "mechanism": "A page that names both sides of a comparison is the only page on your domain that can be quoted when the comparison is asked about.",
+        "patch": "<h1>__FILL_IN__:product vs __FILL_IN__:alternative</h1>\n<p>__FILL_IN__:one_sentence_honest_summary_including_where_you_lose.</p>",
+        "priority": "low",
+        "source": "references/geo-methods.md",
+        "summary": "Write an honest comparison page naming the real alternatives.",
+        "verification": "Confirm the page names the alternative in its title and H1."
+      },
+      "title": "Publish a comparison page for the alternatives buyers already weigh you against"
+    }
+  ],
+  "schema_version": "1.0",
+  "site": "spa-only.test",
+  "summary": {
+    "blocked_findings": 11,
+    "by_category": {
+      "discoverability": 16,
+      "engagement": 0
+    },
+    "by_stage": {
+      "extract": 9,
+      "reach": 1,
+      "read": 4,
+      "trust": 2
+    },
+    "critical": 0,
+    "high": 4,
+    "info": 0,
+    "low": 5,
+    "medium": 7,
+    "suppressed_by_rule": [
+      {
+        "check_id": "act.context.assumes_prior_context",
+        "count": 4,
+        "reason": "suppressed entirely",
+        "rule": "suppressed entirely"
+      },
+      {
+        "check_id": "act.context.no_onward_path",
+        "count": 1,
+        "reason": "suppressed entirely",
+        "rule": "suppressed entirely"
+      },
+      {
+        "check_id": "act.cta.absent_for_page_type",
+        "count": 2,
+        "reason": "suppressed entirely",
+        "rule": "suppressed entirely"
+      },
+      {
+        "check_id": "act.orient.no_value_proposition",
+        "count": 2,
+        "reason": "suppressed entirely",
+        "rule": "suppressed entirely"
+      },
+      {
+        "check_id": "act.perf.above_fold_weight",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "act.trust.no_policy_or_contact_path",
+        "count": 1,
+        "reason": "suppressed entirely",
+        "rule": "suppressed entirely"
+      },
+      {
+        "check_id": "extract.ans.fact_coverage_gap",
+        "count": 4,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "extract.ans.no_evidence_markers",
+        "count": 3,
+        "reason": "suppressed by threshold",
+        "rule": "suppressed by threshold"
+      },
+      {
+        "check_id": "extract.sd.absent_on_eligible_page",
+        "count": 4,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "reach.agent.llms_txt_absent",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "reach.edge.bot_ua_blocked",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "reach.edge.bot_ua_challenged",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "read.render.nav_links_js_only",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "read.render.raw_text_gap",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "trust.authorship.unattributed",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      }
+    ],
+    "total_findings": 16
+  }
+}

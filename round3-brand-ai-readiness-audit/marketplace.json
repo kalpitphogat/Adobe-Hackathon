@@ -1,0 +1,54 @@
+{
+  "name": "brand-ai-readiness-audit",
+  "version": "1.0.0",
+  "description": "Audits a website for AI-discoverability and on-site-engagement problems and emits one prioritised, evidence-backed audit report.",
+  "license": "MIT",
+  "skills": [
+    {
+      "id": "ai-readiness-orchestrator",
+      "path": "skills/ai-readiness-orchestrator",
+      "entrypoint": true,
+      "description": "Entrypoint. Composes every other skill, applies the reach-read-extract-trust gate cascade, dedupes, scores, and emits the single audit report."
+    },
+    {
+      "id": "site-evidence-collector",
+      "path": "skills/site-evidence-collector",
+      "description": "Fetches and renders the site exactly once and writes the shared evidence bundle. The only skill that touches the network."
+    },
+    {
+      "id": "site-profile-classifier",
+      "path": "skills/site-profile-classifier",
+      "description": "Detects site archetype and per-page type, then selects the threshold profile every other skill scores against."
+    },
+    {
+      "id": "crawl-access-audit",
+      "path": "skills/crawl-access-audit",
+      "description": "Stage reach. Determines whether an AI crawler is allowed in at all: robots.txt, edge blocking, indexability, link integrity."
+    },
+    {
+      "id": "render-gap-audit",
+      "path": "skills/render-gap-audit",
+      "description": "Stage read. Determines whether the page is readable without executing JavaScript, and whether facts are locked in non-text."
+    },
+    {
+      "id": "structured-data-audit",
+      "path": "skills/structured-data-audit",
+      "description": "Stage extract. Determines whether the page's facts are machine-typed via JSON-LD, microdata, or RDFa."
+    },
+    {
+      "id": "answerability-audit",
+      "path": "skills/answerability-audit",
+      "description": "Stage extract. Determines whether a specific fact can be lifted out of the page and quoted on its own."
+    },
+    {
+      "id": "trust-freshness-audit",
+      "path": "skills/trust-freshness-audit",
+      "description": "Stage trust. Determines whether a machine would believe the page: date coherence, entity identity, external corroboration."
+    },
+    {
+      "id": "engagement-audit",
+      "path": "skills/engagement-audit",
+      "description": "Stage act. Determines whether a visitor who arrives can orient, act, and continue."
+    }
+  ]
+}

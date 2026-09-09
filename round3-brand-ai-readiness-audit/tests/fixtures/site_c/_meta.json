@@ -1,0 +1,25 @@
+{
+  "_comment": [
+    "site_c: BLANKET DISALLOW. robots.txt forbids every crawler from the whole",
+    "site. Content pages exist and would be full of defects, but we never fetch",
+    "them: robots.txt is a hard constraint on our own crawling, not advice.",
+    "",
+    "Expected output: exactly ONE critical (reach.robots.blanket_disallow),",
+    "audit_status no_content_available, and a limitations[] block stating that",
+    "no page content could be lawfully fetched and therefore no page-level check",
+    "could run. Zero page-level findings of any kind.",
+    "",
+    "The trap this fixture guards against is an auditor that crawls anyway and",
+    "then reports twenty findings it had no right to collect."
+  ],
+  "origin": "https://members-only.test",
+  "default_status": 404,
+  "not_found_file": "404.html",
+  "ttfb_ms": [90.0, 95.0, 92.0],
+  "routes": {
+    "/": { "status": 200, "file": "index.html" },
+    "/robots.txt": { "status": 200, "content_type": "text/plain; charset=utf-8", "file": "robots.txt" },
+    "/secret": { "status": 200, "file": "index.html" }
+  },
+  "rendered": {}
+}

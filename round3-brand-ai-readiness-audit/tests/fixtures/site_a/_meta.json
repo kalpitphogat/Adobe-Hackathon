@@ -1,0 +1,35 @@
+{
+  "_comment": [
+    "site_a: the HEALTHY CONTROL. A well-built SaaS site with docs and a blog.",
+    "Hand-authored so every golden assertion is explainable by construction.",
+    "Expected outcome: ZERO findings at high or critical severity. Any high or",
+    "critical here is a false positive and fails the build (tests/run_offline.py",
+    "--assert-clean). A few low/medium observations are acceptable and are what",
+    "the golden report pins.",
+    "",
+    "Routes not listed return default_status with not_found_file, which is how",
+    "the soft-404 probe finds a correctly-behaving server."
+  ],
+  "origin": "https://northwind-analytics.test",
+  "default_status": 404,
+  "not_found_file": "404.html",
+  "ttfb_ms": [118.0, 131.0, 124.0],
+  "routes": {
+    "/": { "status": 200, "file": "index.html", "headers": { "last-modified": "Wed, 02 Apr 2026 09:15:00 GMT" } },
+    "/robots.txt": { "status": 200, "content_type": "text/plain; charset=utf-8", "file": "robots.txt" },
+    "/sitemap.xml": { "status": 200, "content_type": "application/xml", "file": "sitemap.xml" },
+    "/about": { "status": 200, "file": "about.html" },
+    "/contact": { "status": 200, "file": "contact.html" },
+    "/pricing": { "status": 200, "file": "pricing.html" },
+    "/blog/": { "status": 200, "file": "blog-index.html" },
+    "/blog/measuring-pipeline-latency": { "status": 200, "file": "blog-post.html" },
+    "/docs/getting-started": { "status": 200, "file": "docs.html" },
+    "/privacy": { "status": 200, "file": "privacy.html" }
+  },
+  "rendered": {
+    "/": "index.html",
+    "/pricing": "pricing.html",
+    "/blog/measuring-pipeline-latency": "blog-post.html",
+    "/docs/getting-started": "docs.html"
+  }
+}

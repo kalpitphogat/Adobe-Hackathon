@@ -1,0 +1,30 @@
+{
+  "_comment": [
+    "site_d: ALL-SPA, NO RENDERER. Every route serves an unhydrated React mount",
+    "point. The `rendered` map is deliberately EMPTY, so no page on this site",
+    "has observed content.",
+    "",
+    "This is the fixture for blocking fix F4. Gate Rule 0b suppresses the 14",
+    "visible-content act.* checks per URL. But act.trust.no_policy_or_contact_path",
+    "is site-scoped and Rule 0b exempt, on the reasoning that it can be evidenced",
+    "from OTHER pages - and on this site there are no other pages with content",
+    "either. Without the site-wide guard it would fire falsely on every crawl.",
+    "",
+    "Expected output: ZERO act.* findings SITE-WIDE, not merely per page, plus a",
+    "limitations[] entry naming the URLs and the checks that could not run.",
+    "read.render.empty_spa_shell fires at high/likely (CORE tier, no browser)."
+  ],
+  "origin": "https://spa-only.test",
+  "default_status": 404,
+  "not_found_file": "shell.html",
+  "ttfb_ms": [140.0, 150.0, 145.0],
+  "routes": {
+    "/": { "status": 200, "file": "shell.html" },
+    "/robots.txt": { "status": 200, "content_type": "text/plain; charset=utf-8", "file": "robots.txt" },
+    "/sitemap.xml": { "status": 200, "content_type": "application/xml", "file": "sitemap.xml" },
+    "/features": { "status": 200, "file": "shell.html" },
+    "/pricing": { "status": 200, "file": "shell.html" },
+    "/about": { "status": 200, "file": "shell.html" }
+  },
+  "rendered": {}
+}
