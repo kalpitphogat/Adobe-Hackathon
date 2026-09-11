@@ -1,3 +1,38 @@
+# When to recommend structured data, and which type
+
+**Read this table before the templates.** The audit recommends a schema type only when
+the page's role makes that type genuinely applicable. A role that is not in this table
+receives **no** schema recommendation at all, because suggesting Product markup for a
+documentation page, or FAQPage for a site with no questions, is worse than silence.
+
+| Page role | Type recommended | Accepted as already satisfying it |
+|-----------|------------------|-----------------------------------|
+| homepage | Organization and WebSite | Organization, WebSite, LocalBusiness, Corporation, Person, NGO, EducationalOrganization, GovernmentOrganization |
+| article | Article / NewsArticle / BlogPosting | Article, NewsArticle, BlogPosting, Report, LiveBlogPosting |
+| product | Product with Offer, or Service | Product, Offer, AggregateOffer, Service, SoftwareApplication, Course |
+| contact | ContactPage with contact points | ContactPage, Organization, LocalBusiness |
+| documentation | TechArticle or HowTo | TechArticle, HowTo, APIReference, FAQPage, Article |
+| utility, authentication, legal, directory, generic, unknown | **nothing** | n/a |
+
+Two further gates apply before any recommendation is made:
+
+- The page's role must have been classified with **confidence** (high or medium). An
+  `unknown` role produces no recommendation, and the abstention is recorded in
+  `skipped_checks`.
+- The finding is an **improvement**, capped at low severity. Missing structured data is
+  never automatically a high-severity defect: it leaves fact extraction to inference from
+  prose, it does not make the facts unreadable.
+
+The one structured-data **defect** is a JSON-LD block that fails to parse. That is
+unambiguous: consumers discard it, so the site is publishing markup that delivers nothing
+while appearing done.
+
+FAQPage is recommended only where real question-and-answer content already exists on the
+page. The action is to mark up the questions that are there, never to invent questions to
+justify the markup.
+
+---
+
 # Paste-ready JSON-LD templates
 
 Concrete fixes for structured-data findings. Drop the relevant block into a
@@ -19,8 +54,9 @@ Concrete fixes for structured-data findings. Drop the relevant block into a
   ]
 }
 ```
-The `sameAs` array is what resolves name collisions and merges independent signals onto
-the right entity — always include it.
+The `sameAs` array states which external profiles refer to the same entity, which helps
+resolve name collisions. Include only URLs that genuinely describe this brand; this audit
+can observe whether the array is present, not whether any given profile exists.
 
 ## Product / Offer (product pages)
 ```json
@@ -55,8 +91,8 @@ the right entity — always include it.
   ]
 }
 ```
-This is the single most quotable format for AI assistants — each Q→A is a self-contained
-fact.
+Each question-and-answer pair is self-contained, which is why it is easy to quote. Use
+this only for questions the page already answers.
 
 ## Article (blog/news)
 ```json

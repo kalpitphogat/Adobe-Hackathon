@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started — Tesselate documentation</title>
+</head>
+<body>
+<!-- A documentation page. It deliberately has NO call-to-action, NO footer, and
+     no marketing language. None of that may be reported as an engagement defect. -->
+<nav>
+  <a href="/">Home</a>
+  <a href="/docs/getting-started.html">Getting started</a>
+  <a href="/tool.html">Mesh inspector</a>
+</nav>
+
+<main>
+  <h1>Getting started</h1>
+  <p>This page walks through installing Tesselate and running your first check on a
+     mesh file. It assumes you have a working Python 3.9 or newer installation and a
+     mesh in OBJ, PLY or STL format.</p>
+
+  <h2>Install</h2>
+  <p>Install from the package index. The package has no compiled dependencies, so it
+     installs the same way on Linux, macOS and Windows.</p>
+  <pre><code>pip install tesselate</code></pre>
+
+  <h2>Run your first check</h2>
+  <p>Point the command at a mesh file. It prints a report of every defect it finds,
+     grouped by severity, and exits non-zero if any defect would prevent the mesh from
+     being printed or simulated.</p>
+  <pre><code>tesselate check scan.ply --report report.json</code></pre>
+  <p>The report lists each defect with the indices of the faces or edges involved, so
+     you can open the same file in a modelling tool and jump straight to the problem
+     rather than hunting for it visually.</p>
+
+  <h3>Reading the output</h3>
+  <p>Each entry names the defect class, the count, and whether the repair step can fix
+     it automatically. Non-manifold edges and flipped normals are usually repairable.
+     Self-intersections often are not, because the correct resolution depends on what
+     the geometry is supposed to represent, and the tool does not guess.</p>
+
+  <h2>Repair</h2>
+  <p>The repair command applies only the fixes you name, so nothing changes silently.
+     It writes to a new file and never modifies the input.</p>
+  <pre><code>tesselate repair scan.ply --fix normals,manifold --out clean.ply</code></pre>
+
+  <h2>Next</h2>
+  <p>Read the simplification notes for how the triangle budget interacts with boundary
+     preservation, or open the browser inspector to look at a mesh without installing
+     anything.</p>
+</main>
+</body>
+</html>

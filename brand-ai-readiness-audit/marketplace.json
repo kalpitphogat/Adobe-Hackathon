@@ -1,16 +1,49 @@
 {
   "name": "brand-ai-readiness-audit",
-  "version": "1.0.0",
-  "description": "A marketplace of focused agent skills that audit any website for AI-discoverability and on-site-engagement problems, then emit a single structured report of evidence-backed findings and prioritized fixes.",
+  "version": "2.0.0",
+  "description": "A marketplace of focused agent skills that audit any website for AI-discoverability and on-site-engagement problems. Every check is gated on what the fetched resource actually is and what the page is for, every finding separates what was observed from what it may imply, and severity is capped by confidence and materiality - so the report states evidence-backed problems and prioritized fixes rather than a list of absent conventions.",
   "entrypoint": "audit-orchestrator",
   "skills": [
-    { "id": "audit-orchestrator",         "path": "skills/audit-orchestrator",         "entrypoint": true,  "concern": "Compose sub-audits and emit the final report" },
-    { "id": "crawl-access-audit",          "path": "skills/crawl-access-audit",         "concern": "Can the crawler get in? (robots, sitemap, status, canonical, AI bots)" },
-    { "id": "render-extraction-audit",     "path": "skills/render-extraction-audit",    "concern": "Can a machine read the page? (static-vs-rendered fact gap)" },
-    { "id": "structured-data-audit",       "path": "skills/structured-data-audit",      "concern": "Can it pick out the fact? (JSON-LD / schema, metadata, entity clarity)" },
-    { "id": "freshness-corroboration-audit","path": "skills/freshness-corroboration-audit","concern": "Is it trusted? (stale facts, single-source claims, identity collision)" },
-    { "id": "answerability-audit",         "path": "skills/answerability-audit",        "concern": "Is it easy to quote? (self-contained, extractable claims / FAQ)" },
-    { "id": "integrity-audit",             "path": "skills/integrity-audit",            "concern": "Is it trustworthy? (prompt-injection, hidden/cloaked text, invisible Unicode)" },
-    { "id": "engagement-audit",            "path": "skills/engagement-audit",           "concern": "Do arriving visitors stay? (orientation, CTA, speed, mobile)" }
+    {
+      "id": "audit-orchestrator",
+      "path": "skills/audit-orchestrator",
+      "entrypoint": true,
+      "concern": "Classify, compose sub-audits, validate evidence, deduplicate, gate severity, emit the one report"
+    },
+    {
+      "id": "crawl-access-audit",
+      "path": "skills/crawl-access-audit",
+      "concern": "Can the machine reach the content? (robots, AI-bot rules, sitemap, status, noindex on HTML pages, edge blocks)"
+    },
+    {
+      "id": "render-extraction-audit",
+      "path": "skills/render-extraction-audit",
+      "concern": "Can it read the content? (raw HTML vs rendered DOM, measured; never inferred)"
+    },
+    {
+      "id": "structured-data-audit",
+      "path": "skills/structured-data-audit",
+      "concern": "Can it identify the important facts? (role-matched schema, entity identity, titles, topical identity)"
+    },
+    {
+      "id": "freshness-corroboration-audit",
+      "path": "skills/freshness-corroboration-audit",
+      "concern": "Are the facts fresh and corroborated? (dates, sameAs declared on-site only - no external claim)"
+    },
+    {
+      "id": "answerability-audit",
+      "path": "skills/answerability-audit",
+      "concern": "Are the facts clear enough to extract? (self-contained claims, existing Q&A markup, contact routes)"
+    },
+    {
+      "id": "integrity-audit",
+      "path": "skills/integrity-audit",
+      "concern": "Is the page trustworthy? (prompt injection, non-UI hidden text, invisible Unicode)"
+    },
+    {
+      "id": "engagement-audit",
+      "path": "skills/engagement-audit",
+      "concern": "Can an arriving visitor do what they came for? (role-relevant task, orientation, viewport, latency)"
+    }
   ]
 }

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tesselate — open-source mesh tooling</title>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"Tesselate",
+ "url":"http://127.0.0.1/","logo":"http://127.0.0.1/logo.png"}
+</script>
+</head>
+<body>
+<!-- Cookie consent banner: hidden until the visitor has not yet chosen.
+     This must NOT be reported as an intrusive entry interstitial. -->
+<div id="cookie-consent-banner" class="cookie consent banner" style="display:none">
+  <p>We use a single analytics cookie. You can accept or decline it at any time,
+     and declining does not change how the site works for you.</p>
+  <button>Accept</button><button>Decline</button>
+</div>
+
+<header>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/docs/getting-started.html">Documentation</a>
+    <a href="/tool.html">Mesh inspector</a>
+    <a href="/blog/mesh-simplification.html">Notes</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/sitemap.xml">Sitemap</a>
+    <a href="/data.json">Public data</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Tesselate</h1>
+  <p>Tesselate is an open-source toolkit for inspecting, repairing and simplifying
+     polygon meshes. It is a command-line tool and a small browser inspector, built
+     for people who work with scanned geometry and need to find out why a mesh will
+     not print, render or simulate.</p>
+  <p>It is free, there is nothing to buy, and there is no account to create. If you
+     want to try it, <a href="/docs/getting-started.html">get started with the
+     installation guide</a> or open the inspector in your browser.</p>
+
+  <!-- A muted background video. Muted autoplay is standard practice and must NOT
+       be reported as autoplay with sound. -->
+  <video autoplay muted loop playsinline>
+    <source src="/mesh.mp4" type="video/mp4">
+  </video>
+
+  <h2>What it does</h2>
+  <ul>
+    <li>Reports non-manifold edges, flipped normals and self-intersections.</li>
+    <li>Simplifies a mesh to a target triangle count while preserving boundaries.</li>
+    <li>Exports to OBJ, PLY, STL and glTF without re-triangulating.</li>
+  </ul>
+</main>
+
+<!-- A newsletter sign-up sitting in the page footer. It expresses a capture
+     intent but is ordinary page furniture, not a blocking entry overlay, and
+     must NOT be reported as an interstitial. -->
+<footer>
+  <section class="newsletter-signup MarketingFooter-module__newsletter">
+    <h2>Release notes by email</h2>
+    <p>Occasional notes when a release changes behaviour. No marketing.</p>
+    <form><input type="email" name="email"><button>Subscribe</button></form>
+  </section>
+  <nav><a href="/privacy.html">Privacy</a> <a href="/login.html">Sign in</a></nav>
+</footer>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in - Tesselate</title>
+</head>
+<body>
+<!-- An authentication screen. Its hidden error and state containers are inherent
+     to the page type and must NOT be reported as cloaked text, even though the
+     hidden text outweighs the small amount of visible text. -->
+<nav><a href="/">Home</a> <a href="/docs/getting-started.html">Docs</a></nav>
+<main>
+  <h1>Sign in</h1>
+  <form>
+    <input type="email" name="email" placeholder="Email">
+    <input type="password" name="password" placeholder="Password">
+    <button type="submit">Sign in</button>
+  </form>
+  <div class="state-error" style="display:none">That email and password do not match an account on record.</div>
+  <div class="state-locked" style="display:none">This account is locked after too many attempts. Try again in fifteen minutes.</div>
+  <div class="state-expired" style="display:none">Your session expired while the page was open. Sign in again to continue.</div>
+  <div class="state-network" style="display:none">We could not reach the server. Check your connection and retry the request.</div>
+</main>
+</body>
+</html>

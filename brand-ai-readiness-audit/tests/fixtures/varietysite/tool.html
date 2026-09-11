@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mesh inspector — Tesselate</title>
+</head>
+<body>
+<!-- A browser utility. Little prose, several controls, no CTA, no footer.
+     A tool is not defective for lacking marketing copy. -->
+<nav><a href="/">Home</a> <a href="/docs/getting-started.html">Docs</a></nav>
+<main>
+  <h1>Mesh inspector</h1>
+  <p>Drop a mesh file to inspect it. Nothing is uploaded; the file is read in your browser.</p>
+  <form>
+    <input type="file" name="mesh">
+    <input type="number" name="budget" value="50000">
+    <input type="checkbox" name="normals">
+    <input type="checkbox" name="manifold">
+    <select name="format"><option>OBJ</option><option>PLY</option><option>STL</option></select>
+    <button type="button">Inspect</button>
+    <button type="button">Reset</button>
+  </form>
+  <canvas id="viewport" width="640" height="480"></canvas>
+</main>
+</body>
+</html>

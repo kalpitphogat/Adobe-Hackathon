@@ -58,19 +58,41 @@ independently testable and swappable.
 
 ## The eight skills (one concern each)
 
-| Skill | Answers | Maps to |
-|-------|---------|---------|
-| **audit-orchestrator** *(entrypoint)* | Crawl once, run the rest, emit the report | — |
-| **crawl-access-audit** | Can an AI crawler reach & index it? robots, AI-bot rules, **edge/CDN bot blocks**, sitemap, `noindex`, status, HTTPS, broken links, mixed content, `llms.txt` | Gate 1 |
-| **render-extraction-audit** | Are facts in raw HTML or only after JS? (raw-vs-rendered gap, thin SPA shells, image-locked facts) | Gate 2 |
-| **structured-data-audit** | Can a machine extract & attribute the fact? JSON-LD coverage/validity, Organization + `sameAs`, metadata, headings, duplicates | Gate 3 |
-| **freshness-corroboration-audit** | Is it current & cross-verifiable? stale dates, machine-readable dates, `sameAs`, unattributed claims | Trust |
-| **answerability-audit** | Is the key fact short, self-contained, quotable? FAQ markup, thin content, clear homepage, **chunkable structure (lists/tables/Q-headings)** | Quotability |
-| **integrity-audit** | Is it trustworthy? prompt-injection / hidden LLM directives, visually-hidden (cloaked) text, invisible/zero-width Unicode | Trust/safety |
-| **engagement-audit** | Will an arriving visitor stay? viewport, weight/latency, CTA, nav, interstitials | Retention |
+| Skill | Answers | Mechanism |
+|-------|---------|-----------|
+| **audit-orchestrator** *(entrypoint)* | Classify resources and roles, compose, validate evidence, deduplicate, gate severity, emit the one report | — |
+| **crawl-access-audit** | Can a crawler reach and index it? robots.txt and per-AI-bot rules, **edge/CDN bot blocks**, sitemap, `noindex` on HTML pages only, status, HTTPS, broken links, insecure sub-resources, `llms.txt` | reach |
+| **render-extraction-audit** | Are the facts in the server HTML, or only after JS? A **measured** raw-vs-rendered diff; sparse HTML is reported as sparse HTML, not as AI invisibility | read |
+| **structured-data-audit** | Can a machine extract and attribute the fact, **given what this page is for**? Role-matched schema only, entity identity, titles, topical identity | identify facts |
+| **freshness-corroboration-audit** | Is it current, and is identity stated so external sources can be connected? Dates, `sameAs` — with an explicit no-external-lookup claim boundary | fresh & corroborated |
+| **answerability-audit** | Are the important facts hard to locate? Existing Q&A markup, thin information pages, homepage self-description, contact routes | clarity of facts |
+| **integrity-audit** | Does the page manipulate the machine reading it? Prompt injection, hidden **non-UI** text, invisible Unicode | trust |
+| **engagement-audit** | Can an arriving visitor do what they came for? Role-relevant next step, orientation, viewport, latency, real interstitials | visitor task |
 
-First six → **discoverability** (integrity is a trust signal on that side); last →
-**engagement**. Every finding is tagged with its dimension; the report summarizes both halves.
+First seven map to **discoverability** (integrity is a trust signal on that side); the
+last to **engagement**. Every finding is tagged with its dimension and with
+`finding_type` (defect or improvement), and the report summarizes both splits.
+
+### What makes this version different
+
+Three shared mechanisms in `auditlib.py`, used by every skill, decide whether a check
+runs at all and how loudly it may speak:
+
+1. **Resource classification.** Content-Type, then a body sniff, then a URL extension, in
+   that order, with no single signal deciding alone. HTML-only checks never touch an XML
+   sitemap, a JSON endpoint, an image or a PDF.
+2. **Page-role classification** with a confidence level, from converging evidence.
+   `unknown` is a valid answer that makes role-specific checks stand down rather than guess.
+3. **Evidence discipline and severity gates.** Each finding separates what was *measured*
+   from what it may *imply*, and names what was *not verified*. An improvement can never
+   exceed `low`; confidence caps severity; and `critical`/`high` require materiality to
+   have been established. Every cap is recorded on the finding itself.
+
+Deliberately **not** findings: no CTA where the role does not imply one; no footer; a low
+link count; no FAQ; missing JSON-LD as high severity; no `sameAs` as proof of anything
+external; no H1 where the title already states the topic; sparse raw HTML as proof of AI
+invisibility; a cookie banner as an interstitial; muted autoplay; `noindex` on a sitemap;
+a render comparison that could not be run.
 
 ---
 
@@ -79,21 +101,31 @@ First six → **discoverability** (integrity is a trust signal on that side); la
 ```json
 {
   "site": "example.com",
-  "audited_at": "2026-09-20T14:32:00Z",
-  "scope": { "pages_crawled": 12, "render_used": true, "robots_respected": true },
+  "audited_at": "2026-09-12T14:32:00Z",
+  "status": "ok",
+  "scope": { "pages_crawled": 12, "html_pages_analyzed": 9, "non_html_resources": 3,
+             "resource_kinds": { "html": 9, "xml": 2, "json": 1 },
+             "page_roles": { "homepage": 1, "article": 4, "documentation": 3, "unknown": 1 },
+             "sample_based": true, "render_used": true, "robots_respected": true,
+             "checks_skipped": [ { "check": "...", "reason": "..." } ] },
   "summary": { "total_findings": 6, "critical": 1, "high": 2, "medium": 3, "low": 0,
-               "by_dimension": { "discoverability": 5, "engagement": 1 } },
+               "by_dimension": { "discoverability": 5, "engagement": 1 },
+               "by_type": { "defects": 4, "improvements": 2 } },
   "findings": [{
     "id": "F-001",
-    "title": "Pages are near-empty in raw HTML (client-side rendered)",
-    "severity": "critical", "dimension": "discoverability", "skill": "render-extraction-audit",
-    "evidence": "3/12 sampled pages have <300 chars of text in server HTML despite a full app shell.",
-    "suggested_action": { "summary": "Server-render or pre-render primary content.", "priority": "critical" }
+    "title": "HTML pages carry a noindex directive",
+    "severity": "critical", "dimension": "discoverability", "finding_type": "defect",
+    "confidence": "high", "skill": "crawl-access-audit", "mechanism": "reach",
+    "evidence": "1/9 sampled HTML pages set noindex: https://example.com/ [meta robots, role=homepage]. noindex instructs search engines and assistant crawlers to exclude the page entirely - and this includes the homepage.",
+    "evidence_detail": { "observation": "1/9 sampled HTML pages set noindex ...",
+                         "interpretation": "noindex instructs ...", "not_verified": "" },
+    "suggested_action": { "summary": "Remove noindex from the public pages listed above.", "priority": "critical" }
   }]
 }
 ```
-Severity is **computed from evidence** (homepage `noindex` = critical; one deep page =
-high), not hardcoded — so it generalizes to unseen sites.
+Severity is computed from evidence and then **gated**: no check can emit `critical` or
+`high` without having established materiality, and no improvement can exceed `low`. No
+score is reported, because no scoring formula is implemented.
 
 ---
 
@@ -107,10 +139,12 @@ python skills/audit-orchestrator/scripts/run_audit.py https://example.com \
     --render --out report.json --html report.html
 
 python scripts/validate.py     # manifest + SKILL.md compliance
-python tests/run_tests.py      # offline suite: broken + healthy fixture sites (8 tests)
+python tests/run_tests.py      # 70 offline tests across five fixture sites
+python batch_audit.py --all    # live: 10-site benchmark + 9-site generalisation set
 ```
 Python 3.8+, **standard library only** for the audit. `--render` optionally uses
-Playwright + Chromium; without it the audit degrades gracefully (thin-HTML heuristic).
+Playwright + Chromium; without it the audit records the missing measurement as a scope
+limitation rather than guessing.
 
 ---
 
@@ -120,6 +154,8 @@ Playwright + Chromium; without it the audit degrades gracefully (thin-HTML heuri
 |---|---|
 | Marketplace + `marketplace.json` with **exactly one** entrypoint | ✅ |
 | Every skill folder = valid agentskills.io `SKILL.md` (name/description/license) | ✅ 8/8 |
+| Findings separate defect from improvement, and state their scope | ✅ |
+| Audit limitations reported as scope, never as website defects | ✅ |
 | Entrypoint composes the rest into **one** report | ✅ |
 | Report floor: `site`, `audited_at`, counts-by-severity; per finding `id`, `title`, `severity`, `evidence`, `suggested_action` | ✅ |
 | Detects **both** discoverability and engagement | ✅ |

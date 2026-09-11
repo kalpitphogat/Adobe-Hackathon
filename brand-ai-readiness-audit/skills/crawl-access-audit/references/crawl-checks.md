@@ -1,48 +1,93 @@
 # Crawl & access check catalog
 
-The three gates (Round-2 appendix A): a crawler must be **let in**, able to **read**
-the page, and able to **pick out the fact**. This skill owns gate 1.
+This skill owns mechanism 1: **can the machine reach the content?** Nothing here judges
+content quality.
 
-| # | Check | Signal | Severity logic |
-|---|-------|--------|----------------|
-| 1 | robots.txt present | GET `/robots.txt` != 200 | low (slows discovery, not fatal) |
-| 2 | AI crawlers allowed | `Disallow: /` for GPTBot/OAI-SearchBot/ClaudeBot/PerplexityBot/Google-Extended/etc. | critical if a major citation bot is blocked, else high |
-| 3 | XML sitemap | no `Sitemap:` line and `/sitemap.xml` not a valid urlset | medium |
-| 4 | noindex | meta robots or `X-Robots-Tag` contains `noindex` | critical on homepage, else high |
-| 5 | Disallowed public pages | robots.txt Disallow matches a sampled URL | high |
-| 6 | HTTP errors | sampled URL returns 4xx/5xx | high |
-| 7 | canonical | no `rel=canonical` on any successful page | low |
-| 8 | HTTPS | base URL is `http://` | high |
-| 9 | broken internal links | HEAD/GET sweep of up to 15 homepage links returns 4xx/5xx/none | medium |
-| 10 | mixed content | http:// sub-resources referenced from an https page | medium |
-| 11 | edge/CDN AI-bot block | homepage serves a browser UA (200) but refuses the GPTBot UA (403/challenge) | critical |
-| 12 | llms.txt | no `/llms.txt` guidance file (proactive AI-guidance signal) | low |
+| # | Check | Trigger | Band | Material when |
+|---|-------|---------|------|---------------|
+| 1 | robots.txt present | `/robots.txt` != 200 | low (improvement) | never — absence slows discovery, it blocks nothing |
+| 2 | AI crawlers disallowed | a tested AI user-agent cannot fetch the site root | see the two-group rule below | at least half the citation fetchers are blocked at the root |
+| 3 | XML sitemap | no `Sitemap:` line and `/sitemap.xml` is not a urlset | low (improvement) | never |
+| 4 | noindex | meta robots or `X-Robots-Tag` on an **HTML page** | critical on homepage, high on content roles, low on utility/auth | a homepage or content-bearing role is affected |
+| 5 | robots-disallowed URLs | a Disallow rule matched a sampled URL | medium, confidence medium | never — contents unknown by design |
+| 6 | HTTP errors | a sampled URL returns 4xx/5xx | high if any 5xx, else medium | a 5xx is present |
+| 7 | canonical | no `rel=canonical` on any successful page | medium defect if parameterised URLs were observed, else low improvement | URL ambiguity was actually observed |
+| 8 | HTTPS | base URL is `http://` | high | always |
+| 9 | broken internal links | HEAD-then-GET sweep of up to 15 homepage links returns 4xx/5xx | medium | always |
+| 10 | insecure sub-resources | `http://` in a `src`/`link href` on an https page | medium | always |
+| 11 | edge/CDN AI-bot refusal | homepage serves a browser UA but returns a refusal **status** to the GPTBot UA, on a retried request | critical | always |
+| 12 | llms.txt | no `/llms.txt` | low (improvement) | never |
 
-## Why the edge/CDN check matters (beyond robots.txt)
-robots.txt is only a *request*. A CDN or WAF (Cloudflare, Akamai, Vercel bot-management)
-can refuse an AI crawler's User-Agent at the edge with a 403 or a JS challenge even when
-robots.txt explicitly allows it — so the page is unreachable to the assistant regardless.
-This skill probes the homepage twice, once as a normal browser and once as `GPTBot`, and
-flags a block that only the bot UA hits. This is a common, invisible cause of "we allow
-the bot but it still never cites us."
+## noindex applies to HTML pages only
 
-## AI crawler user-agents checked
-GPTBot, OAI-SearchBot, ChatGPT-User (OpenAI); ClaudeBot, Claude-Web, anthropic-ai
-(Anthropic); PerplexityBot; Google-Extended (Gemini/Vertex grounding); Applebot-Extended;
-CCBot (Common Crawl, a training/discovery feeder); Bytespider.
+An XML sitemap, a JSON feed or an API response carrying `X-Robots-Tag: noindex` is
+entirely normal and says nothing about whether the site's pages are indexable. Those
+resources are excluded from the check and the exclusion is recorded in `skipped_checks`.
+Within HTML pages, the role matters too: an authentication or utility page is routinely
+and correctly noindexed, so it does not reach `high`.
 
-Each bot is evaluated against the site's own robots.txt rules using a standard robots
-parser, so custom `User-agent` blocks are honored exactly as a real crawler would.
+## AI crawler restriction, and why the agent matters
 
-## Why these matter
-robots and noindex are absolute gates: a blocked or noindexed page is excluded outright,
-regardless of content quality. Sitemaps and canonicals are about *efficient, unambiguous*
-discovery — they raise the odds every page is found and that duplicates consolidate onto
-one authoritative URL. HTTPS is a baseline trust signal.
+Blocking AI crawlers is frequently a deliberate content-licensing decision, and the
+finding says so in its own evidence. Two things then decide how loudly it is reported.
+
+**First, the site root must be disallowed**, so a `Disallow: /search` rule cannot produce
+a high-severity finding.
+
+**Second, which agents.** The tested user-agents are not interchangeable:
+
+| Group | Agents | What blocking costs |
+|-------|--------|---------------------|
+| **Citation fetchers** | GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-Web, anthropic-ai, PerplexityBot, Google-Extended, Applebot-Extended | These are documented as fetching pages so an assistant can answer or cite. Blocking them is what removes a site from those answers. |
+| **Bulk corpus crawlers** | CCBot, Bytespider | These gather corpora rather than serving a live query. Blocking them is a licensing position with no effect on being cited at query time. |
+
+Severity therefore follows what is lost:
+
+- at least half the citation fetchers blocked at the root → **high defect**
+- some citation fetchers blocked → **medium defect**
+- only bulk corpus crawlers blocked → **low improvement**, and the action says plainly
+  that no change is needed for citation
+
+Without that split, a site blocking only Bytespider was reported identically to one
+blocking every assistant — which the live benchmark showed happening on github.com.
+
+Membership of either list is not a claim that a given assistant uses a given agent; it is
+how the operators document them, and the finding says so. Each agent is evaluated against
+the site's own rules, so custom `User-agent` blocks are honoured exactly as a real crawler
+would honour them.
+
+## The robots.txt parser
+
+Rules are matched against the URL's **path and query**, per RFC 9309, with `*` and `$`
+supported and the longest match winning (Allow breaking a tie). The standard library's
+`urllib.robotparser` discards the query component, so the very common `Disallow: /?` —
+used by google.com, wikipedia.org and many large sites to keep crawlers off parameterised
+URLs — collapses into `Disallow: /` and appears to forbid the entire site. On the live
+benchmark that produced an empty crawl of google.com and would have reported every AI
+crawler as blocked on any site using that pattern.
+
+## Why the edge/CDN check exists
+
+robots.txt is only a request. A CDN or WAF can refuse an AI crawler's User-Agent at the
+edge with a 403 even when robots.txt explicitly allows it, so the page is unreachable
+regardless. The probe therefore compares two user-agents against the same URL. Crucially,
+it requires an actual refusal **status** on a retried request: a network error alone is
+recorded as inconclusive in `skipped_checks`, because one transient timeout must never
+manufacture a critical finding.
+
+## Mixed content means sub-resources
+
+Only `src` on script/img/iframe/source/track/embed/audio/video and `href` on `<link>` are
+counted. An `<a href="http://...">` pointing at another site is an ordinary outbound
+link, not mixed content, and counting it was a false-positive source removed in v2.
 
 ## False-positive guards
-- Bot-block finding lists the exact disallowed agents as evidence.
-- noindex is confirmed from the actual `<meta name="robots">` content or response header,
-  not inferred.
-- canonical finding fires only when **no** successful page declares one (sitewide), to
-  avoid flagging intentional cross-canonical setups on a single page.
+
+- noindex is read from the parsed `<meta name="robots">` content attribute and the
+  response header, never from a raw-string window that can span into unrelated markup.
+- The canonical finding fires only when **no** successful page declares one, and is a
+  defect only where duplicate/parameterised URLs were actually observed.
+- Broken-link findings count only real 4xx/5xx. Links that produced no response at all
+  are reported as an inconclusive skipped check, because a timeout is not a broken link.
+- A robots-disallowed URL is recorded as blocked and never fetched, and the finding says
+  explicitly that the audit therefore cannot judge what those URLs contain.

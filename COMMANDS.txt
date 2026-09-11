@@ -50,13 +50,16 @@ Full audit: add --render (JS fact-gap) and --html (readable report page):
 Then open report.html in any browser.
 
 Available flags:
-    --max-pages N     how many pages to sample (default 12)
+    --max-pages N     how many resources to sample (default 12, max 100)
     --render          use headless Chromium to measure the raw-vs-rendered gap
     --out FILE        write the JSON report to FILE
     --html FILE       also write a human-readable HTML report to FILE
 
 Exit code is 0 on success; non-zero if the site is unreachable, the crawl
 fails, or a sub-audit could not run (so an incomplete report is never silent).
+A crawl that reaches nothing still writes a report, with "status": "failed"
+and a machine-readable "failure" object - never a hollow report that could be
+mistaken for a clean site.
 
 
 --------------------------------------------------------------------------------
@@ -65,7 +68,7 @@ fails, or a sub-audit could not run (so an incomplete report is never silent).
     cd brand-ai-readiness-audit
     python3 scripts/validate.py
 
-Expected: "OK: 7 skills, 1 entrypoint (audit-orchestrator), all SKILL.md ..."
+Expected: "OK: 8 skills, 1 entrypoint (audit-orchestrator), all SKILL.md ..."
 
 
 --------------------------------------------------------------------------------
@@ -78,7 +81,7 @@ Add --render to also exercise the headless-browser path:
 
     python3 tests/run_tests.py --render
 
-Expected: "Ran 9 tests ... OK"
+Expected: "Ran 70 tests ... OK"
 
 
 --------------------------------------------------------------------------------
@@ -94,9 +97,12 @@ If you already have a report.json and just want the HTML page:
 5) PACKAGE THE SUBMISSION ZIP
 --------------------------------------------------------------------------------
     cd brand-ai-readiness-audit
-    zip -r ../submission.zip . -x '*__pycache__*' -x '*.pyc' -x 'tests/*cache*'
+    python3 scripts/package.py
 
-The zip lands at the repo root as submission.zip (well under the 50 MB limit).
+The zip lands at the repo root as submission.zip (about 130 KB, far under the
+50 MB limit). The packager is deterministic - fixed file order and timestamps -
+and excludes __pycache__, *.pyc, run logs and benchmark output, so the archive
+contains only source. No external zip binary is required.
 
 
 --------------------------------------------------------------------------------
@@ -124,8 +130,24 @@ The repo ships fixture sites used by the tests; you can audit one directly:
     # stop the server when done:
     kill %1
 
-badsite is deliberately broken (expect many findings); goodsite is healthy
-(expect very few).
+badsite is deliberately broken (expect the severe checks to fire); goodsite is
+healthy (expect very few). A third fixture, varietysite, is the false-positive
+suite: a documentation/tool site with no call-to-action, no footer, no FAQ, a
+cookie banner, muted autoplay, an XML sitemap and a sitemap that returns
+X-Robots-Tag: noindex. None of those may appear in its report.
+
+
+--------------------------------------------------------------------------------
+8) RUN THE LIVE BENCHMARK
+--------------------------------------------------------------------------------
+    cd brand-ai-readiness-audit
+    python3 batch_audit.py            # the fixed 10-site benchmark
+    python3 batch_audit.py --stress   # the 9-site generalisation set
+    python3 batch_audit.py --all      # both
+
+Reports land in batch_reports/ and stress_reports/, with a combined
+_summary.json in each. One site failing never stops the batch, and a site that
+could not be audited is recorded as a failure rather than dropped.
 
 
 --------------------------------------------------------------------------------

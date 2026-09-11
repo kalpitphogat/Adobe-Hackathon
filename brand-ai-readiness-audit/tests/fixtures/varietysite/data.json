@@ -1,0 +1,2 @@
+{"defect_classes": ["non_manifold_edge", "flipped_normal", "self_intersection"],
+ "formats": ["obj", "ply", "stl", "gltf"], "version": "3.1.0"}

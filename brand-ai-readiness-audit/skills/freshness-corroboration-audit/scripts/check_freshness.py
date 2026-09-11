@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
-"""freshness-corroboration-audit: is the content current and cross-verifiable?
-Round-2 appendix D: machines trust facts that are fresh and agreed-upon across the
-web, and get confused by name collisions. Usage: check_freshness.py <cache_dir>"""
+"""freshness-corroboration-audit: are the facts current, and is the entity
+identifiable beyond this one site?
+
+Mechanism 4 of the chain - are the facts fresh and corroborated. This skill is
+strict about what it may claim. It checks the site's own markup and text; it does
+not query external sources. Therefore it never concludes that a brand lacks
+external corroboration - only that the site does or does not declare any.
+
+Usage: check_freshness.py <cache_dir>
+"""
 import datetime
 import os
 import re
@@ -14,101 +21,142 @@ import auditlib as A  # noqa: E402
 SKILL = "freshness-corroboration-audit"
 NOW = datetime.date.today()
 
+COPYRIGHT = re.compile(r"(?:©|\(c\)|copyright|&copy;)\s*(?:\d{4}\s*[-–]\s*)?(\d{4})", re.I)
+SUPERLATIVE = re.compile(
+    r"\b(?:#1|number one|world'?s (?:leading|best)|award-winning|top-rated|"
+    r"most trusted|industry-leading)\b", re.I)
+
 
 def run(cache_dir):
     meta = A.load_meta(cache_dir)
     pages = A.html_pages(meta)
-    findings = []
+    findings, skips = [], []
+
+    non_html = A.non_html_resources(meta)
+    if non_html:
+        skips.append(A.skipped(
+            "freshness and corroboration checks on non-HTML resources",
+            f"{len(non_html)} crawled resource(s) are not HTML documents; copyright lines, "
+            "publish dates and entity markup are page-level properties."))
     if not pages:
-        return findings
+        skips.append(A.skipped("all freshness checks",
+                               "no HTML page was retrieved in this crawl"))
+        return findings, skips
 
-    # 1. Stale copyright / dates
-    stale_years = []
+    # ---- 1. stale copyright ------------------------------------------------- #
+    stale = []
     for p in pages:
         text = A.read_page(cache_dir, p, "text") or ""
-        for m in re.finditer(r"(?:©|copyright|&copy;)\s*(?:\d{4}\s*[-–]\s*)?(\d{4})", text, re.I):
-            yr = int(m.group(1))
-            if yr < NOW.year - 1 and yr > 2000:
-                stale_years.append((p["url"], yr))
-                break
-    if stale_years:
-        oldest = min(y for _, y in stale_years)
+        years = [int(m) for m in COPYRIGHT.findall(text) if 2000 < int(m) <= NOW.year + 1]
+        if years and max(years) < NOW.year - 1:
+            stale.append((p["url"], max(years)))
+    if stale:
+        oldest = min(y for _, y in stale)
         findings.append(A.finding(
-            "Stale copyright / last-updated year",
-            "medium",
-            f"{len(stale_years)} page(s) show a copyright year of {oldest} or earlier "
-            f"(current year {NOW.year}), e.g. {stale_years[0][0]} ({stale_years[0][1]}).",
-            "Update the footer year and surface a visible 'last updated' date on time-sensitive "
-            "pages. Stale dates signal abandonment and lower an assistant's trust in the facts.",
-            "medium", "freshness", checked=len(pages)))
-
-    # 2. No machine-readable dates on article-like pages
-    dated, article_like = 0, 0
-    for p in pages:
-        html = A.read_page(cache_dir, p, "html") or ""
-        low = html.lower()
-        is_article = ("article" in low and ("datepublished" in low or "<time" in low
-                                            or "/blog/" in p["url"].lower() or "/news/" in p["url"].lower()
-                                            or "/article" in p["url"].lower()))
-        if "/blog/" in p["url"].lower() or "/news/" in p["url"].lower() or "/article" in p["url"].lower():
-            article_like += 1
-            if "datepublished" in low or "datemodified" in low or "<time" in low:
-                dated += 1
-    if article_like and dated == 0:
-        findings.append(A.finding(
-            "Article/blog pages have no machine-readable publish date",
-            "medium",
-            f"{article_like} article-like page(s) expose no <time>, datePublished, or dateModified.",
-            "Add datePublished/dateModified (in Article JSON-LD and a visible <time> element) so "
-            "assistants can judge recency and prefer current sources.",
-            "medium", "freshness", checked=article_like))
-
-    # 3. Entity-collision / disambiguation risk
-    home = pages[0]
-    home_html = A.read_page(cache_dir, home, "html") or ""
-    low = home_html.lower()
-    has_sameas = "sameas" in low
-    has_about = any(k in low for k in ["about", "who we are", "what we do"])
-    if not has_sameas:
-        findings.append(A.finding(
-            "No sameAs relationships in homepage structured data",
+            "Copyright year in page text is more than one year out of date",
             "low",
-            "Homepage structured data does not declare sameAs links to external identity "
-            "sources (e.g. Wikipedia, LinkedIn, social profiles). The brand may have strong "
-            "external corroboration that is simply not declared in the markup.",
-            "Consider adding sameAs links in Organization JSON-LD to authoritative external "
-            "profiles. This helps machines confirm the brand's identity across sources.",
-            "low", "corroboration",
-            finding_type="improvement"))
-    if not has_about:
-        findings.append(A.finding(
-            "No clear identity/'about' statement to distinguish the brand",
-            "low",
-            "Homepage text lacks an explicit about/who-we-are statement.",
-            "State plainly who the brand is, what it does, and what makes it distinct, so systems "
-            "don't confuse it with similarly named entities.",
-            "low", "corroboration",
-            finding_type="improvement"))
+            f"{len(stale)}/{len(pages)} sampled pages show a most-recent copyright year of "
+            f"{oldest} or earlier against the current year {NOW.year}, e.g. "
+            + ", ".join(f"{u} ({y})" for u, y in stale[:3]) + ".",
+            "A visibly old copyright line is one of several signals a reader may use to judge "
+            "whether a site is maintained. It says nothing directly about whether the content "
+            "itself is current, which this audit did not assess.",
+            "Render the footer year from the current date rather than a hard-coded value, and "
+            "surface a real last-reviewed date on pages whose facts change.",
+            "low", "freshness", checked=len(pages), finding_type="improvement",
+            confidence="high", mechanism="freshness", dedup_key="freshness:stale-copyright",
+            not_verified="whether the page content itself is out of date"))
 
-    # 4. Unqualified superlative claims with no attribution (fragile single-source facts)
-    superlatives = 0
-    for p in pages[:6]:
+    # ---- 2. article publish dates -------------------------------------------- #
+    # Only pages confidently classified as articles; a URL containing "/blog" is
+    # not on its own treated as an article.
+    articles = [p for p in pages if A.role_of(p) == "article" and A.role_confident(p)]
+    if articles:
+        undated = []
+        for p in articles:
+            html = (A.read_page(cache_dir, p, "html") or "").lower()
+            has_date = (p.get("n_time_elements", 0) > 0
+                        or "datepublished" in html or "datemodified" in html
+                        or "article:published_time" in html)
+            if not has_date:
+                undated.append(p["url"])
+        if undated:
+            findings.append(A.finding(
+                "Article pages expose no machine-readable publication date",
+                "medium",
+                f"{len(undated)}/{len(articles)} sampled pages classified as articles declare "
+                "no <time> element, no datePublished or dateModified property and no "
+                "article:published_time meta tag: " + ", ".join(undated[:4]) + ".",
+                "Recency is one of the inputs used when choosing between sources that make "
+                "competing claims. Without a declared date, a consumer cannot place these "
+                "pages on a timeline except by guessing from the text.",
+                "Emit datePublished and dateModified in the Article JSON-LD on these pages, "
+                "and show the same date to readers in a <time datetime=\"...\"> element.",
+                "medium", "freshness", checked=len(articles), confidence="high", material=True,
+                mechanism="freshness", dedup_key="freshness:undated-articles"))
+    else:
+        skips.append(A.skipped(
+            "article publication dates",
+            "no sampled page was confidently classified as an article, so no page was "
+            "assessed for a publication date."))
+
+    # ---- 3. entity corroboration -------------------------------------------- #
+    # Reports exactly what was inspected. Absence of sameAs is never reported as
+    # absence of external corroboration: no external source was queried.
+    home = A.homepage_of(meta)
+    if home is not None:
+        home_html = A.read_page(cache_dir, home, "html") or ""
+        has_sameas = '"sameas"' in home_html.lower()
+        if not has_sameas:
+            findings.append(A.finding(
+                "No sameAs relationships detected in homepage structured data",
+                "low",
+                "The homepage's server HTML was searched for a sameAs property in its "
+                "structured data, and none was found.",
+                "sameAs is how a page asserts which external profiles refer to the same "
+                "entity. This audit inspected the homepage markup only. It did not query "
+                "Wikidata, search engines, social platforms or any other external source, so "
+                "it makes no claim about whether such sources exist, agree, or describe this "
+                "brand at all.",
+                "If the brand has authoritative external profiles, list them in the "
+                "Organization node's sameAs array so the connection is stated rather than "
+                "left to be inferred.",
+                "low", "corroboration", checked=1, checked_unit="homepage",
+                finding_type="improvement",
+                confidence="high", page_role="homepage", mechanism="corroborate",
+                dedup_key="corroboration:entity-sameas",
+                not_verified="whether external sources describing this brand exist or agree; "
+                             "no external source was queried by this audit"))
+
+    # ---- 4. unattributed superlatives ---------------------------------------- #
+    sample = pages[:6]
+    hits = []
+    for p in sample:
         text = A.read_page(cache_dir, p, "text") or ""
-        superlatives += len(re.findall(r"\b(?:best|#1|number one|world'?s leading|award-winning|"
-                                       r"top-rated|fastest|most trusted)\b", text, re.I))
-    if superlatives >= 3:
+        found = SUPERLATIVE.findall(text)
+        if found:
+            hits.append((p["url"], len(found)))
+    n_claims = sum(n for _, n in hits)
+    if n_claims >= 3:
         findings.append(A.finding(
-            "Unattributed superlative claims",
+            "Superlative claims appear without a named source",
             "low",
-            f"Found ~{superlatives} superlative marketing claims (e.g. 'best', '#1', "
-            "'world-leading') without visible third-party attribution across sampled pages.",
-            "Back strong claims with attributable evidence (named awards, cited rankings, dated "
-            "sources). Unverifiable single-source claims are discounted and rarely repeated by assistants.",
-            "low", "corroboration", checked=min(6, len(pages)),
-            finding_type="improvement"))
+            f"{n_claims} superlative marketing phrase(s) such as \"#1\", \"world-leading\" or "
+            f"\"award-winning\" were found across {len(hits)}/{len(sample)} sampled pages, "
+            "e.g. " + ", ".join(f"{u} ({n})" for u, n in hits[:3]) + ".",
+            "Whether each claim is attributed nearby was not determined; the audit matched the "
+            "phrases, not their context. Claims that carry a named award, ranking or date are "
+            "easier for a reader to verify than ones that do not.",
+            "Where these claims are backed by a specific award, ranking or study, name it and "
+            "date it next to the claim, and link the source.",
+            "low", "corroboration", checked=len(sample), finding_type="improvement",
+            confidence="low", mechanism="corroborate",
+            dedup_key="corroboration:unattributed-claims",
+            not_verified="whether each claim is attributed in its surrounding context"))
 
-    return findings
+    return findings, skips
 
 
 if __name__ == "__main__":
-    A.emit(SKILL, run(sys.argv[1]))
+    f, s = run(sys.argv[1])
+    A.emit(SKILL, f, s)
