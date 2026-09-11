@@ -166,10 +166,23 @@ def run(b, profile) -> tuple[list[dict], list[dict], list[dict]]:
     status = b.meta.get("crawl", {}).get("robots_status")
     snapshot = f"{bots['snapshot_date']} (upstream commit {bots['source']['commit'][:12]})"
 
+    is_2xx = bool(status and 200 <= status < 300)
+    looks_like_html = "<html" in text[:400].lower() or "<!doctype" in text[:400].lower()
+
+    # An ABSENT robots.txt is permissive and correct, and absence is signalled by a
+    # non-2xx status EVEN WHEN the server returns an HTML error page as the body. A
+    # 404 whose body is a styled "Not Found" page is "no robots.txt", not an
+    # "unparseable robots.txt" — treating it as a defect is a false positive that
+    # fires on a large share of ordinary sites. Only a 2xx response is a robots.txt
+    # whose content we are entitled to expect to parse.
+    if not is_2xx:
+        if looks_like_html or not text.strip() or (status and status >= 300):
+            return findings, skipped, []
+        # status unknown and the body is non-HTML: fall through and try to parse it.
+
     if not text.strip():
-        if status and 200 <= status < 300:
+        if is_2xx:
             findings.append(_unparseable_finding(b, "robots.txt returned 200 with an empty body", status))
-        # A 404 robots.txt is permissive and correct. Not a finding.
         return findings, skipped, []
 
     groups, errors = parse_groups(text)
@@ -178,17 +191,17 @@ def run(b, profile) -> tuple[list[dict], list[dict], list[dict]]:
         for p in b.pages
     }) or ["/"]
 
-    # ---- unparseable / not actually robots.txt
-    looks_like_html = "<html" in text[:400].lower() or "<!doctype" in text[:400].lower()
+    # ---- unparseable / not actually robots.txt (only meaningful for a 2xx response)
     if looks_like_html or (errors and not groups):
-        findings.append(
-            _unparseable_finding(
-                b,
-                "body is HTML, not a robots.txt directive file" if looks_like_html
-                else "; ".join(errors[:5]),
-                status,
+        if is_2xx:
+            findings.append(
+                _unparseable_finding(
+                    b,
+                    "body is HTML, not a robots.txt directive file" if looks_like_html
+                    else "; ".join(errors[:5]),
+                    status,
+                )
             )
-        )
         return findings, skipped, []
 
     # ---- blanket disallow

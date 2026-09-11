@@ -62,12 +62,12 @@
   "generator": {
     "ai_bots_snapshot_date": "2026-09-09",
     "ai_bots_source_commit": "0e111dcc24cbcdf4e609edde70f9f9184eac8b02",
-    "checks_available": 61,
+    "checks_available": 64,
     "checks_run": 1,
     "name": "brand-ai-readiness-audit",
     "tool_versions": {
       "collector": "1.0.0",
-      "python": "3.11.9",
+      "python": "3.11.15",
       "renderer": "none",
       "transport": "offline"
     },
@@ -189,6 +189,24 @@
       },
       {
         "check_id": "trust.entity.no_external_corroboration",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "trust.integrity.cloaked_text",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "trust.integrity.invisible_unicode",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "trust.integrity.prompt_injection",
         "count": 1,
         "reason": "not assessed",
         "rule": "not assessed"

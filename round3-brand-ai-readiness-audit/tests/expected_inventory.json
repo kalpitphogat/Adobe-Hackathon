@@ -16,17 +16,17 @@
     "                      fires for a URL and no rendered DOM exists for it. See gate-rules.md."
   ],
   "totals": {
-    "checks": 61,
-    "core": 58,
+    "checks": 64,
+    "core": 61,
     "enrichment": 3,
-    "discoverability": 44,
+    "discoverability": 47,
     "engagement": 17,
     "by_stage": {
       "act": 17,
       "extract": 14,
       "reach": 18,
       "read": 5,
-      "trust": 7
+      "trust": 10
     },
     "by_skill": {
       "answerability-audit": 8,
@@ -34,7 +34,7 @@
       "engagement-audit": 17,
       "render-gap-audit": 5,
       "structured-data-audit": 6,
-      "trust-freshness-audit": 7
+      "trust-freshness-audit": 10
     },
     "rule_0b_suppressible": 13
   },
@@ -558,6 +558,30 @@
       "tier": "core",
       "default_severity": "medium",
       "rule_0b_suppressible": true
+    },
+    {
+      "id": "trust.integrity.prompt_injection",
+      "skill": "trust-freshness-audit",
+      "stage": "trust",
+      "category": "discoverability",
+      "tier": "core",
+      "default_severity": "critical"
+    },
+    {
+      "id": "trust.integrity.cloaked_text",
+      "skill": "trust-freshness-audit",
+      "stage": "trust",
+      "category": "discoverability",
+      "tier": "core",
+      "default_severity": "medium"
+    },
+    {
+      "id": "trust.integrity.invisible_unicode",
+      "skill": "trust-freshness-audit",
+      "stage": "trust",
+      "category": "discoverability",
+      "tier": "core",
+      "default_severity": "medium"
     }
   ],
   "proactive_only": [
