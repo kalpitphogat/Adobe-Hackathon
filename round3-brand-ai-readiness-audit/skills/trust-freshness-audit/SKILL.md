@@ -55,6 +55,9 @@ python scripts/run.py --bundle ./evidence --profile ./profile.json
 | `trust.entity.nap_inconsistent` | the site states more than one address or phone for itself | medium |
 | `trust.entity.no_external_corroboration` | nothing links the site to an independent record | medium |
 | `trust.authorship.unattributed` | articles naming no author | low |
+| `trust.integrity.prompt_injection` | text phrased as an instruction to an AI reader (often in HTML comments or hidden nodes) | critical |
+| `trust.integrity.cloaked_text` | many elements hidden from view via CSS while remaining in the served HTML (cloaking) | medium |
+| `trust.integrity.invisible_unicode` | runs of zero-width or bidi-control code points in the extracted text | medium |
 
 ### A confidence ceiling that matters
 

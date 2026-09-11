@@ -20,12 +20,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import content_integrity  # noqa: E402
 import corroboration  # noqa: E402
 import date_consistency  # noqa: E402
 import entity_ambiguity  # noqa: E402
 from bundle import emit, load  # noqa: E402
 
-MODULES = (corroboration, date_consistency, entity_ambiguity,)
+MODULES = (corroboration, date_consistency, entity_ambiguity, content_integrity,)
 SKILL = "trust-freshness-audit"
 STAGE = "trust"
 
