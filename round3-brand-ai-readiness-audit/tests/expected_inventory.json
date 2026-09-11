@@ -16,14 +16,14 @@
     "                      fires for a URL and no rendered DOM exists for it. See gate-rules.md."
   ],
   "totals": {
-    "checks": 64,
-    "core": 61,
+    "checks": 65,
+    "core": 62,
     "enrichment": 3,
-    "discoverability": 47,
+    "discoverability": 48,
     "engagement": 17,
     "by_stage": {
       "act": 17,
-      "extract": 14,
+      "extract": 15,
       "reach": 18,
       "read": 5,
       "trust": 10
@@ -33,7 +33,7 @@
       "crawl-access-audit": 18,
       "engagement-audit": 17,
       "render-gap-audit": 5,
-      "structured-data-audit": 6,
+      "structured-data-audit": 7,
       "trust-freshness-audit": 10
     },
     "rule_0b_suppressible": 13
@@ -275,6 +275,14 @@
     },
     {
       "id": "extract.sd.identity_graph_weak",
+      "skill": "structured-data-audit",
+      "stage": "extract",
+      "category": "discoverability",
+      "tier": "core",
+      "default_severity": "medium"
+    },
+    {
+      "id": "extract.i18n.hreflang_incomplete",
       "skill": "structured-data-audit",
       "stage": "extract",
       "category": "discoverability",

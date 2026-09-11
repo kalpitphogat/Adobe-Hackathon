@@ -39,9 +39,15 @@ INJECTION = re.compile(
     r"|you are (?:chatgpt|claude|gemini|an ai|a large language model)"
     r"|system\s*prompt\b"
     r"|prompt\s*injection"
+    r"|(?:reveal|repeat|print|output|ignore)\s+(?:your|the)\s+(?:system\s+)?(?:prompt|instructions)"
     r"|(?:do not|don'?t) (?:mention|reveal|disclose) (?:this|the following|that)"
     r"|(?:instructions?|note|message) (?:to|for) (?:the )?(?:ai|assistant|llm|chatbot|model)"
-    r"|<!--\s*(?:ai|llm|assistant|gpt)[:\s]",
+    r"|<!--\s*(?:ai|llm|assistant|gpt)[:\s]"
+    # LLM chat-template / instruction control tokens. These are machine-only
+    # delimiters — they have no meaning in human copy, so matching one is
+    # unambiguous evidence of text staged for a model rather than a reader.
+    r"|<\|(?:im_start|im_end|im_sep|system|user|assistant|endoftext)\|>"
+    r"|\[/?INST\]|<</?SYS>>|<\|eot_id\|>|<\|start_header_id\|>",
     re.I)
 
 # Inline styles that remove an element's text from human view.

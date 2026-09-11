@@ -346,4 +346,4 @@ Findings other tools would raise that we suppressed, and why:
 
 ---
 
-*brand-ai-readiness-audit 1.0.0 · 13 of 64 checks ran · AI crawler list snapshot 2026-09-09 (commit 0e111dcc24cb) · recommend-only: nothing was written to the audited site.*
+*brand-ai-readiness-audit 1.0.0 · 13 of 65 checks ran · AI crawler list snapshot 2026-09-09 (commit 0e111dcc24cb) · recommend-only: nothing was written to the audited site.*
