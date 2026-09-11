@@ -102,7 +102,7 @@ Nine skills. One entrypoint.
 | render-gap-audit | Can it read the page without running JavaScript? | read |
 | structured-data-audit | Is the fact machine-typed? | extract |
 | answerability-audit | Is the fact quotable? | extract |
-| trust-freshness-audit | Would a machine believe it? | trust |
+| trust-freshness-audit | Would a machine believe it, and is the page honest? | trust |
 | engagement-audit | Does the visitor stay and act? | act |
 
 ### Why two of these are not checks
@@ -162,6 +162,14 @@ declares itself in a `CHECKS` registry, and `tests/validate_marketplace.py`
 parses those registries out of the source, compares them against
 `tests/expected_inventory.json`, and fails the build if this README disagrees.
 No count in any document here is hand-written.
+
+The `trust` stage also covers **content integrity** — whether a page tries to
+manipulate the machine reading it rather than serve the human. `trust-freshness-audit`
+flags prompt-injection and LLM-directive text (often buried in HTML comments or
+hidden nodes), large amounts of visually-hidden / cloaked text, and invisible
+zero-width or bidi-control Unicode. Detection is deliberately conservative — narrow
+injection phrasing, a multi-element threshold for cloaking, a run-length threshold
+for invisible characters — so an ordinary page that merely mentions AI never trips it.
 
 ### Not firing is a feature
 
@@ -253,7 +261,7 @@ mechanism cannot silently alter the proof of another:
 
 ## Dependencies
 
-**CORE — Python 3.9+ standard library only.** 58 of 61 checks, including every
+**CORE — Python 3.9+ standard library only.** 61 of 64 checks, including every
 `reach` check and every `act` check.
 
 Note that `urllib.robotparser` is **not** used: it implements the 1996 draft
