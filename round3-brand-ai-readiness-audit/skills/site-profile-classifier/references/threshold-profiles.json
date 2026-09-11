@@ -1,0 +1,90 @@
+{
+  "_comment": [
+    "Thresholds every audit skill scores against. This file is where",
+    "generalisation to unseen sites actually lives: no check hardcodes a number,",
+    "each asks the profile for it, and the profile is selected from observed site",
+    "signals rather than from a list of known sites.",
+    "",
+    "A threshold is only here if a check would otherwise have to invent a number.",
+    "Where a defect is absolute (invalid JSON, a noindex on a content page) there",
+    "is no threshold, because calibration would be false precision.",
+    "",
+    "Numbers are conservative on purpose: they are set where a defect is not",
+    "seriously arguable, because the rubric penalises false positives and the",
+    "gate cascade already suppresses noise. A check that fires at the boundary is",
+    "worse than a check that stays quiet."
+  ],
+  "default": {
+    "thin_content_words": { "home": 120, "product": 120, "category": 60, "article": 300, "docs": 200, "pricing": 120, "contact": 40, "about": 100, "utility": 0, "other": 150 },
+    "boilerplate_ratio_max": 0.7,
+    "form_fields_max": { "contact": 8, "pricing": 5, "home": 5, "product": 6, "utility": 30, "other": 7 },
+    "high_friction_fields": ["phone", "tel", "company", "organisation", "organization", "job_title", "jobtitle", "dob", "date_of_birth", "birthday", "address1", "address_line_1", "street", "postcode", "zip", "fax"],
+    "competing_primary_ctas_max": 3,
+    "ttfb_median_ms_max": 800,
+    "above_fold_bytes_max": 1200000,
+    "page_bytes_max": 3000000,
+    "stale_volatile_days": 540,
+    "evidence_markers_min_words": 400,
+    "direct_answer_max_words": 50,
+    "chunk_target_tokens": 300,
+    "chunk_overlap_ratio": 0.15,
+    "render_gap_min_rendered_words": 200,
+    "render_gap_raw_ratio_max": 0.3,
+    "structured_data_min_words": 200,
+    "broken_link_rate_max": 0.02,
+    "broken_link_count_max": 5,
+    "sitemap_coverage_gap_ratio": 0.4,
+    "internal_links_hub_min": 15,
+    "onward_links_min": 3,
+    "gated_content_ratio_max": 0.2
+  },
+  "archetypes": {
+    "docs": {
+      "_why": "Documentation is long, densely linked and legitimately undated. Answerability matters most; CTAs and social proof do not apply.",
+      "thin_content_words": { "docs": 150, "article": 250, "category": 40 },
+      "evidence_markers_min_words": 800,
+      "stale_volatile_days": 730,
+      "surface_llms_txt": true
+    },
+    "developer-platform": {
+      "_why": "Same as docs, plus agent-facing surfaces are genuinely relevant here.",
+      "thin_content_words": { "docs": 150, "article": 250 },
+      "evidence_markers_min_words": 800,
+      "surface_llms_txt": true
+    },
+    "saas-marketing": {
+      "_why": "Short punchy pages are the idiom, so thin-content thresholds drop. Conversion checks apply in full.",
+      "thin_content_words": { "home": 100, "pricing": 100, "product": 100, "other": 120 },
+      "competing_primary_ctas_max": 3,
+      "form_fields_max": { "contact": 7, "pricing": 4, "home": 4 },
+      "surface_llms_txt": false
+    },
+    "e-commerce": {
+      "_why": "Product pages are short by design and category pages are link hubs; both would false-positive on generic thin-content rules. Cost signal is mandatory here and nowhere else.",
+      "thin_content_words": { "product": 80, "category": 40, "home": 100 },
+      "boilerplate_ratio_max": 0.8,
+      "form_fields_max": { "utility": 30, "contact": 8 },
+      "require_cost_signal": true,
+      "surface_llms_txt": false
+    },
+    "publisher": {
+      "_why": "Dates and authorship carry real weight; commercial checks mostly do not.",
+      "thin_content_words": { "article": 350, "category": 50, "home": 100 },
+      "stale_volatile_days": 365,
+      "require_cost_signal": false,
+      "surface_llms_txt": false
+    },
+    "local-business": {
+      "_why": "Small sites with few pages. Name, address and phone consistency is the dominant trust signal.",
+      "thin_content_words": { "home": 80, "about": 60, "contact": 30, "other": 80 },
+      "nap_consistency_required": true,
+      "require_cost_signal": false,
+      "surface_llms_txt": false
+    },
+    "other": {
+      "_why": "Unclassified. Uses defaults throughout and every check that depends on archetype lowers its confidence one notch.",
+      "confidence_penalty": true,
+      "surface_llms_txt": false
+    }
+  }
+}

@@ -1,0 +1,11 @@
+# Scoped to this directory only, so it cannot affect anything else in the repo.
+#
+# The determinism proof compares generated reports byte-for-byte against the
+# checked-in goldens in tests/golden/. Git's autocrlf would rewrite those
+# goldens to CRLF on checkout under Windows while the audit writes LF, so the
+# comparison would fail for anyone who cloned on Windows. Forcing LF keeps the
+# goldens byte-identical on every platform.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.zip binary

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://taxonomy-demo.test/</loc><lastmod>2026-04-02</lastmod></url>
+  <url><loc>https://taxonomy-demo.test/about</loc><lastmod>2026-02-11</lastmod></url>
+  <url><loc>https://taxonomy-demo.test/contact</loc><lastmod>2026-01-20</lastmod></url>
+  <url><loc>https://taxonomy-demo.test/pricing</loc><lastmod>2026-04-02</lastmod></url>
+  <url><loc>https://taxonomy-demo.test/blog/</loc><lastmod>2026-03-28</lastmod></url>
+  <url><loc>https://taxonomy-demo.test/blog/measuring-pipeline-latency</loc><lastmod>2026-03-28</lastmod></url>
+  <url><loc>https://taxonomy-demo.test/docs/getting-started</loc><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://taxonomy-demo.test/privacy</loc><lastmod>2025-11-30</lastmod></url>
+</urlset>

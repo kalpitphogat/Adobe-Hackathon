@@ -1,0 +1,19 @@
+# Every AI retrieval crawler is welcome. Training corpora are not.
+
+User-agent: *
+Disallow: /admin/
+Allow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+Sitemap: https://taxonomy-demo.test/sitemap.xml

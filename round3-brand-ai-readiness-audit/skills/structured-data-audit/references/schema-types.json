@@ -1,0 +1,87 @@
+{
+  "_comment": [
+    "Page type -> the schema.org type(s) that page should declare, and the",
+    "properties a consumer needs to actually use it.",
+    "",
+    "'required' means: without this property the markup cannot answer the",
+    "question the page exists to answer. A Product with no price does not tell a",
+    "retrieval system what the thing costs, which is the single most common",
+    "question about a product. That is a stricter and more useful bar than",
+    "schema.org's own optionality, which is deliberately permissive.",
+    "",
+    "'recommended' properties are reported at most as proactive recommendations,",
+    "never as defects."
+  ],
+  "page_types": {
+    "product": {
+      "expected": ["Product"],
+      "accept_also": ["Offer", "ProductGroup", "SoftwareApplication", "Service"],
+      "required": ["name", "offers.price", "offers.priceCurrency"],
+      "recommended": ["description", "image", "brand", "offers.availability", "aggregateRating", "sku"]
+    },
+    "pricing": {
+      "expected": ["Product", "Offer", "Service", "SoftwareApplication"],
+      "accept_also": ["WebPage", "ItemList"],
+      "required": ["name"],
+      "recommended": ["offers.price", "offers.priceCurrency", "description"]
+    },
+    "article": {
+      "expected": ["Article", "NewsArticle", "BlogPosting"],
+      "accept_also": ["TechArticle", "Report"],
+      "required": ["headline", "datePublished"],
+      "recommended": ["author", "dateModified", "publisher", "image", "mainEntityOfPage"]
+    },
+    "docs": {
+      "expected": ["TechArticle", "Article", "HowTo", "APIReference"],
+      "accept_also": ["WebPage", "BlogPosting"],
+      "required": ["headline"],
+      "recommended": ["datePublished", "dateModified", "author", "proficiencyLevel"]
+    },
+    "home": {
+      "expected": ["Organization", "WebSite", "LocalBusiness", "Person"],
+      "accept_also": ["WebPage", "Corporation", "NGO", "Store"],
+      "required": ["name"],
+      "recommended": ["url", "description", "sameAs", "logo", "contactPoint"]
+    },
+    "contact": {
+      "expected": ["ContactPage", "Organization", "LocalBusiness"],
+      "accept_also": ["WebPage", "Person"],
+      "required": [],
+      "recommended": ["telephone", "email", "address"]
+    },
+    "about": {
+      "expected": ["AboutPage", "Organization", "LocalBusiness", "Person"],
+      "accept_also": ["WebPage"],
+      "required": [],
+      "recommended": ["foundingDate", "sameAs", "address", "description"]
+    },
+    "category": {
+      "expected": ["CollectionPage", "ItemList"],
+      "accept_also": ["WebPage", "BreadcrumbList", "Product"],
+      "required": [],
+      "recommended": ["itemListElement", "numberOfItems"]
+    },
+    "other": {
+      "expected": ["WebPage"],
+      "accept_also": [],
+      "required": [],
+      "recommended": ["name", "description"]
+    }
+  },
+  "ineligible_page_types": {
+    "_comment": "Structured data is not expected here. Firing on these is the single most common structured-data false positive.",
+    "types": ["utility"]
+  },
+  "property_aliases": {
+    "_comment": "Different vocabularies spell the same idea differently; treat these as satisfying the requirement.",
+    "headline": ["name", "title"],
+    "name": ["headline", "legalName"],
+    "datePublished": ["dateCreated", "uploadDate"],
+    "offers.price": ["offers.lowPrice", "offers.highPrice", "price"],
+    "offers.priceCurrency": ["priceCurrency", "offers.priceSpecification.priceCurrency"]
+  },
+  "contradiction_checks": {
+    "_comment": "Properties worth comparing against visible page text. A schema value that disagrees with the page is worse than no schema, because it actively misinforms.",
+    "compare": ["offers.price", "name", "headline", "datePublished", "aggregateRating.ratingValue"]
+  }
+}

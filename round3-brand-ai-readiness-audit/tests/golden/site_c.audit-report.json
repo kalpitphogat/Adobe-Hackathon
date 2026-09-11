@@ -1,0 +1,217 @@
+{
+  "audit_status": "no_content_available",
+  "audited_at": "2026-05-28T20:26:40Z",
+  "evidence_bundle": {
+    "degraded_capabilities": [
+      {
+        "affects": [
+          "act.perf.above_fold_weight",
+          "read.render.nav_links_js_only",
+          "read.render.raw_text_gap"
+        ],
+        "capability": "rendered_dom",
+        "confidence_effect": "read.render.empty_spa_shell drops from critical/confirmed to high/likely",
+        "reason": "offline fixture declares no rendered pairs"
+      },
+      {
+        "affects": [
+          "all page-level checks"
+        ],
+        "capability": "site_content",
+        "confidence_effect": "no page evidence exists, so no page-level check may fire",
+        "reason": "robots.txt disallows crawling; no content could be lawfully fetched"
+      }
+    ],
+    "pages_fetched": 0,
+    "pages_rendered": 0,
+    "path": "evidence"
+  },
+  "findings": [
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://members-only.test/"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "reach.robots.blanket_disallow",
+      "confidence": "confirmed",
+      "evidence": "robots.txt at https://members-only.test/robots.txt contains a wildcard group with \"Disallow: /\" on line 2 and no narrower Allow rule that re-admits content. Every crawler, including every AI retrieval bot, is excluded from all 1 discovered paths. This auditor honoured it and fetched no page content.",
+      "id": "F-001",
+      "severity": "critical",
+      "stage": "reach",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 9.3,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 10.0
+        },
+        "mechanism": "A crawler that is refused at robots.txt never requests the page, so no amount of on-page quality can compensate; this is the first of the three steps that must succeed in order.",
+        "patch": "User-agent: *\nDisallow: /admin/\nDisallow: /cart/\nDisallow: /checkout/\nAllow: /\n\nSitemap: https://members-only.test/sitemap.xml\n",
+        "patch_path": "fix_patches/F-001.reach.robots.blanket_disallow.txt",
+        "priority": "critical",
+        "source": "RFC 9309 section 2.2.2",
+        "summary": "Replace the site-wide Disallow with rules that exclude only genuinely private paths.",
+        "verification": "curl -s https://members-only.test/robots.txt | grep -A5 'User-agent: \\*'"
+      },
+      "title": "robots.txt forbids every crawler from the entire site"
+    }
+  ],
+  "generator": {
+    "ai_bots_snapshot_date": "2026-09-09",
+    "ai_bots_source_commit": "0e111dcc24cbcdf4e609edde70f9f9184eac8b02",
+    "checks_available": 64,
+    "checks_run": 1,
+    "name": "brand-ai-readiness-audit",
+    "tool_versions": {
+      "collector": "1.0.0",
+      "python": "3.11.15",
+      "renderer": "none",
+      "transport": "offline"
+    },
+    "version": "1.0.0"
+  },
+  "limitations": [
+    {
+      "checks_not_run": [
+        "reach.edge.bot_ua_blocked",
+        "reach.edge.bot_ua_challenged"
+      ],
+      "confidence_effect": "not assessed; re-run with --probe-bot-ua to close this gap",
+      "optional_feature": true,
+      "reason": "Edge and CDN reachability for named AI crawlers was not assessed, because --probe-bot-ua was not set. This is the highest-value check in this marketplace: a CDN or WAF rule that returns 403 to OAI-SearchBot, PerplexityBot or Claude-SearchBot removes a brand from those assistants entirely, and leaves no trace in robots.txt or in what a human sees. If you own this site, re-run the orchestrator with the --probe-bot-ua flag:\n    orchestrate.py <url> --out ./audit-output --probe-bot-ua\nThat sends ONE request per crawler, to the homepage only, with an auditor token appended to the user-agent string so it is identifiable in your logs. It is off by default because sending named-crawler user-agents to a site you do not own is not something an audit should do without being asked.",
+      "scope": "site"
+    },
+    {
+      "checks_not_run": [
+        "reach.agent.llms_txt_absent",
+        "reach.edge.bot_ua_blocked",
+        "reach.edge.bot_ua_challenged",
+        "reach.http.broken_internal_links",
+        "reach.http.insecure_or_mixed_scheme",
+        "reach.http.soft_404",
+        "reach.index.canonical_conflict",
+        "reach.index.noindex_on_content",
+        "reach.index.redirect_chain_or_loop",
+        "reach.perf.slow_median_ttfb",
+        "reach.robots.ai_search_bot_blocked",
+        "reach.robots.ai_training_bot_blocked",
+        "reach.robots.crawl_delay_excessive",
+        "reach.robots.dual_purpose_bot_blocked",
+        "reach.robots.unparseable",
+        "reach.sitemap.absent_or_invalid",
+        "reach.sitemap.coverage_gap"
+      ],
+      "confidence_effect": "page-level reach checks were not assessed",
+      "reason": "No page content was collected, so only origin-level policy could be assessed. robots.txt disallows this auditor from fetching the seed URL. robots.txt is a hard constraint on our own crawling, so no page content was fetched. The robots policy itself is still reported.",
+      "scope": "site"
+    }
+  ],
+  "proactive_recommendations": [],
+  "schema_version": "1.0",
+  "site": "members-only.test",
+  "summary": {
+    "blocked_findings": 0,
+    "by_category": {
+      "discoverability": 1,
+      "engagement": 0
+    },
+    "by_stage": {
+      "reach": 1
+    },
+    "critical": 1,
+    "high": 0,
+    "info": 0,
+    "low": 0,
+    "medium": 0,
+    "suppressed_by_rule": [
+      {
+        "check_id": "act.perf.above_fold_weight",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "act.trust.no_policy_or_contact_path",
+        "count": 1,
+        "reason": "suppressed entirely",
+        "rule": "suppressed entirely"
+      },
+      {
+        "check_id": "extract.sd.identity_graph_weak",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "reach.agent.llms_txt_absent",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "reach.edge.bot_ua_blocked",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "reach.edge.bot_ua_challenged",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "reach.perf.slow_median_ttfb",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "reach.sitemap.absent_or_invalid",
+        "count": 1,
+        "reason": "suppressed by threshold",
+        "rule": "suppressed by threshold"
+      },
+      {
+        "check_id": "read.render.nav_links_js_only",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "read.render.raw_text_gap",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "trust.entity.no_external_corroboration",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "trust.integrity.cloaked_text",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "trust.integrity.invisible_unicode",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "trust.integrity.prompt_injection",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      }
+    ],
+    "total_findings": 1
+  }
+}

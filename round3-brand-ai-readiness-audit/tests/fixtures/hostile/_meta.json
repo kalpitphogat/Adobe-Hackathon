@@ -1,0 +1,30 @@
+{
+  "_comment": [
+    "hostile: the five degenerate seeds from blocking fix B7. Each must produce",
+    "a SCHEMA-VALID bundle and, downstream, a schema-valid report. None may",
+    "crash, and per F6 none may exit non-zero, because a bundle WAS written.",
+    "",
+    "The audit outcome belongs in the report's audit_status field, never in the",
+    "process exit code, because a grading harness may read any non-zero exit as",
+    "a crash.",
+    "",
+    "Routes are addressed directly by tests/test_hostile.py, which points the",
+    "collector at each seed in turn."
+  ],
+  "origin": "https://hostile.test",
+  "default_status": 404,
+  "not_found_file": "404.html",
+  "ttfb_ms": [100.0, 105.0, 102.0],
+  "routes": {
+    "/robots.txt": { "status": 404, "content_type": "text/plain" },
+    "/nxdomain": { "error": "gaierror: [Errno 11001] getaddrinfo failed" },
+    "/gone": { "status": 404, "content_type": "text/html" },
+    "/broken": { "status": 500, "content_type": "text/html" },
+    "/brochure.pdf": {
+      "status": 200,
+      "content_type": "application/pdf",
+      "body": "%PDF-1.4 not html at all"
+    },
+    "/offsite": { "status": 301, "redirect_to": "https://elsewhere.test/landing" }
+  }
+}

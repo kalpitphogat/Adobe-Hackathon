@@ -1,0 +1,12 @@
+# Northwind Analytics
+# Search and AI retrieval crawlers are welcome.
+
+User-agent: *
+Disallow: /admin/
+Disallow: /cart/
+Allow: /
+
+User-agent: GPTBot
+Disallow: /
+
+Sitemap: https://northwind-analytics.test/sitemap.xml

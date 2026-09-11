@@ -16,3 +16,14 @@ venv/
 
 # OS
 .DS_Store
+
+# --- Round 3 Brand AI-Readiness Audit (round3-brand-ai-readiness-audit/) ---
+# Added by the Round 3 submission. Some of these overlap with rules already
+# above; they are repeated here so this block is self-contained and can be
+# removed cleanly without disturbing anyone else's rules.
+__pycache__/
+*.pyc
+audit-output/
+evidence/
+.venv/
+*.zip

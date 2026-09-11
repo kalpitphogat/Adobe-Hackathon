@@ -1,0 +1,104 @@
+{
+  "_comment": [
+    "DATED SNAPSHOT. Never fetched at runtime - an audit that reaches out to a",
+    "third-party list mid-run is neither deterministic nor self-contained, and",
+    "the handout requires the marketplace manifest to resolve with no external",
+    "service.",
+    "",
+    "Bot names churn. Both the snapshot date and the upstream commit are printed",
+    "in every report so a reader can judge how stale this list is, and re-derive",
+    "it if they want to.",
+    "",
+    "The three-way classification is ours, not upstream's. Upstream lists bots to",
+    "block; we need to know what blocking each one COSTS, which is a different",
+    "question and the reason a flat list produces bad findings."
+  ],
+  "snapshot_date": "2026-09-09",
+  "source": {
+    "repository": "https://github.com/ai-robots-txt/ai.robots.txt",
+    "license": "MIT",
+    "commit": "0e111dcc24cbcdf4e609edde70f9f9184eac8b02",
+    "commit_date": "2026-09-08T05:20:04Z",
+    "note": "Bot names cross-checked against this snapshot; the retrieval/training/dual-purpose classification is this marketplace's own work and is not asserted by upstream."
+  },
+  "categories": {
+    "retrieval": {
+      "meaning": "Fetches pages at answer time to ground or cite a response. Blocking one of these removes the brand from that assistant's answers.",
+      "blocking_cost": "high",
+      "default_severity": "critical"
+    },
+    "training": {
+      "meaning": "Collects content for model training corpora. Blocking has no effect on whether the brand is retrieved or cited at answer time.",
+      "blocking_cost": "none for retrieval",
+      "default_severity": "info"
+    },
+    "dual_purpose": {
+      "meaning": "Contested. Vendor documentation ties the token to more than one use, or the vendor has changed its stated scope. Blocking may or may not cost retrieval visibility.",
+      "blocking_cost": "contested",
+      "default_severity": "medium"
+    }
+  },
+  "bots": [
+    { "token": "OAI-SearchBot", "vendor": "OpenAI", "category": "retrieval",
+      "note": "Documented by OpenAI as the crawler for search features and surfacing links in ChatGPT." },
+    { "token": "ChatGPT-User", "vendor": "OpenAI", "category": "retrieval",
+      "note": "Fetches a page on behalf of a user request in ChatGPT." },
+    { "token": "PerplexityBot", "vendor": "Perplexity", "category": "retrieval",
+      "note": "Indexes pages for Perplexity search results and citations." },
+    { "token": "Perplexity-User", "vendor": "Perplexity", "category": "retrieval",
+      "note": "User-initiated page fetch." },
+    { "token": "Claude-User", "vendor": "Anthropic", "category": "retrieval",
+      "note": "Fetches a page in response to a user request in Claude." },
+    { "token": "Claude-SearchBot", "vendor": "Anthropic", "category": "retrieval",
+      "note": "Indexes pages to support search results in Claude." },
+    { "token": "Google-CloudVertexBot", "vendor": "Google", "category": "retrieval",
+      "note": "Fetches site content for Vertex AI grounding at customer direction." },
+    { "token": "Bingbot", "vendor": "Microsoft", "category": "retrieval",
+      "note": "Classic search crawler; also underpins Copilot answer grounding." },
+    { "token": "Googlebot", "vendor": "Google", "category": "retrieval",
+      "note": "Classic search crawler. Google states AI Overviews and AI Mode use content crawled by Googlebot, so blocking it removes the site from both." },
+    { "token": "Applebot", "vendor": "Apple", "category": "retrieval",
+      "note": "Powers Siri and Spotlight suggestions." },
+    { "token": "Amazonbot", "vendor": "Amazon", "category": "retrieval",
+      "note": "Used to answer Alexa questions from web sources." },
+    { "token": "MistralAI-User", "vendor": "Mistral", "category": "retrieval",
+      "note": "User-initiated fetch for Le Chat." },
+    { "token": "DuckAssistBot", "vendor": "DuckDuckGo", "category": "retrieval",
+      "note": "Supports DuckAssist answers." },
+    { "token": "meta-externalfetcher", "vendor": "Meta", "category": "retrieval",
+      "note": "User-initiated fetch for Meta AI." },
+
+    { "token": "GPTBot", "vendor": "OpenAI", "category": "training",
+      "note": "Documented by OpenAI as collecting data for model training. Blocking it does not remove a site from ChatGPT search results, which use OAI-SearchBot." },
+    { "token": "ClaudeBot", "vendor": "Anthropic", "category": "training",
+      "note": "Training corpus collection. Retrieval in Claude uses Claude-User and Claude-SearchBot." },
+    { "token": "CCBot", "vendor": "Common Crawl", "category": "training",
+      "note": "Common Crawl corpus, widely used as training data." },
+    { "token": "anthropic-ai", "vendor": "Anthropic", "category": "training",
+      "note": "Legacy token, retained in many robots.txt files." },
+    { "token": "cohere-ai", "vendor": "Cohere", "category": "training", "note": "Training corpus collection." },
+    { "token": "Bytespider", "vendor": "ByteDance", "category": "training", "note": "Training corpus collection." },
+    { "token": "Diffbot", "vendor": "Diffbot", "category": "training", "note": "Knowledge-graph and dataset construction." },
+    { "token": "Omgilibot", "vendor": "Webz.io", "category": "training", "note": "Dataset construction and resale." },
+    { "token": "Timpibot", "vendor": "Timpi", "category": "training", "note": "Dataset construction." },
+    { "token": "img2dataset", "vendor": "community", "category": "training", "note": "Image dataset construction." },
+
+    { "token": "Google-Extended", "vendor": "Google", "category": "dual_purpose",
+      "note": "Contested. Google documents this token as controlling whether content helps improve Gemini apps and grounded answers. It is not a crawler in its own right - it modifies how Googlebot-crawled content may be used - so blocking it does not remove the site from Google Search, but it can affect AI-surface grounding. Report as a trade-off the site may have chosen deliberately, never as an error." },
+    { "token": "Applebot-Extended", "vendor": "Apple", "category": "dual_purpose",
+      "note": "Contested. Controls use of Applebot-crawled content for training Apple foundation models while leaving Applebot search indexing in place. Blocking is a licensing decision, not a visibility defect." },
+    { "token": "Meta-ExternalAgent", "vendor": "Meta", "category": "dual_purpose",
+      "note": "Contested. Documented for both training-corpus collection and product-related indexing." },
+    { "token": "FacebookBot", "vendor": "Meta", "category": "dual_purpose",
+      "note": "Contested. Historically a link-preview crawler, also cited in AI-training contexts." },
+    { "token": "PetalBot", "vendor": "Huawei", "category": "dual_purpose",
+      "note": "Contested. Search indexing for Petal Search plus reported AI use." }
+  ],
+  "crawl_delay_honoured_by": {
+    "_comment": "Crawl-delay is NOT part of RFC 9309. Which crawlers honour it decides whether setting one is a mistake or a deliberate, effective choice.",
+    "honours": ["Bingbot", "Yandex", "Seznam", "Applebot"],
+    "ignores": ["Googlebot"],
+    "unknown": ["OAI-SearchBot", "PerplexityBot", "Claude-SearchBot", "ClaudeBot", "GPTBot"],
+    "note": "Google documents that Googlebot ignores Crawl-delay and that crawl rate is managed in Search Console instead. A site that sets Crawl-delay for Bingbot has made a supported, effective choice and must not be reported as having made a mistake."
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "_comment": [
+    "site_b: THE GATE CASCADE FIXTURE.",
+    "Content-wise this site is identical in structure to site_a, but robots.txt",
+    "disallows the AI retrieval bots (OAI-SearchBot, PerplexityBot,",
+    "Claude-SearchBot) across the whole site, and it also has genuine downstream",
+    "defects: no JSON-LD anywhere, a thin page, and a generic title.",
+    "",
+    "A flat checklist reports every downstream defect at full severity.",
+    "Expected output here is ONE critical (reach.robots.ai_search_bot_blocked)",
+    "plus downstream discoverability findings CAPPED at medium and tagged",
+    "blocked_by, and all engagement checks running normally and UNAFFECTED,",
+    "because gate Rule 0 does not gate the act stage on reach.",
+    "",
+    "The wildcard group still allows us, so we can lawfully crawl and observe",
+    "the downstream defects. That separation is the whole point: the bots that",
+    "matter are blocked, our auditor is not."
+  ],
+  "origin": "https://harborview-clinic.test",
+  "default_status": 404,
+  "not_found_file": "404.html",
+  "ttfb_ms": [210.0, 198.0, 221.0],
+  "routes": {
+    "/": { "status": 200, "file": "index.html" },
+    "/robots.txt": { "status": 200, "content_type": "text/plain; charset=utf-8", "file": "robots.txt" },
+    "/sitemap.xml": { "status": 404, "content_type": "text/html" },
+    "/services": { "status": 200, "file": "services.html" },
+    "/team": { "status": 200, "file": "team.html" },
+    "/contact": { "status": 200, "file": "contact.html" }
+  },
+  "rendered": {
+    "/": "index.html",
+    "/services": "services.html",
+    "/team": "team.html",
+    "/contact": "contact.html"
+  }
+}
