@@ -157,6 +157,10 @@ SUPPRESSION_CASES: dict[str, dict] = {
         "suppressor": "an Organization node with sameAs links exists",
         "proved_by": "site_a declares Organization with sameAs and does not fire",
     },
+    "extract.i18n.hreflang_incomplete": {
+        "suppressor": "the page declares no hreflang at all, or its cluster already carries a fallback and valid codes",
+        "proved_by": "site_a declares no hreflang and does not fire; unit case below fires only on an incomplete cluster",
+    },
     "extract.ans.fact_coverage_gap": {
         "suppressor": "fewer than 2 derivable claims, or a utility page",
         "proved_by": "site_a records sparse pages as not assessed",
@@ -314,7 +318,7 @@ try:
         "act.blocker.not_mobile_ready", "act.cta.competing_primaries",
         "act.orient.no_wayfinding", "act.trust.no_cost_signal",
         "act.form.high_friction_required_fields", "act.cta.absent_for_page_type",
-        "act.blocker.content_gated_by_interaction",
+        "act.blocker.content_gated_by_interaction", "extract.i18n.hreflang_incomplete",
     ):
         expect(check_id not in fired, f"suppressed on the healthy control: {check_id}")
 
@@ -352,6 +356,65 @@ try:
         "reach.robots.ai_search_bot_blocked" not in e_ids,
         "blocking only training and dual-purpose bots does not fire the retrieval finding",
     )
+
+    # extract.i18n.hreflang_incomplete: prove the check both stays silent on a
+    # well-formed cluster and actually FIRES on the two defects it targets, by
+    # calling the module directly against tiny synthetic pages. Silence alone
+    # (a check that never fires) would pass the control assertion above while
+    # detecting nothing; this is the positive half of that guarantee.
+    sys.path.insert(0, str(ROOT / "skills" / "structured-data-audit" / "scripts"))
+    import check_i18n  # noqa: E402
+
+    class _StubBundle:
+        def __init__(self, root, pages):
+            self.root = root
+            self._pages = pages
+
+        def html_pages(self):
+            return self._pages
+
+    def _i18n_fires(root, name, head_html, url):
+        (root / name).write_text(
+            f"<html><head><title>t</title>{head_html}</head><body>hi</body></html>",
+            encoding="utf-8",
+        )
+        b = _StubBundle(root, [{"url": url, "raw_html_path": name, "status": 200}])
+        findings, _s, _p = check_i18n.run(b, None)
+        return any(f["check_id"] == "extract.i18n.hreflang_incomplete" for f in findings)
+
+    itmp = Path(tempfile.mkdtemp(prefix="bara-i18n-"))
+    try:
+        expect(
+            not _i18n_fires(itmp, "mono.html", "", "https://ex.com/"),
+            "hreflang: a monolingual page with no alternates does not fire",
+        )
+        complete = (
+            '<link rel="alternate" hreflang="x-default" href="https://ex.com/">'
+            '<link rel="alternate" hreflang="en" href="https://ex.com/">'
+            '<link rel="alternate" hreflang="fr" href="https://ex.com/fr/">'
+        )
+        expect(
+            not _i18n_fires(itmp, "ok.html", complete, "https://ex.com/"),
+            "hreflang: a complete cluster with x-default and valid codes does not fire",
+        )
+        no_fallback = (
+            '<link rel="alternate" hreflang="en" href="https://ex.com/en/">'
+            '<link rel="alternate" hreflang="fr" href="https://ex.com/fr/">'
+        )
+        expect(
+            _i18n_fires(itmp, "nofb.html", no_fallback, "https://ex.com/"),
+            "hreflang: a cluster with neither x-default nor a self-reference fires",
+        )
+        bad_code = (
+            '<link rel="alternate" hreflang="x-default" href="https://ex.com/">'
+            '<link rel="alternate" hreflang="english" href="https://ex.com/">'
+        )
+        expect(
+            _i18n_fires(itmp, "bad.html", bad_code, "https://ex.com/"),
+            "hreflang: an unparseable language code fires",
+        )
+    finally:
+        shutil.rmtree(itmp, ignore_errors=True)
 
     # Every registry entry must name where it is proved.
     for check_id, entry in SUPPRESSION_CASES.items():

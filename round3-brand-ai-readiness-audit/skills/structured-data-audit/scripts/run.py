@@ -21,11 +21,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import check_hierarchy  # noqa: E402
+import check_i18n  # noqa: E402
 import extract_markup  # noqa: E402
 import validate_types  # noqa: E402
 from bundle import emit, load  # noqa: E402
 
-MODULES = (check_hierarchy, extract_markup, validate_types,)
+MODULES = (check_hierarchy, extract_markup, validate_types, check_i18n,)
 SKILL = "structured-data-audit"
 STAGE = "extract"
 

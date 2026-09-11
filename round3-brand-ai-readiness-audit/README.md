@@ -149,11 +149,11 @@ The contract is normative and was written before the audit skills:
 ## Checks
 
 <!-- INVENTORY:AUTO -->
-**64 checks** across six audit skills (47 discoverability, 17 engagement).
+**65 checks** across six audit skills (48 discoverability, 17 engagement).
 
-- Dependency tier: **61 CORE** (Python standard library only), **3 ENRICHMENT** (cannot fire without an optional dependency).
-- By stage: reach 18, read 5, extract 14, trust 10, act 17.
-- By skill: answerability-audit 8, crawl-access-audit 18, engagement-audit 17, render-gap-audit 5, structured-data-audit 6, trust-freshness-audit 10.
+- Dependency tier: **62 CORE** (Python standard library only), **3 ENRICHMENT** (cannot fire without an optional dependency).
+- By stage: reach 18, read 5, extract 15, trust 10, act 17.
+- By skill: answerability-audit 8, crawl-access-audit 18, engagement-audit 17, render-gap-audit 5, structured-data-audit 7, trust-freshness-audit 10.
 - Engagement checks suppressed entirely under gate Rule 0b when a page has no observed rendered content: **13** of 17.
 <!-- /INVENTORY:AUTO -->
 

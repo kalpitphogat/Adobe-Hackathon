@@ -1,6 +1,6 @@
 ---
 name: structured-data-audit
-description: Determine whether a page states its facts in a machine-typed form. Extracts JSON-LD, microdata, RDFa and OpenGraph, checks that eligible pages carry structured data at all, that the declared schema.org type matches what the page is about, that JSON-LD parses, that the properties a consumer actually needs are populated, that markup does not contradict the visible page, and that the site declares a coherent organisation identity with sameAs links. Use when diagnosing why a product, article or business is not represented correctly in AI answers or rich results, or as the extract stage of a full AI-readiness audit.
+description: Determine whether a page states its facts in a machine-typed form. Extracts JSON-LD, microdata, RDFa and OpenGraph, checks that eligible pages carry structured data at all, that the declared schema.org type matches what the page is about, that JSON-LD parses, that the properties a consumer actually needs are populated, that markup does not contradict the visible page, that the site declares a coherent organisation identity with sameAs links, and that declared hreflang language alternates form a complete, self-consistent cluster. Use when diagnosing why a product, article or business is not represented correctly in AI answers or rich results, or as the extract stage of a full AI-readiness audit.
 license: MIT
 compatibility: Python 3.9+ standard library only. JSON-LD is parsed exactly; microdata and RDFa are parsed structurally. extruct, when installed, broadens exotic-format coverage but is never required.
 allowed-tools: Bash(python:*) Read
@@ -40,6 +40,10 @@ python scripts/run.py --bundle ./evidence --profile ./profile.json
    formatting differences are never reported as contradictions.
 6. Check the homepage identity graph: an Organization, LocalBusiness or Person
    node, its `sameAs` links, and whether any `@id` reference dangles.
+7. On pages that **already declare** hreflang alternates, check the cluster is
+   internally complete: it names a fallback (an `x-default` or a self-reference)
+   and every alternate carries a parseable BCP-47 code. A monolingual page with
+   no hreflang is correct and is never reported.
 
 ## Checks
 
@@ -51,6 +55,7 @@ python scripts/run.py --bundle ./evidence --profile ./profile.json
 | `extract.sd.required_props_missing` | a declared type omits the properties that make it useful | medium |
 | `extract.sd.contradicts_visible_content` | schema disagrees with the visible page | high |
 | `extract.sd.identity_graph_weak` | no organisation identity, no sameAs, or dangling @id references | medium |
+| `extract.i18n.hreflang_incomplete` | a declared hreflang cluster lacks a fallback (x-default/self) or names an invalid language code | medium |
 
 Markup that contradicts the page is scored **higher** than markup that is merely
 absent, because a consumer that trusts it will state the wrong value. Wrong is
@@ -76,6 +81,9 @@ worse than missing.
 - `extract.sd.identity_graph_weak` — an Organization or LocalBusiness node with
   `sameAs` links exists, or a Person node substitutes coherently on a personal
   site.
+- `extract.i18n.hreflang_incomplete` — the page declares no hreflang alternates
+  at all (a monolingual page is correct, not a defect), or the cluster it does
+  declare already carries a fallback and only valid codes.
 
 ## Output
 
