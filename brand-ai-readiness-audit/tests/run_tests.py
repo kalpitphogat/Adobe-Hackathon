@@ -112,7 +112,7 @@ class TestBadSite(unittest.TestCase):
 
     def test_expected_findings_detected(self):
         r = self.report
-        self.assertTrue(has(r, "AI assistant crawlers are blocked"))
+        self.assertTrue(has(r, "AI assistant crawlers are restricted"))
         self.assertTrue(has(r, "noindex"))
         self.assertTrue(has(r, "near-empty in raw HTML"))
         self.assertTrue(has(r, "No structured data"))
@@ -123,7 +123,7 @@ class TestBadSite(unittest.TestCase):
 
     def test_both_dimensions_and_severity(self):
         r = self.report
-        self.assertGreaterEqual(r["summary"]["critical"], 2)
+        self.assertGreaterEqual(r["summary"]["critical"], 1)
         self.assertGreater(r["summary"]["by_dimension"]["discoverability"], 0)
         self.assertGreater(r["summary"]["by_dimension"]["engagement"], 0)
 

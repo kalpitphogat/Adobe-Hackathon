@@ -17,7 +17,7 @@ NOW = datetime.date.today()
 
 def run(cache_dir):
     meta = A.load_meta(cache_dir)
-    pages = [p for p in meta["pages"] if p["status"] == 200]
+    pages = A.html_pages(meta)
     findings = []
     if not pages:
         return findings
@@ -71,22 +71,24 @@ def run(cache_dir):
     has_about = any(k in low for k in ["about", "who we are", "what we do"])
     if not has_sameas:
         findings.append(A.finding(
-            "Weak entity corroboration (identity lives only on this site)",
-            "medium",
-            "Homepage declares no sameAs/external identity links; the brand's facts are not tied "
-            "to independent, agreeing sources.",
-            "Establish and link consistent profiles across independent sources (Wikidata, "
-            "LinkedIn, industry directories, press) and reference them via sameAs. Agreement "
-            "across unrelated sources is what makes a fact trusted and repeated.",
-            "medium", "corroboration"))
+            "No sameAs relationships in homepage structured data",
+            "low",
+            "Homepage structured data does not declare sameAs links to external identity "
+            "sources (e.g. Wikipedia, LinkedIn, social profiles). The brand may have strong "
+            "external corroboration that is simply not declared in the markup.",
+            "Consider adding sameAs links in Organization JSON-LD to authoritative external "
+            "profiles. This helps machines confirm the brand's identity across sources.",
+            "low", "corroboration",
+            finding_type="improvement"))
     if not has_about:
         findings.append(A.finding(
-            "No clear identity/‘about’ statement to distinguish the brand",
+            "No clear identity/'about' statement to distinguish the brand",
             "low",
             "Homepage text lacks an explicit about/who-we-are statement.",
             "State plainly who the brand is, what it does, and what makes it distinct, so systems "
             "don't confuse it with similarly named entities.",
-            "low", "corroboration"))
+            "low", "corroboration",
+            finding_type="improvement"))
 
     # 4. Unqualified superlative claims with no attribution (fragile single-source facts)
     superlatives = 0
@@ -102,7 +104,8 @@ def run(cache_dir):
             "'world-leading') without visible third-party attribution across sampled pages.",
             "Back strong claims with attributable evidence (named awards, cited rankings, dated "
             "sources). Unverifiable single-source claims are discounted and rarely repeated by assistants.",
-            "low", "corroboration", checked=min(6, len(pages))))
+            "low", "corroboration", checked=min(6, len(pages)),
+            finding_type="improvement"))
 
     return findings
 

@@ -209,22 +209,102 @@ def read_page(cache_dir, page, kind="html"):
 
 
 # --------------------------------------------------------------------------- #
+# Resource classification — every sub-audit should filter on these
+# --------------------------------------------------------------------------- #
+def is_html_page(page):
+    """True if the crawled resource is an actual HTML document.
+
+    Returns False for XML sitemaps, JSON feeds, images, PDFs, and other
+    non-HTML resources that should not be evaluated by HTML-specific checks
+    (viewport, H1, navigation, structured data, etc.).
+    """
+    if page.get("status") != 200:
+        return False
+    ct = page.get("content_type", "").lower()
+    url = page.get("url", "").lower()
+    # Explicit content-type exclusions
+    if any(t in ct for t in ("xml", "/json", "image/", "/pdf")):
+        return False
+    # URL-based heuristic for missing or generic content-types
+    if any(url.endswith(ext) for ext in (".xml", ".json", ".pdf", ".png", ".jpg", ".svg", ".gif")):
+        return False
+    if "sitemap" in url:
+        return False
+    return True
+
+
+def classify_page_role(page, is_first=False):
+    """Infer the page's functional role from URL patterns and content signals.
+
+    Returns one of: homepage, article, product, documentation, about, contact,
+    legal, utility, sitemap, non-html, content (default for unclassified HTML).
+    """
+    if not is_html_page(page):
+        url = page.get("url", "").lower()
+        if "sitemap" in url or "xml" in page.get("content_type", ""):
+            return "sitemap"
+        return "non-html"
+    if is_first:
+        return "homepage"
+    url = page.get("url", "").lower()
+    path = url.split("?")[0].split("#")[0]  # strip query/fragment
+    for pattern, role in [
+        ("/login", "utility"), ("/signin", "utility"), ("/signup", "utility"),
+        ("/auth", "utility"), ("/register", "utility"), ("/account", "utility"),
+        ("/privacy", "legal"), ("/terms", "legal"), ("/legal", "legal"),
+        ("/cookie", "legal"), ("/policy", "legal"), ("/gdpr", "legal"),
+        ("/about", "about"), ("/team", "about"), ("/company", "about"),
+        ("/contact", "contact"), ("/support", "contact"),
+        ("/blog", "article"), ("/news", "article"), ("/post", "article"),
+        ("/article", "article"), ("/story", "article"),
+        ("/product", "product"), ("/pricing", "product"), ("/plan", "product"),
+        ("/shop", "product"), ("/store", "product"),
+        ("/docs", "documentation"), ("/help", "documentation"),
+        ("/faq", "documentation"), ("/guide", "documentation"),
+    ]:
+        if pattern in path:
+            return role
+    return "content"
+
+
+def html_pages(meta):
+    """Return only the HTML pages with status 200 from a meta.json structure.
+
+    This is the standard page-selection filter every sub-audit should use
+    instead of the raw meta["pages"] list.
+    """
+    return [p for p in meta.get("pages", []) if is_html_page(p)]
+
+
+# --------------------------------------------------------------------------- #
 # Finding helper — every sub-audit emits findings in this shape
 # --------------------------------------------------------------------------- #
-def finding(title, severity, evidence, action_summary, priority, category, checked=None):
-    """severity/priority in {critical, high, medium, low}. `checked` = pages/items inspected."""
+def finding(title, severity, evidence, action_summary, priority, category,
+            checked=None, finding_type="defect", thin_html_sensitive=False):
+    """severity/priority in {critical, high, medium, low}.
+    finding_type: 'defect' (something is wrong) or 'improvement' (could be stronger).
+    thin_html_sensitive: True if this finding may be a symptom of client-rendered content.
+    `checked` = pages/items inspected."""
     f = {
         "title": title,
         "severity": severity,
         "category": category,
         "evidence": evidence,
         "suggested_action": {"summary": action_summary, "priority": priority},
+        "finding_type": finding_type,
     }
     if checked is not None:
         f["checked"] = checked
+    if thin_html_sensitive:
+        f["_thin_html_sensitive"] = True
     return f
 
 
 def emit(skill_id, findings):
     """Print the standard sub-audit envelope to stdout."""
-    print(json.dumps({"skill": skill_id, "findings": findings}, ensure_ascii=False, indent=2))
+    import io
+    payload = json.dumps({"skill": skill_id, "findings": findings}, ensure_ascii=False, indent=2)
+    # On Windows the default console encoding (cp1252) can't encode all Unicode characters
+    # that appear in finding text (e.g. →, –). Write directly to a UTF-8 stdout wrapper.
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    print(payload)

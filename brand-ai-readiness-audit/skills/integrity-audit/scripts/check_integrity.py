@@ -51,7 +51,7 @@ ZERO_WIDTH = re.compile("[" + "".join(chr(c) for c in _ZW) + "]")
 
 def run(cache_dir):
     meta = A.load_meta(cache_dir)
-    pages = [p for p in meta["pages"] if p["status"] == 200]
+    pages = A.html_pages(meta)
     findings = []
     if not pages:
         return findings

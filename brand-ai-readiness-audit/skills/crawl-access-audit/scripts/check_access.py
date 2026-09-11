@@ -6,14 +6,16 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "audit-orchestrator", "scripts")))
-import auditlib as A  # noqa: E402
+# pyrefly: ignore [missing-import]
+import auditlib as A  # noqa: E402  ← required: sys.path must be modified before this import
 
 SKILL = "crawl-access-audit"
 
 
 def run(cache_dir):
     meta = A.load_meta(cache_dir)
-    pages = meta["pages"]
+    all_pages = meta["pages"]
+    pages = A.html_pages(meta)  # HTML pages only for HTML-specific checks
     findings = []
     robots = meta["robots"]
 
@@ -27,34 +29,33 @@ def run(cache_dir):
             "forces every crawler to guess and slows discovery.",
             "low", "crawl-access"))
 
-    # 2. AI crawlers blocked
+    # 2. AI crawlers restricted
     blocked_bots = [b for b, s in robots.get("ai_bots", {}).items() if s == "blocked"]
     if blocked_bots:
-        key = [b for b in blocked_bots if b in ("GPTBot", "OAI-SearchBot", "ClaudeBot",
-                                                "PerplexityBot", "Google-Extended")]
-        sev = "critical" if key else "high"
         findings.append(A.finding(
-            "AI assistant crawlers are blocked in robots.txt",
-            sev,
-            f"robots.txt disallows: {', '.join(blocked_bots)}. These are the fetchers "
-            "AI assistants use to find and cite pages.",
+            "AI assistant crawlers are restricted in robots.txt",
+            "high",
+            f"robots.txt disallows: {', '.join(blocked_bots)}. These user-agents are used "
+            "by AI assistants to fetch pages for citation. This may be an intentional editorial "
+            "policy; if so, this finding can be ignored.",
             "If you want the brand cited by AI assistants, allow these user-agents "
             "(GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot, Google-Extended) for public content.",
-            sev, "crawl-access", checked=len(robots.get("ai_bots", {}))))
+            "high", "crawl-access", checked=len(robots.get("ai_bots", {}))))
 
     # 3. sitemap
     if not meta["sitemaps"]:
         findings.append(A.finding(
             "No XML sitemap discovered",
             "medium",
-            "No sitemap referenced in robots.txt and /sitemap.xml did not return a valid urlset.",
+            "No XML sitemap was discovered via robots.txt or /sitemap.xml. "
+            "One may exist at a non-standard path.",
             "Publish an XML sitemap and reference it in robots.txt so crawlers can find "
             "every page without relying on internal-link discovery.",
             "medium", "crawl-access"))
 
-    # 4. per-page blocking / noindex / status
+    # 4. per-page blocking / noindex / status (uses all_pages including non-HTML)
     noindex_pages, blocked_pages, err_pages = [], [], []
-    for p in pages:
+    for p in all_pages:
         xrt = (p.get("x_robots_tag") or "").lower()
         if "noindex" in xrt:
             noindex_pages.append(p["url"])
@@ -65,7 +66,7 @@ def run(cache_dir):
 
     # meta robots noindex needs the raw HTML
     meta_noindex = []
-    for p in pages:
+    for p in all_pages:
         html = A.read_page(cache_dir, p, "html") or ""
         low = html.lower()
         if 'name="robots"' in low and "noindex" in low.split('name="robots"', 1)[1][:200]:
@@ -78,20 +79,20 @@ def run(cache_dir):
         findings.append(A.finding(
             "Pages carry a noindex directive",
             sev,
-            f"{len(noindex_pages)}/{len(pages)} crawled pages set noindex "
+            f"{len(noindex_pages)}/{len(all_pages)} crawled pages set noindex "
             f"(meta robots or X-Robots-Tag): {', '.join(noindex_pages[:5])}.",
             "Remove noindex from pages you want found and cited. noindex tells every "
             "engine and assistant to exclude the page entirely.",
-            sev, "crawl-access", checked=len(pages)))
+            sev, "crawl-access", checked=len(all_pages)))
 
     if blocked_pages:
         findings.append(A.finding(
             "Crawlable content is disallowed by robots.txt",
             "high",
-            f"{len(blocked_pages)}/{len(pages)} sampled URLs are Disallow'd for the default "
+            f"{len(blocked_pages)}/{len(all_pages)} sampled URLs are Disallow'd for the default "
             f"user-agent: {', '.join(blocked_pages[:5])}.",
             "Relax robots.txt Disallow rules for public pages you want indexed and cited.",
-            "high", "crawl-access", checked=len(pages)))
+            "high", "crawl-access", checked=len(all_pages)))
 
     if err_pages:
         findings.append(A.finding(
@@ -111,7 +112,8 @@ def run(cache_dir):
             f"0/{len(no_canonical)} successful pages declare rel=canonical.",
             "Add a self-referential rel=canonical to each page to consolidate duplicate/"
             "parameterized URLs onto one authoritative address.",
-            "low", "crawl-access", checked=len(no_canonical)))
+            "low", "crawl-access", checked=len(no_canonical),
+            finding_type="improvement"))
 
     # 6. HTTPS
     if meta["site"].startswith("http://"):
@@ -166,14 +168,14 @@ def run(cache_dir):
     # 9. llms.txt (emerging AI-assistant guidance file) — proactive improvement
     if not meta.get("llms_txt", {}).get("present"):
         findings.append(A.finding(
-            "No llms.txt guidance file for AI assistants",
+            "No llms.txt guidance file detected",
             "low",
-            f"GET {meta['site']}/llms.txt returned status "
-            f"{meta.get('llms_txt', {}).get('status')}.",
+            f"No llms.txt was detected at {meta['site']}/llms.txt "
+            f"(status {meta.get('llms_txt', {}).get('status')}).",
             "Consider adding an llms.txt (an emerging convention) that points AI assistants to "
             "your most important, quotable pages in plain markdown — a proactive discoverability "
             "signal even though it is not yet universally consumed.",
-            "low", "crawl-access"))
+            "low", "crawl-access", finding_type="improvement"))
 
     return findings
 

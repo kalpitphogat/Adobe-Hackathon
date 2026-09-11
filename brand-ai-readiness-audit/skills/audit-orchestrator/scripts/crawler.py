@@ -203,6 +203,9 @@ def main():
             "n_lists": len(re.findall(r"<(?:ul|ol)\b", r["body"], re.I)) if r["body"] else 0,
             "n_tables": len(re.findall(r"<table\b", r["body"], re.I)) if r["body"] else 0,
         }
+        # Resource classification: is this an HTML page or XML/JSON/other?
+        rec["is_html"] = A.is_html_page(rec)
+        rec["page_role"] = A.classify_page_role(rec, is_first=(len(pages) == 0))
         # persist raw html + extracted text
         if r["body"]:
             with open(os.path.join(args.cache_dir, "pages", sl + ".html"), "w", encoding="utf-8") as f:

@@ -17,10 +17,14 @@ CTA_WORDS = ["get started", "sign up", "start free", "try ", "buy ", "book ", "c
              "request", "subscribe", "download", "learn more", "add to cart", "demo",
              "get a quote", "shop"]
 
+# Page roles where a clear CTA / conversion next-step is expected.
+# Articles, docs, legal, utility, and about pages don't need marketing CTAs.
+ACTIONABLE_ROLES = {"homepage", "product", "content", "contact"}
+
 
 def run(cache_dir):
     meta = A.load_meta(cache_dir)
-    pages = [p for p in meta["pages"] if p["status"] == 200]
+    pages = A.html_pages(meta)
     findings = []
     if not pages:
         return findings
@@ -32,19 +36,21 @@ def run(cache_dir):
         findings.append(A.finding(
             "Missing mobile viewport meta tag",
             "high" if len(no_vp) == total else "medium",
-            f"{len(no_vp)}/{total} pages lack <meta name=viewport>: {', '.join(no_vp[:4])}.",
+            f"{len(no_vp)}/{total} HTML pages lack <meta name=viewport>: {', '.join(no_vp[:4])}.",
             "Add <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">. Without "
             "it, mobile visitors get a zoomed-out desktop layout and bounce.",
             "high" if len(no_vp) == total else "medium", "engagement", checked=total))
 
     # 2. Page weight / latency (proxy for LCP and bounce)
-    heavy = [(p["url"], round(p.get("bytes", 0) / 1024)) for p in pages if p.get("bytes", 0) > 2_000_000]
+    # Threshold: 500KB of raw HTML is genuinely heavy (not images/JS, just markup).
+    heavy = [(p["url"], round(p.get("bytes", 0) / 1024)) for p in pages
+             if p.get("bytes", 0) > 500_000]
     slow = [(p["url"], p.get("elapsed_ms", 0)) for p in pages if p.get("elapsed_ms", 0) > 3000]
     if heavy:
         findings.append(A.finding(
             "Very heavy HTML documents",
             "medium",
-            "Pages with >2MB of HTML: " + "; ".join(f"{u} ({kb}KB)" for u, kb in heavy[:4]),
+            "Pages with >500KB of raw HTML: " + "; ".join(f"{u} ({kb}KB)" for u, kb in heavy[:4]),
             "Trim/split oversized documents, defer non-critical assets, and lazy-load below-the-fold "
             "media. Heavy pages raise load time and abandonment.",
             "medium", "engagement", checked=total))
@@ -52,54 +58,83 @@ def run(cache_dir):
         findings.append(A.finding(
             "Slow server response on sampled pages",
             "medium",
-            "Pages taking >3s to fetch: " + "; ".join(f"{u} ({ms}ms)" for u, ms in slow[:4]),
+            "Pages taking >3s to return an initial response (TTFB proxy, not a field-data metric): "
+            + "; ".join(f"{u} ({ms}ms)" for u, ms in slow[:4]),
             "Investigate TTFB (caching, CDN, server rendering cost). Slow first response delays "
             "everything after it and drives bounce.",
             "medium", "engagement", checked=total))
 
-    # 3. Weak next-step orientation (no CTA)
+    # 3. Weak next-step orientation (no CTA) — only for actionable page roles
+    # Articles, documentation, legal pages don't need marketing CTAs.
+    actionable = [p for p in pages
+                  if p.get("page_role", "content") in ACTIONABLE_ROLES
+                  and p.get("text_len", 0) > 500]
     no_cta = []
-    for p in pages:
+    for p in actionable:
         text = (A.read_page(cache_dir, p, "text") or "").lower()
         if not any(w in text for w in CTA_WORDS):
             no_cta.append(p["url"])
-    if len(no_cta) > total / 2:
+    if actionable and len(no_cta) > len(actionable) / 2:
         findings.append(A.finding(
-            "Pages lack a clear call-to-action / next step",
+            "Actionable pages lack a clear call-to-action / next step",
             "medium",
-            f"{len(no_cta)}/{total} sampled pages contain no recognizable CTA phrase.",
+            f"{len(no_cta)}/{len(actionable)} actionable pages (homepage/product/content) "
+            f"contain no recognizable CTA phrase.",
             "Give each key page one obvious next step (primary CTA) so an arriving visitor knows "
             "what to do next instead of leaving.",
-            "medium", "engagement", checked=total))
+            "medium", "engagement", checked=len(actionable),
+            finding_type="improvement", thin_html_sensitive=True))
 
-    # 4. Thin navigation (orientation)
-    low_links = [p["url"] for p in pages if p.get("n_links", 0) < 5]
-    if len(low_links) > total / 2:
+    # 4. Thin navigation (orientation) — only for content/homepage/product pages
+    nav_roles = {"homepage", "product", "content", "article", "about"}
+    nav_pages = [p for p in pages
+                 if p.get("page_role", "content") in nav_roles
+                 and p.get("text_len", 0) > 300]
+    low_links = [p["url"] for p in nav_pages if p.get("n_links", 0) < 5]
+    if nav_pages and len(low_links) > len(nav_pages) / 2:
         findings.append(A.finding(
-            "Sparse internal navigation",
+            "Sparse internal navigation on content pages",
             "low",
-            f"{len(low_links)}/{total} sampled pages expose fewer than 5 links, limiting a "
-            "visitor's ability to explore.",
+            f"{len(low_links)}/{len(nav_pages)} content pages expose fewer than 5 same-host "
+            f"links in the raw HTML.",
             "Provide clear header/footer navigation and contextual internal links so visitors can "
             "orient and move deeper into the site.",
-            "low", "engagement", checked=total))
+            "low", "engagement", checked=len(nav_pages),
+            finding_type="improvement", thin_html_sensitive=True))
 
     # 5. Intrusive interstitial / autoplay signals (heuristic from raw HTML)
+    # Refined: exclude cookie-consent patterns and muted autoplay backgrounds.
     intrusive = 0
+    intrusive_evidence = []
     for p in pages[:6]:
-        low = (A.read_page(cache_dir, p, "html") or "").lower()
-        if re.search(r"(modal|popup|interstitial|newsletter).{0,40}(overlay|backdrop)", low) \
-           or "autoplay" in low:
+        html = A.read_page(cache_dir, p, "html") or ""
+        low = html.lower()
+        # Check for popup/interstitial overlays (excluding cookie consent)
+        has_overlay = bool(re.search(
+            r"(modal|popup|interstitial|newsletter).{0,40}(overlay|backdrop)", low))
+        is_cookie = bool(re.search(r"cookie.{0,30}(modal|consent|banner|overlay)", low))
+        # Check for non-muted autoplay (muted background videos are standard practice)
+        has_intrusive_autoplay = ("autoplay" in low
+                                  and not re.search(r"autoplay[^>]*muted", low)
+                                  and ("audio" in low or "<video" in low))
+        if (has_overlay and not is_cookie) or has_intrusive_autoplay:
+            reason = []
+            if has_overlay and not is_cookie:
+                reason.append("popup/interstitial overlay")
+            if has_intrusive_autoplay:
+                reason.append("non-muted autoplay media")
             intrusive += 1
+            intrusive_evidence.append(f"{p['url']} ({', '.join(reason)})")
     if intrusive:
         findings.append(A.finding(
             "Possible intrusive interstitial or autoplay media",
             "low",
-            f"{intrusive} sampled page(s) show markup consistent with overlay pop-ups or autoplay "
-            "media.",
-            "Avoid full-screen interstitials on entry and autoplaying audio/video; both are common "
-            "immediate-bounce triggers (and interstitials are penalized on mobile search).",
-            "low", "engagement", checked=min(6, total)))
+            f"{intrusive} sampled page(s) show markup consistent with engagement barriers: "
+            + "; ".join(intrusive_evidence[:3]) + ".",
+            "Avoid full-screen interstitials on entry and non-muted autoplaying audio/video; both "
+            "are common immediate-bounce triggers (and interstitials are penalized on mobile search).",
+            "low", "engagement", checked=min(6, total),
+            finding_type="improvement"))
 
     return findings
 

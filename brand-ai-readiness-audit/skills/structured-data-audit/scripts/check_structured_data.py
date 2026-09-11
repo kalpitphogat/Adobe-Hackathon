@@ -44,7 +44,7 @@ def types_of(objs):
 
 def run(cache_dir):
     meta = A.load_meta(cache_dir)
-    pages = [p for p in meta["pages"] if p["status"] == 200]
+    pages = A.html_pages(meta)
     findings = []
     if not pages:
         return findings
@@ -77,13 +77,15 @@ def run(cache_dir):
     # 1. structured data coverage
     if with_schema == 0:
         findings.append(A.finding(
-            "No structured data (JSON-LD / schema.org) anywhere",
-            "high",
-            f"Crawled {total} pages; 0/{total} contain any schema.org markup.",
-            "Add JSON-LD to every page: Organization + WebSite on the homepage, and the right "
-            "type per page (Product/Offer, Article, FAQPage, BreadcrumbList, LocalBusiness). "
-            "See references/schema-templates.md for paste-ready snippets.",
-            "high", "structured-data", checked=total))
+            "No structured data (JSON-LD / schema.org) detected",
+            "medium",
+            f"No schema.org markup was detected across the {total} sampled HTML pages.",
+            "Add JSON-LD to key pages: Organization + WebSite on the homepage, and the "
+            "appropriate type for other pages (e.g. Article for blog posts, Product for "
+            "product pages). Not every page needs structured data — prioritize pages with "
+            "facts that would benefit from machine-readable representation.",
+            "medium", "structured-data", checked=total,
+            finding_type="improvement"))
     elif with_schema < total:
         findings.append(A.finding(
             "Structured data is missing on some pages",
@@ -110,7 +112,7 @@ def run(cache_dir):
     home_types = set(types_of(home_objs))
     if not (home_types & {"Organization", "LocalBusiness", "Corporation", "WebSite"}):
         findings.append(A.finding(
-            "Homepage lacks an Organization/WebSite identity in structured data",
+            "No Organization/WebSite identity detected in homepage structured data",
             "high",
             f"Homepage JSON-LD @types found: {sorted(home_types) or 'none'}.",
             "Add Organization (name, url, logo, sameAs) and WebSite JSON-LD to the homepage so "
@@ -152,15 +154,23 @@ def run(cache_dir):
             f"0/{total} pages declare Open Graph (og:*) tags.",
             "Add og:title/og:description/og:image/og:url so shared and cited links render with "
             "correct titles and previews.",
-            "low", "structured-data", checked=total))
-    if no_h1:
+            "low", "structured-data", checked=total,
+            finding_type="improvement"))
+    # Only flag missing H1 on pages with enough content to meaningfully have one.
+    # SPA shells with <200 chars of text lack *all* content in raw HTML — the root
+    # cause is client-side rendering, already caught by render-extraction-audit.
+    content_pages = [p for p in pages if p.get("text_len", 0) > 200]
+    no_h1_content = [p["url"] for p in content_pages if p.get("n_h1", 0) == 0]
+    if no_h1_content:
         findings.append(A.finding(
             "Pages with no H1 heading",
             "medium",
-            f"{len(no_h1)}/{total} pages have no <h1>: {', '.join(no_h1[:4])}.",
+            f"{len(no_h1_content)}/{len(content_pages)} content pages have no <h1>: "
+            f"{', '.join(no_h1_content[:4])}.",
             "Add a single clear H1 stating what the page is about; headings give machines the "
             "topical spine of the page.",
-            "medium", "structured-data", checked=total))
+            "medium", "structured-data", checked=len(content_pages),
+            thin_html_sensitive=True))
     if multi_h1:
         findings.append(A.finding(
             "Pages with multiple H1 headings",
@@ -180,7 +190,8 @@ def run(cache_dir):
             f"65 characters: {', '.join(bad_title_len[:4])}.",
             "Aim for descriptive ~10-60 character titles; very short titles under-describe the "
             "page and very long ones get truncated in results and citations.",
-            "low", "structured-data", checked=total))
+            "low", "structured-data", checked=total,
+            finding_type="improvement"))
 
     # 4c. Broken heading hierarchy (a level is skipped, e.g. H1 -> H3)
     skipped = []
@@ -200,7 +211,8 @@ def run(cache_dir):
             f"e.g. {', '.join(skipped[:4])}.",
             "Use headings in order (H1 -> H2 -> H3) without skipping levels so machines can "
             "reconstruct a correct topical outline of the page.",
-            "low", "structured-data", checked=total))
+            "low", "structured-data", checked=total,
+            finding_type="improvement"))
 
     # 5. duplicate titles / descriptions across pages
     if total >= 3:

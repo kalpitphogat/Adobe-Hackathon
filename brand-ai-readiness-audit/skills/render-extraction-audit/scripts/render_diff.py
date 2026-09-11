@@ -24,29 +24,38 @@ def words(text):
 
 def run(cache_dir):
     meta = A.load_meta(cache_dir)
-    pages = meta["pages"]
+    pages = A.html_pages(meta)
     findings = []
 
     # 1. Thin static HTML (client-rendered shell)
     thin = []
     for p in pages:
-        if p["status"] != 200:
-            continue
         raw_text_len = p.get("text_len", 0)
         html = A.read_page(cache_dir, p, "html") or ""
         looks_spa = any(re.search(pat, html, re.I) for pat in SPA_ROOTS)
         if raw_text_len < 300 and (looks_spa or len(html) > 1500):
             thin.append((p["url"], raw_text_len))
     if thin:
-        findings.append(A.finding(
-            "Pages are near-empty in raw HTML (client-side rendered)",
-            "critical",
+        # Severity depends on whether we have render evidence: if --render was used
+        # and confirmed the gap, it's critical. Without render data, we can only say
+        # the raw HTML is sparse — the content may still be accessible after JS.
+        render_available = meta.get("render_available", False)
+        sev = "critical" if render_available else "high"
+        evidence = (
             f"{len(thin)}/{len(pages)} sampled pages have <300 chars of extractable text in "
             f"the server HTML despite a full app shell, e.g. "
-            f"{', '.join(f'{u} ({n} chars)' for u, n in thin[:4])}.",
+            f"{', '.join(f'{u} ({n} chars)' for u, n in thin[:4])}."
+        )
+        if not render_available:
+            evidence += (" (Severity capped at high: re-run with --render to confirm "
+                         "whether content is accessible after JavaScript executes.)")
+        findings.append(A.finding(
+            "Pages are near-empty in raw HTML (client-side rendered)",
+            sev,
+            evidence,
             "Server-render or pre-render the primary content (SSR/SSG, or a prerender layer "
             "for bots) so the main facts exist in the initial HTML, not only after JavaScript runs.",
-            "critical", "render-extraction", checked=len(pages)))
+            sev, "render-extraction", checked=len(pages)))
 
     # 2. Static-vs-rendered fact gap (needs render data)
     rendered_pages = [p for p in pages if p.get("rendered") and p.get("rendered_len")]

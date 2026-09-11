@@ -101,11 +101,22 @@ def main():
             f["dimension"] = "engagement" if cat in eng else "discoverability"
             all_findings.append(f)
 
+    # 2b. Deduplication: if render-extraction flagged thin HTML, annotate
+    #     downstream findings that are symptoms of the same root cause.
+    thin_html_flagged = any(
+        f["skill"] == "render-extraction-audit" and "near-empty" in f.get("title", "")
+        for f in all_findings
+    )
+    if thin_html_flagged:
+        for f in all_findings:
+            if f.get("_thin_html_sensitive"):
+                f["evidence"] += (" (Note: this may be a symptom of client-side rendering "
+                                  "detected by render-extraction-audit, not a standalone issue.)")
+
     # 3. sort + stable ids
     all_findings.sort(key=lambda f: (SEV_ORDER.get(f["severity"], 9), f.get("skill", "")))
     for i, f in enumerate(all_findings, 1):
         f["id"] = f"F-{i:03d}"
-        f = f  # id first is nicer, but json order is not significant
 
     counts = {s: sum(1 for f in all_findings if f["severity"] == s)
               for s in ("critical", "high", "medium", "low")}
@@ -132,6 +143,10 @@ def main():
                 "discoverability": sum(1 for f in all_findings if f["dimension"] == "discoverability"),
                 "engagement": sum(1 for f in all_findings if f["dimension"] == "engagement"),
             },
+            "by_type": {
+                "defects": sum(1 for f in all_findings if f.get("finding_type", "defect") == "defect"),
+                "improvements": sum(1 for f in all_findings if f.get("finding_type") == "improvement"),
+            },
         },
         "findings": [
             {
@@ -140,6 +155,7 @@ def main():
                 "severity": f["severity"],
                 "dimension": f["dimension"],
                 "skill": f["skill"],
+                "finding_type": f.get("finding_type", "defect"),
                 "evidence": f["evidence"],
                 "suggested_action": f["suggested_action"],
                 **({"checked": f["checked"]} if "checked" in f else {}),
@@ -157,7 +173,10 @@ def main():
         with open(args.html, "w", encoding="utf-8") as fh:
             fh.write(render_report.render(report))
         print(f"wrote HTML report -> {args.html}", file=sys.stderr)
-    print(text)
+    
+    import io
+    safe_stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace") if hasattr(sys.stdout, "buffer") else sys.stdout
+    print(text, file=safe_stdout)
     # Non-zero exit if any sub-audit failed to run, so callers/CI notice an incomplete report.
     return 1 if skill_errors else 0
 
