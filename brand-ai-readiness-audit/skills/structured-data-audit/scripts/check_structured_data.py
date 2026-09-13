@@ -171,6 +171,9 @@ def run(cache_dir):
             "with confidence, so no schema type was recommended for them."))
 
     # ---- 3. homepage entity identity --------------------------------------- #
+    # If not a single page in the sample has ANY schema.org, the site is
+    # genuinely unmarked — that's a defect, not just an improvement opportunity.
+    any_schema_anywhere = any(tset for _, _, _, tset in per_page)
     home = A.homepage_of(meta)
     if home is not None:
         entry = next((e for e in per_page if e[0]["url"] == home["url"]), None)
@@ -179,18 +182,25 @@ def run(cache_dir):
         ident = {"organization", "localbusiness", "corporation", "website", "person",
                  "ngo", "educationalorganization", "governmentorganization"}
         if not (home_types & ident):
+            # Escalate when no page in the entire sample has any schema at all
+            sev = "medium" if not any_schema_anywhere else "low"
+            ftype = "defect" if not any_schema_anywhere else "improvement"
             findings.append(A.finding(
                 "Homepage declares no Organization or WebSite entity in structured data",
-                "medium",
+                sev,
                 "Homepage JSON-LD @types found: "
-                + (", ".join(sorted(home_types)) if home_types else "none") + ".",
+                + (", ".join(sorted(home_types)) if home_types else "none") + "."
+                + (f" No page in the {total}-page sample declares any schema.org markup at all."
+                   if not any_schema_anywhere else ""),
                 "Without an explicit entity node, a machine must infer the brand's identity "
                 "from prose and the domain name. That inference usually succeeds for a "
-                "well-known brand and is least reliable for names that collide with others.",
+                "well-known brand and is least reliable for names that collide with others."
+                + (" The complete absence of structured data across the sample means no page "
+                   "offers a machine-readable fact." if not any_schema_anywhere else ""),
                 "Add Organization JSON-LD to the homepage with name, url and logo, plus a "
                 "WebSite node. Do not add unrelated types.",
-                "medium", "structured-data", checked=1, checked_unit="homepage",
-                finding_type="improvement", confidence="high", page_role="homepage",
+                sev, "structured-data", checked=1, checked_unit="homepage",
+                finding_type=ftype, confidence="high", page_role="homepage",
                 mechanism="identify-facts", dedup_key="structured-data:no-entity"))
         else:
             has_sameas = any(isinstance(o, dict) and o.get("sameAs") for o in home_objs)
@@ -371,7 +381,22 @@ def run(cache_dir):
             confidence="high", mechanism="identify-facts",
             dedup_key="structured-data:no-h1", thin_html_sensitive=True))
 
-    # ---- 9. skipped heading levels ----------------------------------------- #
+    # ---- 9. multiple H1 headings ------------------------------------------- #
+    multi_h1 = [p["url"] for p in considered_h1 if p.get("n_h1", 0) > 1]
+    if multi_h1:
+        findings.append(A.finding(
+            "Content pages have multiple H1 headings",
+            "low",
+            f"{len(multi_h1)}/{len(considered_h1)} sampled content pages (600+ characters) "
+            f"have more than one <h1>, e.g. {', '.join(multi_h1[:4])}.",
+            "Multiple H1s make the document outline ambiguous — a parser cannot tell which "
+            "one names the page's primary subject.",
+            "Keep a single H1 per page that names the page's topic and use H2+ for sub-sections.",
+            "low", "structured-data", checked=len(considered_h1), finding_type="improvement",
+            confidence="high", mechanism="identify-facts",
+            dedup_key="structured-data:multiple-h1"))
+
+    # ---- 10. skipped heading levels ---------------------------------------- #
     skipped_levels = []
     for p in pages:
         prev = 0
@@ -380,7 +405,7 @@ def run(cache_dir):
                 skipped_levels.append(p["url"])
                 break
             prev = lvl
-    if skipped_levels and len(skipped_levels) >= max(2, total // 2):
+    if skipped_levels:
         findings.append(A.finding(
             "Heading levels are skipped, so the document outline has gaps",
             "low",

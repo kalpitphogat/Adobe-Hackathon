@@ -143,20 +143,30 @@ def run(cache_dir):
              for p in img_pages
              if p.get("n_content_imgs_no_alt", 0) / max(p.get("n_content_imgs", 1), 1) > 0.6]
     if heavy:
+        # Calculate the overall alt-text miss rate across the sample
+        total_missing = sum(n for _, n, _ in heavy)
+        total_imgs = sum(tot for _, _, tot in heavy)
+        miss_rate = total_missing / max(total_imgs, 1)
+        # When >80% of content images across the sample lack alt, this is a
+        # genuine accessibility/discoverability defect, not just an improvement.
+        sev = "medium" if miss_rate > 0.8 else "low"
+        ftype = "defect" if miss_rate > 0.8 else "improvement"
         findings.append(A.finding(
             "Content images carry no alt text",
-            "low",
+            sev,
             f"{len(heavy)}/{len(img_pages)} sampled pages where at least three images sit in "
             "the content area (outside nav, header, footer and aside, not icon-sized, not "
             "role=presentation) have no alt attribute on most of them: "
-            + "; ".join(f"{u} ({n}/{tot} missing)" for u, n, tot in heavy[:4]) + ".",
+            + "; ".join(f"{u} ({n}/{tot} missing)" for u, n, tot in heavy[:4]) + "."
+            + (f" Overall, {total_missing}/{total_imgs} ({int(miss_rate*100)}%) content images "
+               "in the sample lack alt text." if miss_rate > 0.8 else ""),
             "Whether these particular images carry information a reader needs was not "
             "determined; the audit measured their position and size, not their content. "
             "Where they do carry facts, those facts are unavailable to any text-based reader "
             "and to assistive technology.",
             "Review the listed images. Give the ones that convey information a description of "
             "what they show, and mark the purely decorative ones with alt=\"\".",
-            "low", "render-extraction", checked=len(img_pages), finding_type="improvement",
+            sev, "render-extraction", checked=len(img_pages), finding_type=ftype,
             confidence="medium", mechanism="read-content",
             dedup_key="render-extraction:image-alt",
             not_verified="whether the images convey information rather than decoration"))
