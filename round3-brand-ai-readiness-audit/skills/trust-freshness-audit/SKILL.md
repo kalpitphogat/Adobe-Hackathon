@@ -56,7 +56,7 @@ python scripts/run.py --bundle ./evidence --profile ./profile.json
 | `trust.entity.no_external_corroboration` | nothing links the site to an independent record | medium |
 | `trust.authorship.unattributed` | articles naming no author | low |
 | `trust.integrity.prompt_injection` | text phrased as an instruction to an AI reader (often in HTML comments or hidden nodes) | critical |
-| `trust.integrity.cloaked_text` | many elements hidden from view via CSS while remaining in the served HTML (cloaking) | medium |
+| `trust.integrity.cloaked_text` | text hidden from the visitor (CSS or `hidden`) whose **wording is manipulative** — grants permission/authority, dictates how to rank or cite the brand, tells the machine to bypass its rules, or stuffs keywords | medium |
 | `trust.integrity.invisible_unicode` | runs of zero-width or bidi-control code points in the extracted text | medium |
 
 ### A confidence ceiling that matters
@@ -92,6 +92,12 @@ the optional Wikidata cross-check is unavailable.
 - `trust.authorship.unattributed` — the archetype is e-commerce or SaaS
   marketing, where corporate rather than personal authorship is idiomatic and an
   unattributed page is not a defect.
+- `trust.integrity.cloaked_text` — the hidden text is benign. Hiding text with
+  CSS is ordinary (responsive menus, screen-reader-only hints, accordions, tab
+  panels, modals, cookie banners), so the check reads the hidden text and fires
+  **only** when its wording is manipulative — a permission or authority grant, an
+  instruction on how to rank/cite/describe the brand, an order to bypass the
+  machine's rules, or keyword stuffing. Ordinary hidden UI text never fires.
 
 ## Output
 
