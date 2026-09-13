@@ -107,7 +107,7 @@ Six fixture sites ship with the marketplace. Audit any of them offline:
 --------------------------------------------------------------------------------
     python3 tests/validate_marketplace.py
 
-Expected: "69 passed, 0 skipped, 0 failed".
+Expected: "73 passed, 0 skipped, 0 failed".
 
 Checks the manifest, every SKILL.md against the agentskills.io spec, the
 allowed-tools declarations, that no skill imports another, that every check_id
@@ -206,5 +206,6 @@ NOTES
 - robots.txt is a hard constraint on our own crawling, not advice.
 - The whole run is bounded by --time-budget (default 300s). Every stage draws
   from one shared clock, so the five-minute ceiling holds even if a stage hangs.
-- More detail: README.md (repo root) and brand-ai-readiness-audit/README.md.
+- More detail: README.md (repo root), brand-ai-readiness-audit/README.md for the
+  short tour, brand-ai-readiness-audit/DESIGN.md for the design notes.
 ================================================================================

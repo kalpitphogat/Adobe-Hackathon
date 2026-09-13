@@ -11,8 +11,10 @@ Enforces, with no third-party dependencies:
   * the live check registry, parsed statically out of each skill's own
     scripts, equals tests/expected_inventory.json exactly - ids, stages,
     categories, tiers and default severities.
-  * every count that appears in prose (README.md) is regenerated from that
+  * every count that appears in prose (DESIGN.md) is regenerated from that
     registry rather than hand maintained.
+  * README.md still satisfies what the submission asks of it: it names every
+    skill and describes how the entrypoint composes them.
   * no script imports from a sibling skill directory, so every skill folder
     can be lifted out and run alone.
 
@@ -34,6 +36,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SKILLS_DIR = ROOT / "skills"
 INVENTORY = ROOT / "tests" / "expected_inventory.json"
 README = ROOT / "README.md"
+DESIGN = ROOT / "DESIGN.md"
 
 NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 CHECK_ID_RE = re.compile(r"^(reach|read|extract|trust|act)[.][a-z0-9_]+[.][a-z0-9_]+$")
@@ -518,20 +521,63 @@ def check_registry(res: Results) -> dict | None:
     return live_totals
 
 
+def check_readme_contract(res: Results, skills: list[dict]) -> None:
+    """What the submission form asks the README itself to do.
+
+    "a zip of the marketplace root directory ... with a short README.md at the
+    root describing what each skill does and how the entry point composes them".
+
+    The design notes moved to DESIGN.md to keep this one short, and the risk of
+    that move is silently taking the required content with it. So the two things
+    the form names are asserted here, not trusted.
+    """
+    if not README.exists():
+        res.fail("readme.present", "the submission requires a README.md at the marketplace root")
+        return
+
+    text = README.read_text(encoding="utf-8")
+
+    missing = [s["id"] for s in skills if s["id"] not in text]
+    if missing:
+        res.fail("readme.describes_every_skill", f"not named in README.md: {missing}")
+    else:
+        res.ok("readme.describes_every_skill", f"all {len(skills)} skills named")
+
+    entry = next((s["id"] for s in skills if s.get("entrypoint")), "")
+    composes = "composes" in text.lower() or "composition" in text.lower()
+    if entry and entry in text and composes:
+        res.ok("readme.describes_composition", f"{entry} and how it composes the rest")
+    else:
+        res.fail("readme.describes_composition",
+                 "README.md must name the entrypoint and describe how it composes the other skills")
+
+    # "short" is the word the form uses. DESIGN.md is where length belongs.
+    lines = len(text.splitlines())
+    if lines > 250:
+        res.fail("readme.short", f"{lines} lines; move design notes to DESIGN.md")
+    else:
+        res.ok("readme.short", f"{lines} lines")
+
+    if DESIGN.exists() and "DESIGN.md" not in text:
+        res.fail("readme.links_design", "DESIGN.md exists but README.md never points to it")
+    elif DESIGN.exists():
+        res.ok("readme.links_design", "points readers to DESIGN.md")
+
+
 def check_readme_counts(res: Results, totals: dict | None) -> None:
     """F1: no count in prose that is not derived from the registry."""
     if totals is None:
         res.skip("readme.inventory_block", "no totals available")
         return
-    if not README.exists():
-        res.skip("readme.inventory_block", "README.md not written yet (build step S10)")
+    if not DESIGN.exists():
+        res.skip("readme.inventory_block", "DESIGN.md not written yet (build step S10)")
         return
-    text = README.read_text(encoding="utf-8")
+    text = DESIGN.read_text(encoding="utf-8")
     m = AUTO_BLOCK_RE.search(text)
     if not m:
         res.fail(
             "readme.inventory_block",
-            "README.md must contain an <!-- INVENTORY:AUTO --> block",
+            "DESIGN.md must contain an <!-- INVENTORY:AUTO --> block",
         )
         return
     expected = render_inventory_block(totals)
@@ -731,6 +777,7 @@ def main(argv: list[str] | None = None) -> int:
     check_no_cross_skill_imports(res)
     check_doc_drift(res)
     check_readme_counts(res, totals)
+    check_readme_contract(res, skills)
 
     if args.json:
         print(json.dumps([{"status": s, "check": n, "detail": d} for s, n, d in res.rows], indent=2))

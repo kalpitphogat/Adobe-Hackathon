@@ -11,7 +11,7 @@ impact. Read-only. Never touches the live site.
 
 > **The submission is [`brand-ai-readiness-audit/`](brand-ai-readiness-audit/)** — that
 > folder is the marketplace root, and `submission.zip` is exactly its contents.
-> Full design notes live in its [README](brand-ai-readiness-audit/README.md).
+> Short tour in its [README](brand-ai-readiness-audit/README.md); full design notes in [DESIGN.md](brand-ai-readiness-audit/DESIGN.md).
 
 ```bash
 cd brand-ai-readiness-audit
@@ -150,7 +150,7 @@ Full command reference: [`COMMANDS.txt`](COMMANDS.txt).
 
 ```bash
 cd brand-ai-readiness-audit
-python3 tests/validate_marketplace.py   # 69 structure / spec / doc-drift checks
+python3 tests/validate_marketplace.py   # 73 structure / spec / doc-drift checks
 python3 tests/run_offline.py            # 6 golden reports, byte-for-byte, + determinism matrix
 for t in tests/test_*.py; do python3 "$t"; done   # 2,223 assertions across 10 suites
 ```

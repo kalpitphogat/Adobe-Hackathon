@@ -1,437 +1,165 @@
 # Brand AI-Readiness Audit
 
 **Adobe University Hackathon 2026 — Round 3, Build the Agent Skill Marketplace**
-
-Submitted by: `Lakshya Jain`
-Team: `Lakshya, Tanmay, Kalpit`
-
----
+Team: Lakshya, Tanmay, Kalpit · MIT
 
 Point this at a website. It tells you why AI assistants do not find, cite or
 correctly describe the brand, and why visitors who do arrive leave without
 acting — with evidence for every claim, a paste-ready fix, and an order to do
-them in.
+them in. Read-only; it never modifies the site it audits.
 
 ```bash
 python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://example.com --out ./audit-output
 ```
 
-Outputs `audit-report.json` and a `report.md` written for someone who is not an
-engineer.
+Outputs `audit-report.json` (fixed schema) and `report.md`, written for someone
+who is not an engineer. Python 3.9+; 63 of 66 checks need nothing but the
+standard library.
 
-**Nine skills, one entrypoint.** `ai-readiness-orchestrator` is the entrypoint;
-it runs `site-evidence-collector` once to fetch the site, `site-profile-classifier`
-to pick the thresholds, then six audit skills against that one shared evidence
-bundle — `crawl-access-audit` (can a crawler get in), `render-gap-audit` (is the
-page readable without JavaScript), `structured-data-audit` (is the fact
-machine-typed), `answerability-audit` (is the fact quotable),
-`trust-freshness-audit` (would a machine believe it), `engagement-audit` (does
-the visitor stay and act) — and merges their output into the single report.
-Full table in [What is in the marketplace](#what-is-in-the-marketplace); the
-composition step by step in [How the entrypoint composes
-them](#how-the-entrypoint-composes-them).
-
-> ### Auditing your own site? Add `--probe-bot-ua`
->
-> ```bash
-> python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://your-site.com \
->     --out ./audit-output --probe-bot-ua
-> ```
->
-> This is the **single highest-value check in the marketplace**, and it is off by
-> default. It detects whether your CDN or WAF returns 403 to AI crawlers — a rule
-> that removes your brand from those assistants entirely while leaving **no trace
-> in robots.txt and nothing visible to anyone browsing the site**. Bot-protection
-> defaults do this routinely, to sites whose owners have no idea.
->
-> It sends **one request per crawler, homepage only**, with an auditor token
-> appended to the user-agent so your logs show it was an audit. It is off by
-> default because sending named-crawler user-agents at a site you do not own is
-> not something an audit should do unless asked. Without it, those two checks
-> report *not assessed* — a blind spot, not a pass.
+> **Design rationale, the full check inventory, guardrails and known limitations
+> are in [DESIGN.md](DESIGN.md).** This file is the short tour the submission
+> asks for: what each skill does, and how the entrypoint composes them.
 
 ---
 
-## The one idea this is built around
-
-The Round-2 appendix, under *"How search visibility works (the basics)"*, says
-three things must succeed **in order** for a page to be visible to a machine:
-the crawler has to be let in, it has to be able to read the page, and it has to
-be able to pick out the specific fact.
-
-**In order** is the whole design.
-
-A flat checklist ignores that and fires forty findings at any URL. Point it at a
-site whose CDN refuses AI crawlers and it reports fifteen criticals, fourteen of
-which are real defects that currently change nothing — because nothing is
-reaching the page to be affected by them.
-
-This marketplace encodes the ordering as a **gate cascade**. Every finding
-carries a stage: `reach`, `read`, `extract`, `trust`, `act`. When an upstream
-stage fails, downstream findings are still recorded, but capped and tagged with
-the id of the one finding blocking them.
-
-On the checked-in `site_b` fixture that is the difference between:
-
-> 15 criticals, no indication where to start
-
-and
-
-> **1 critical**, plus *"13 findings are moot until F-001 is fixed"*, plus
-> **8 engagement findings entirely unaffected** — because a visitor arriving
-> from an ad does not care whether a crawler was let in.
-
-That last clause is the part most implementations get wrong, and it has its own
-rule.
-
-### Rule 0b, the distinction worth reading
-
-Engagement is **not causally** downstream of reach. But engagement **is
-evidentially** downstream of read.
-
-If a page serves an empty JavaScript shell and no rendered DOM was captured, we
-never observed what the visitor sees. Engagement checks there are not "probably
-wrong" — they are **unevidenced**. So they are **suppressed entirely**, not
-downgraded, and one consolidated note says which checks could not run and why.
-
-Capping asserts a weaker claim. Suppression asserts none. None is what we have.
-
-Full statement in
-[`gate-rules.md`](skills/ai-readiness-orchestrator/references/gate-rules.md).
-
----
-
-## What is in the marketplace
+## What each skill does
 
 Nine skills. One entrypoint.
 
-| skill | question it answers | stage |
+| skill | what it does | stage |
 |---|---|---|
-| **ai-readiness-orchestrator** | What matters most, and why? | — (entrypoint) |
-| site-evidence-collector | What does the site actually serve? | — |
-| site-profile-classifier | What kind of site and page is this? | — |
-| crawl-access-audit | Can an AI crawler get in? | reach |
-| render-gap-audit | Can it read the page without running JavaScript? | read |
-| structured-data-audit | Is the fact machine-typed? | extract |
-| answerability-audit | Is the fact quotable? | extract |
-| trust-freshness-audit | Would a machine believe it, and is the page honest? | trust |
-| engagement-audit | Does the visitor stay and act? | act |
-
-### Why two of these are not checks
+| **ai-readiness-orchestrator** | **Entrypoint.** Runs every other skill, applies the gate cascade, dedupes, scores and ranks, and emits the single audit report. | — |
+| site-evidence-collector | Fetches and renders the site **exactly once** and writes the shared evidence bundle. The only skill that touches the network. | — |
+| site-profile-classifier | Detects the site archetype and per-page type, then selects the thresholds every other skill scores against. | — |
+| crawl-access-audit | Can an AI crawler get in? robots.txt against a dated AI-bot snapshot, CDN/WAF reachability, `noindex`, canonicals, redirects, soft 404s, broken links, sitemaps, `llms.txt`. | reach |
+| render-gap-audit | Can it read the page without running JavaScript? Raw-vs-rendered diff, unhydrated SPA shells, JSON-island recovery, facts locked in images. | read |
+| structured-data-audit | Is the fact machine-typed? JSON-LD, microdata, RDFa and OpenGraph — presence, validity, correct type, required properties, markup-vs-visible contradictions, `hreflang`. | extract |
+| answerability-audit | Is the fact quotable? Simulates retrieval over no-JS windows and tests whether each claim survives self-contained: no dangling pronoun, subject named, plus tables, headings and direct-answer blocks. | extract |
+| trust-freshness-audit | Would a machine believe it? Date coherence across schema/visible/sitemap/headers, entity identity and NAP consistency, external corroboration, authorship — plus prompt-injection, cloaking and invisible-Unicode integrity checks. | trust |
+| engagement-audit | Does the visitor stay and act? First-screen orientation, CTA clarity, form friction, dead ends, interstitials, mobile viewport, page weight, social proof, cost signals. | act |
 
 `site-evidence-collector` and `site-profile-classifier` emit no findings, and
-that is deliberate rather than padding.
+that is deliberate. The **collector** is why six audit skills cannot disagree
+about what the site served, and why one crawl fits the time budget. The
+**classifier** is where generalisation lives: no check anywhere hardcodes a
+threshold, every one asks the profile. Neither performs a check; both are
+load-bearing.
 
-The **collector** is why six audit skills cannot disagree about what the site
-served, and why the run fits the time budget: one crawl, one render pass, many
-readers. It is the only component that touches the network.
+---
 
-The **classifier** is where generalisation lives. It is the only component that
-turns "a site nobody has seen" into "known thresholds". No check anywhere
-hardcodes a number; every one asks the profile. Remove it and every threshold
-becomes a guess baked into a different file.
-
-Neither performs a check. Both are load-bearing.
-
-### How the entrypoint composes them
+## How the entrypoint composes them
 
 By **subprocess**, never by import:
 
 ```
-orchestrate.py
+orchestrate.py  (ai-readiness-orchestrator)
   → collect.py           writes the evidence bundle          (network, once)
   → profile.py           archetype + page types + thresholds
-  → 6 × run.py           each reads the bundle, prints one JSON object
+  → 6 × run.py           each reads that bundle, prints one JSON object
   → gate cascade         cap, tag blocked_by, suppress per Rule 0b
   → dedupe, score, rank  severity → ICE → stage → check_id
   → emit                 audit-report.json + report.md + fix_patches/
 ```
 
-No script imports from a sibling skill folder, so **any skill folder can be
-lifted out of this marketplace and run alone**. Where two skills genuinely need
-the same predicate it is duplicated, and the duplication is documented as a
-portability decision. A test walks the AST of every script and fails the build
-on a cross-skill import — including the `sys.path` dodge.
+Every audit skill is invoked as
+`python <skill>/scripts/run.py --bundle <dir> [--profile <file>]`, returns one
+JSON object on stdout, and exits 0 (ran), 3 (precondition unmet) or 1 (error).
+The orchestrator holds **no checks of its own** — it is pure composition.
 
-The contract is normative and was written before the audit skills:
+Because nothing imports across skill folders, **any skill folder can be lifted
+out of this marketplace and run alone**. Where two skills need the same
+predicate it is duplicated on purpose, and a test walks the AST of every script
+to fail the build on a cross-skill import, including the `sys.path` dodge.
+
+The ordering is the design. The Round-2 appendix says three things must succeed
+**in order** — the crawler is let in, the page can be read, the fact can be
+picked out — so when an upstream stage fails, downstream findings are recorded
+but **capped and tagged with the id of the finding blocking them**. You get the
+root cause first instead of forty equal-looking problems.
+See [DESIGN.md](DESIGN.md) for the cascade and Rule 0b in full.
+
+The skill contract is normative and was written before the audit skills:
 [`skill-cli-contract.md`](skills/ai-readiness-orchestrator/references/skill-cli-contract.md).
 
 ---
 
-## Checks
+## The report
 
-<!-- INVENTORY:AUTO -->
-**66 checks** across six audit skills (49 discoverability, 17 engagement).
+```jsonc
+{
+  "site": "example.com",
+  "audited_at": "2026-09-20T14:32:00Z",
+  "summary": { "total_findings": 6, "critical": 1, "high": 2, "medium": 3,
+               "by_category": { "discoverability": 5, "engagement": 1 } },
+  "findings": [{
+    "id": "F-001",
+    "title": "...",
+    "severity": "critical",
+    "evidence": "...",                  // what was observed, with counts and URLs
+    "suggested_action": {
+      "summary": "...", "priority": "critical",
+      "mechanism": "...",               // why the fix works
+      "patch": "...",                   // paste-ready
+      "ice": 9.3, "effort": "low",
+      "verification": "..."             // how to confirm it worked
+    },
+    "stage": "reach", "confidence": "confirmed", "blocked_by": null
+  }],
+  "proactive_recommendations": [ /* improvements where no defect was found */ ],
+  "limitations": [ /* what could not be assessed, and why */ ]
+}
+```
 
-- Dependency tier: **63 CORE** (Python standard library only), **3 ENRICHMENT** (cannot fire without an optional dependency).
-- By stage: reach 18, read 5, extract 16, trust 10, act 17.
-- By skill: answerability-audit 9, crawl-access-audit 18, engagement-audit 17, render-gap-audit 5, structured-data-audit 7, trust-freshness-audit 10.
-- Engagement checks suppressed entirely under gate Rule 0b when a page has no observed rendered content: **13** of 17.
-<!-- /INVENTORY:AUTO -->
+Findings are ordered by what to fix first. Anything the audit could not assess
+is stated in `limitations` rather than passed silently.
 
-That block is **generated from the code**, not maintained by hand. Every check
-declares itself in a `CHECKS` registry, and `tests/validate_marketplace.py`
-parses those registries out of the source, compares them against
-`tests/expected_inventory.json`, and fails the build if this README disagrees.
-No count in any document here is hand-written.
+---
 
-The `trust` stage also covers **content integrity** — whether a page tries to
-manipulate the machine reading it rather than serve the human. `trust-freshness-audit`
-flags prompt-injection and LLM-directive text (often buried in HTML comments or
-hidden nodes), cloaked text, and invisible zero-width or bidi-control Unicode.
-Detection is deliberately conservative — narrow injection phrasing, a run-length
-threshold for invisible characters — so an ordinary page that merely mentions AI
-never trips it. **Cloaking is judged by content, not volume**: hiding text with CSS
-is ordinary (menus, screen-reader hints, accordions, modals), so the check reads the
-hidden text and fires only when its wording is manipulative — a permission or
-authority grant, an instruction on how to rank or cite the brand, an order to bypass
-the machine's rules, or keyword stuffing. Ordinary hidden UI text never fires.
+## Running it
 
-### Beyond the defects
+```bash
+# audit a site
+python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://example.com --out ./audit-output
 
-The handout asks for suggestions that go past what is broken. Generic advice is
-easy to emit and worth nothing — "add structured data" to a site that already
-has it reads as padding — so every beyond-defect recommendation is gated
-**twice**: on the site archetype it is relevant to, and on the absence of the
-defect that would make it redundant. A site with the defect gets a finding,
-which is specific; a site without it gets the recommendation. Never both, and
-never neither.
+# your own site? adds the highest-value check in the marketplace (see DESIGN.md)
+python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://your-site.com \
+    --out ./audit-output --probe-bot-ua
 
-| archetype | what it is told to do that no check would catch |
-|---|---|
-| docs, developer-platform | type procedural pages as `HowTo` / `TechArticle`, so a step list is reusable as an answer |
-| saas-marketing | publish the comparison page buyers already weigh you against, or be described using someone else's |
-| e-commerce | attach shipping and returns to the product's `Offer`, not to a policy page the markup never references |
-| publisher | make each byline a `Person` with `sameAs` off-domain, and say when a piece was corrected |
-| local-business | state hours as typed data *with a timezone* — "are they open now" is unanswerable from prose |
+# no network required
+python skills/ai-readiness-orchestrator/scripts/orchestrate.py \
+    --offline-root tests/fixtures/site_b --out ./audit-output
+```
 
-An unclassified site gets **nothing** here rather than filler, and
-`tests/test_proactive.py` asserts that.
+Playwright is optional and upgrades the render-stage checks; without it the
+audit still runs and reports what it could not see. Exit code is 0 whenever a
+schema-valid report was written — the outcome lives in `audit_status`, never in
+the exit code.
 
-### Not firing is a feature
-
-The rubric rewards few false positives, so suppression is enforced in code,
-documented per check, tested, and **reported**: `summary.suppressed_by_rule`
-tells the reader what we deliberately did not raise.
-
-The rules other tools get wrong:
-
-- **Missing `llms.txt` is LOW**, and only surfaced on documentation and
-  developer-platform sites. Google Search Central states machine-readable AI
-  text files are not used by Google Search and neither help nor harm visibility;
-  no major provider has publicly committed to consuming it at answer time; SE
-  Ranking measured 10.13% adoption across nearly 300,000 domains with no
-  correlation to AI citations. Most tools fire this as high severity. Ours puts
-  the reasoning in the finding so you can check it.
-- **Blocking GPTBot is INFO, not a defect.** Training-corpus collection and
-  answer-time retrieval are separate pipelines with separate user-agent tokens.
-  Blocking GPTBot does not remove a site from ChatGPT search results.
-  Google-Extended is reported separately as *contested*, because it is.
-- **Multiple `<h1>` never fires as an error.** Valid in HTML5 sectioning.
-- **Missing meta description is not a check at all** — it is a snippet input,
-  not a retrieval input.
-- **Slow response needs three samples** and reports the median, never the max.
-- **Missing structured data is suppressed on utility pages** and short pages.
-
-One check was **cut on evidence** during the build: `act.orient.h1_cta_mismatch`
-fired on seven of eight pages of the healthy control fixture, including a
-homepage where H1 *"Pipeline monitoring for data engineering teams"* and CTA
-*"Start a 14-day trial"* is a **correct** pairing. Token overlap does not
-measure whether an action follows from a promise. It could not earn a negative
-fixture, so it does not ship. The reasoning is recorded in
-`tests/expected_inventory.json` under `cut_checks`.
+**Tests** — `python tests/validate_marketplace.py` (structure, spec, doc drift),
+`python tests/run_offline.py` (6 golden reports byte-for-byte + a determinism
+matrix), and `python tests/test_*.py` (10 suites). Details in
+[DESIGN.md](DESIGN.md).
 
 ---
 
 ## Guardrails
 
-- **Recommend-only.** No skill modifies a live site. There is no apply mode, and
-  the HTTP layer validates its method against a `{GET, HEAD}` allowlist, so no
-  code path can POST or DELETE.
-- **robots.txt is a hard constraint on our own crawling**, not advice. On the
-  `site_c` fixture, which disallows everything, the auditor fetches **zero**
-  pages and reports that it could not look.
-- **No authenticated areas, no cookies, no credentials.** The HTTP opener is
-  built with no cookie processor and no auth handler.
-- **Private address space is refused**, on the seed *and on every redirect hop*.
-  Auditing a public brand never requires reaching `127.0.0.1`, `10.0.0.0/8` or
-  `169.254.169.254`, and a redirect is the ordinary way a public host hands a
-  crawler an internal one. `--allow-private-hosts` opts out, for a site you host
-  yourself. IPv4-mapped and 6to4 addresses are unwrapped before the check, so a
-  private address cannot be smuggled through an IPv6 literal.
-- **The five-minute ceiling is structural, not hoped for.** Every stage draws
-  from one shared clock: each remaining skill gets an equal share of what is
-  left, and a stage that cannot be given useful time is skipped and *reported*
-  rather than started and killed halfway. A run can degrade; it cannot overrun.
-- **Bot user-agent probing is opt-in and off by default.** With
-  `--probe-bot-ua`: one request per bot, homepage only, our auditor token
-  appended to the user-agent so a site owner can tell from their logs that it
-  was an audit. We do not silently impersonate. Without the flag those checks
-  report *not assessed* rather than passing quietly.
-- **Politeness:** 5 workers, 0.4s per-host delay, `Retry-After` honoured,
-  exponential backoff on 429 and 5xx, crawler-trap guards, 25-page cap.
-- **No hosted API, key or account.** The optional Wikidata lookup is off by
-  default, degrades to `hypothesis`, and never blocks a run.
-- **Exit codes never encode what was found.** Exit 0 whenever a schema-valid
-  report was written. A domain that does not resolve still produces a report and
-  still exits 0; the outcome lives in `audit_status`.
-- Output is refused inside `skills/` and on cloud-synced paths, and every write
-  is atomic, so a full disk cannot leave a truncated report behind.
+- **Recommend-only.** No skill modifies a live site. The HTTP layer validates
+  every method against a `{GET, HEAD}` allowlist, so no code path can POST.
+- **robots.txt is a hard constraint** on our own crawling, not advice.
+- **No authenticated areas, no cookies, no credentials.**
+- **Private, loopback and link-local hosts are refused**, on the seed and on
+  every redirect hop.
+- **Polite:** 5 workers, 0.4s per-host delay, `Retry-After` honoured, backoff on
+  429/5xx, crawler-trap guards, 25-page cap.
+- **Bounded runtime.** Every stage draws from one shared clock, so the run
+  cannot outrun `--time-budget` (default 300s).
+- **No hosted API, key or account.** The manifest is self-contained.
+
+Full statements, and the reasoning behind each, in [DESIGN.md](DESIGN.md).
 
 ---
 
-## Running the tests
-
-```bash
-python tests/validate_marketplace.py      # structure, spec compliance, doc drift
-python tests/test_politeness.py           # RFC 9309 conformance
-python tests/test_traps.py                # crawler traps and sampling
-python tests/test_profile.py              # classifier, incl. 3 misclassification regressions
-python tests/test_collector.py            # bundle contract + 5 hostile seeds
-python tests/test_regressions.py          # every false positive found and fixed
-python tests/test_suppression.py          # one case per documented SUPPRESS WHEN
-python tests/test_gate_cascade.py         # the cascade, Rule 0b, the control
-python tests/test_deadline.py             # the <5 minute ceiling actually holds
-python tests/test_ssrf.py                 # private-address refusal, read-only transport
-python tests/test_proactive.py            # beyond-defect advice, archetype-gated both ways
-```
-
-Six fixture sites, six separable claims, kept apart so a change to one
-mechanism cannot silently alter the proof of another:
-
-| fixture | proves |
-|---|---|
-| `site_a` | a well-built site produces **zero** high or critical findings |
-| `site_b` | the gate cascade: one critical, downstream capped, engagement untouched |
-| `site_c` | a blanket `Disallow: /` fetches nothing and reports one critical |
-| `site_d` | an all-shell site produces **zero** engagement findings site-wide |
-| `site_e` | the bot taxonomy: training INFO, dual-purpose MEDIUM, no cascade |
-| `site_f` | a well-built tool site produces **zero** false positives on cookie banners, muted autoplay, XML sitemaps, footer newsletters, login pages, and a free tool with no price |
-
----
-
-## Dependencies
-
-**CORE — Python 3.9+ standard library only.** 63 of 66 checks, including every
-`reach` check and every `act` check.
-
-Note that `urllib.robotparser` is **not** used: it implements the 1996 draft
-with no `*` wildcards, no `$` anchor, and no longest-match precedence, so it
-disagrees with the crawlers we audit for. An RFC 9309 matcher is implemented on
-the standard library and has 71 conformance assertions against the RFC's own
-worked examples.
-
-**ENRICHMENT — optional, declared per skill.** Playwright (rendered DOM),
-Protego, extruct, trafilatura, htmldate. When absent, the affected check either
-lowers its confidence and says why, or reports *not assessed* in `limitations[]`.
-It never quietly passes.
-
-The one place the zero-install guarantee bends, stated plainly:
-`read.render.raw_text_gap` is `high` and genuinely needs a renderer. It is high,
-not critical, because firing it means the content demonstrably exists once
-JavaScript runs — a JS-executing crawler recovers it, so the real risk is the
-non-executing fetchers, not invisibility. CORE ships `read.render.empty_spa_shell`
-as the zero-install path to a render-stage finding, at high/likely instead of
-critical/confirmed. A zero-install run still detects and reports the render gap;
-it cannot quantify it.
-
----
-
-## Coverage of the Round-2 background concepts
-
-| appendix subsection | where it is covered |
-|---|---|
-| How search visibility works | the gate cascade itself |
-| How assistants use sources | `answerability-audit`, the retrievability simulation |
-| How machines read a page | `render-gap-audit` |
-| Why agreement across the web matters | `trust-freshness-audit` |
-| Personalization and prior context | `act.context.*` — copy that assumes a session the visitor never had |
-| Why machines drop content from emails | see below |
-
-The email subsection describes a mechanism, not a medium: substance carried in a
-form a reader cannot parse, and important lines buried in low-value filler. That
-mechanism is exactly what `read.nontext.*` and
-`extract.ans.boilerplate_dominant` detect. **We cover the mechanism in the
-medium the task specifies** — the entrypoint takes a URL, so it audits websites,
-not mailboxes.
-
----
-
-## Known limitations, and how we found them
-
-Most submissions claim their checks work. Here is one that did not, what it took
-to notice, and what remains imperfect. If nothing in this section surprises you,
-we did not test hard enough.
-
-### The shell detector had zero recall on real sites
-
-`read.render.empty_spa_shell` is the check the entire read stage depends on. It
-passed every fixture. Then we pointed the audit at five live sites and it fired
-**zero times** — including on a documentation site serving **16 words of body
-text**, which is about as unambiguous a client-rendered shell as exists.
-
-It required a mount point with a *known id* **and** a bundle script whose
-filename matched a Next.js or Create-React-App shape. The site used
-`<div class="_app">` and `/assets/application-<hash>.js`. Both discriminating
-signals missed.
-
-**The check had been tuned to a synthetic Next.js fixture, and the fixture gave
-us false confidence in exactly the check we could least afford to be wrong
-about.** A fixture proves a check does what you wrote; it cannot prove you wrote
-the right thing, because you built both.
-
-Rewritten against a signal that does not require recognising anyone's bundler:
-no text **+** scripts present **+** (an empty mount point **or** a `<noscript>`
-telling the visitor to enable JavaScript). That last signal is what a
-client-rendered page says when it cannot render, in every framework. It now
-fires correctly, and gate Rule 0b engages behind it.
-
-### Navigation without `<nav>`
-
-Chrome detection was tag-based, so a site whose menu is a `<table>` — normal for
-anything built before HTML5 — had its own navigation treated as the opening
-sentence of every page. On one static site this corrupted four checks at once
-and produced 100 findings.
-
-Now fixed with link-density block scoring: a block whose text is mostly anchor
-text is navigation whatever tag it uses. `tests/fixtures/legacy_table_nav.html`
-locks it in. That one change took the site from 100 findings to 32.
-
-### What is still imperfect
-
-- **No renderer in the default install.** Playwright is optional, so
-  `read.render.raw_text_gap` cannot run and `empty_spa_shell` reports at
-  high/likely rather than critical/confirmed. Reported in `limitations[]`, never
-  passed over silently.
-- **Corroboration is single-site by construction.** We can see that a site
-  declares no `sameAs` links. We cannot see whether anyone else mentions it.
-  Confidence is capped at `likely` for that reason and can never be `confirmed`.
-- **Edge reachability is off by default.** See `--probe-bot-ua` above.
-- **Main-content extraction is a heuristic.** trafilatura does it better and
-  replaces ours when installed.
-
-### How the checks were actually tested
-
-Five hand-authored fixtures for behaviour that must be exact, then five live
-sites chosen for **architectural variance** rather than convenience: a static
-documentation site, a client-rendered documentation browser, a Shopify
-storefront, a WordPress publisher, and a JavaScript-heavy SaaS marketing site.
-
-That run produced **365 findings**, which was itself the finding. Twelve false
-positives were identified and named before any threshold was touched — including
-`aria-expanded="false"` on navigation dropdowns being counted as hidden content
-(22 findings on one site), file sizes being reported as inconsistent phone
-numbers, and a free open-source download page being asked for a price. Tuning
-brought the same five sites to **205**, a 44% reduction, with the false negative
-above fixed in the same pass.
-
-Three doubts were investigated and **deliberately not acted on**, because the
-findings turned out to be correct: a static site really does lack an `<h1>`, a
-median time-to-first-byte really was near a second, and none of the five sites
-declares `sameAs` on its homepage.
-
-## Licence and attribution
-
-MIT. See [`LICENSE`](LICENSE) and
-[`ATTRIBUTIONS.md`](ATTRIBUTIONS.md) for borrowed ideas, their origins, and
-their licences. No code was copied from any source; the ideas were reimplemented.
+*Licence: MIT, declared in every skill's `SKILL.md`, in `marketplace.json`, and
+in [`LICENSE`](LICENSE). Third-party sources credited in
+[`ATTRIBUTIONS.md`](ATTRIBUTIONS.md).*
