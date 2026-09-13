@@ -19,6 +19,18 @@ python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://example.c
 Outputs `audit-report.json` and a `report.md` written for someone who is not an
 engineer.
 
+**Nine skills, one entrypoint.** `ai-readiness-orchestrator` is the entrypoint;
+it runs `site-evidence-collector` once to fetch the site, `site-profile-classifier`
+to pick the thresholds, then six audit skills against that one shared evidence
+bundle — `crawl-access-audit` (can a crawler get in), `render-gap-audit` (is the
+page readable without JavaScript), `structured-data-audit` (is the fact
+machine-typed), `answerability-audit` (is the fact quotable),
+`trust-freshness-audit` (would a machine believe it), `engagement-audit` (does
+the visitor stay and act) — and merges their output into the single report.
+Full table in [What is in the marketplace](#what-is-in-the-marketplace); the
+composition step by step in [How the entrypoint composes
+them](#how-the-entrypoint-composes-them).
+
 > ### Auditing your own site? Add `--probe-bot-ua`
 >
 > ```bash
