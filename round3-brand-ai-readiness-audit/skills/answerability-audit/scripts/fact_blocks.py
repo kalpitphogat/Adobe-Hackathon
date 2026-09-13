@@ -224,7 +224,13 @@ def run(b, profile) -> tuple[list[dict], list[dict], list[dict]]:
                 ),
                 "confidence_effect": "reported as info, not a defect",
             })
-        if problems and page_type != "utility":
+        # A heading OUTLINE is only meaningful on a page that is actually trying
+        # to present content. Utility pages (login, cart, privacy) are exempt by
+        # type; but functional or unrecognised pages that fall under "other" (a
+        # thank-you, unsubscribe or confirmation page) are exempt by CONTENT: a
+        # page below its own thin-content floor is too small to owe an article
+        # H1, and its real issue, if any, is thin content, reported above.
+        if problems and page_type != "utility" and words >= floor:
             findings.append(finding(
                 check_id="extract.ans.heading_structure_unusable",
                 title="The heading outline does not divide this page usefully",

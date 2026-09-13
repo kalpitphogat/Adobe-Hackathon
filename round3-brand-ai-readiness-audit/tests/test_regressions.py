@@ -405,6 +405,64 @@ fired3 = {f["check_id"] for f in f3}
 expect("read.render.raw_text_gap" not in fired3 and "read.render.empty_spa_shell" not in fired3,
        "R9: a page whose content is already in raw HTML triggers no render-gap finding")
 
+# =====================================================================
+# R10. Structural checks must be gated by page role, not run on every page.
+#
+# A login, cart or privacy page (type "utility") must never earn an article
+# H1 defect; and a thin functional or UNRECOGNISED page (a thank-you or
+# confirmation page typed "other") is too small to owe a heading outline, so it
+# is exempt by content floor. A substantial content page missing an H1 is still
+# a real defect and must still fire — the guard must not over-suppress.
+# =====================================================================
+
+factblocks_mod = load("answerability-audit", "fact_blocks")
+
+
+class _AnsBundle:
+    origin = "https://x.test"
+
+    def __init__(self, pages):
+        self._pages = pages
+
+    def html_pages(self):
+        return self._pages
+
+    def page_type(self, page, profile=None):
+        return page.get("_type", "other")
+
+    def observed_text(self, page):
+        return page.get("_text", "")
+
+
+def _heading_fires(page):
+    f, _s, _p = factblocks_mod.run(_AnsBundle([page]), None)
+    return any(x["check_id"] == "extract.ans.heading_structure_unusable" for x in f)
+
+
+thin_functional = {
+    "url": "https://x.test/thank-you", "_type": "other",
+    "_text": "Thanks for subscribing. We will be in touch shortly.",
+    "headings": {}, "title": "Thank you", "links": {}, "markup": {},
+}
+expect(not _heading_fires(thin_functional),
+       "R10: a thin functional/unrecognised page (typed 'other') earns no heading defect")
+
+login = {
+    "url": "https://x.test/login", "_type": "utility",
+    "_text": "Sign in to your account. Email. Password. Remember me. Forgot password?",
+    "headings": {}, "title": "Login", "links": {}, "markup": {},
+}
+expect(not _heading_fires(login),
+       "R10: a utility login page earns no heading defect")
+
+real_content = {
+    "url": "https://x.test/guide", "_type": "other",
+    "_text": " ".join(["insight"] * 200),
+    "headings": {}, "title": "A real guide to observability", "links": {}, "markup": {},
+}
+expect(_heading_fires(real_content),
+       "R10: a substantial content page missing its H1 still fires (guard does not over-suppress)")
+
 if FAILURES:
     print(f"FAILED {len(FAILURES)} of {COUNT} assertions:\n")
     for f in FAILURES:

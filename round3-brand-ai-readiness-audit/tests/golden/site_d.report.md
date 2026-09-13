@@ -47,18 +47,18 @@
 | critical | 0 |
 | high | 4 |
 | medium | 7 |
-| low | 5 |
+| low | 1 |
 | info | 0 |
-| **total** | **16** |
+| **total** | **12** |
 
-Discoverability 16 · engagement 0.
+Discoverability 12 · engagement 0.
 
 ## Fix these first — everything else is waiting on them
 
-- 5 finding(s) are recorded but capped at medium because F-001 (The served HTML is an empty application shell with no content) blocks them. They become relevant the moment F-001 is fixed.
-- 2 finding(s) are recorded but capped at medium because F-002 (The served HTML is an empty application shell with no content) blocks them. They become relevant the moment F-002 is fixed.
-- 2 finding(s) are recorded but capped at medium because F-003 (The served HTML is an empty application shell with no content) blocks them. They become relevant the moment F-003 is fixed.
-- 2 finding(s) are recorded but capped at medium because F-004 (The served HTML is an empty application shell with no content) blocks them. They become relevant the moment F-004 is fixed.
+- 4 finding(s) are recorded but capped at medium because F-001 (The served HTML is an empty application shell with no content) blocks them. They become relevant the moment F-001 is fixed.
+- 1 finding(s) are recorded but capped at medium because F-002 (The served HTML is an empty application shell with no content) blocks them. They become relevant the moment F-002 is fixed.
+- 1 finding(s) are recorded but capped at medium because F-003 (The served HTML is an empty application shell with no content) blocks them. They become relevant the moment F-003 is fixed.
+- 1 finding(s) are recorded but capped at medium because F-004 (The served HTML is an empty application shell with no content) blocks them. They become relevant the moment F-004 is fixed.
 
 ## Reach — can a crawler get in?
 
@@ -203,7 +203,7 @@ curl -s https://spa-only.test/pricing | sed -e 's/<[^>]*>//g' | tr -s '[:space:]
 *Source: Handout appendix, How machines read a page*
 
 <details>
-<summary>11 finding(s) are moot until the blockers above are fixed</summary>
+<summary>7 finding(s) are moot until the blockers above are fixed</summary>
 
 - **F-005** · medium · The page title is 'Vantage', which does not say what the page is about — blocked by F-001 (`extract.ans.title_not_entity_bearing`)
 - **F-006** · medium · The page title is 'Vantage', which does not say what the page is about — blocked by F-002 (`extract.ans.title_not_entity_bearing`)
@@ -212,10 +212,6 @@ curl -s https://spa-only.test/pricing | sed -e 's/<[^>]*>//g' | tr -s '[:space:]
 - **F-009** · medium · The site does not clearly state who publishes it — blocked by F-001 (`extract.sd.identity_graph_weak`)
 - **F-010** · medium · The name 'Vantage' is ambiguous and nothing on the homepage distinguishes it — blocked by F-001 (`trust.entity.name_collision`)
 - **F-011** · medium · Nothing connects this site to an independent record of the same entity — blocked by F-001 (`trust.entity.no_external_corroboration`)
-- **F-013** · low · The heading outline does not divide this page usefully — blocked by F-001 (`extract.ans.heading_structure_unusable`)
-- **F-014** · low · The heading outline does not divide this page usefully — blocked by F-002 (`extract.ans.heading_structure_unusable`)
-- **F-015** · low · The heading outline does not divide this page usefully — blocked by F-003 (`extract.ans.heading_structure_unusable`)
-- **F-016** · low · The heading outline does not divide this page usefully — blocked by F-004 (`extract.ans.heading_structure_unusable`)
 
 </details>
 
@@ -256,4 +252,4 @@ Findings other tools would raise that we suppressed, and why:
 
 ---
 
-*brand-ai-readiness-audit 1.0.0 · 7 of 65 checks ran · AI crawler list snapshot 2026-09-09 (commit 0e111dcc24cb) · recommend-only: nothing was written to the audited site.*
+*brand-ai-readiness-audit 1.0.0 · 6 of 65 checks ran · AI crawler list snapshot 2026-09-09 (commit 0e111dcc24cb) · recommend-only: nothing was written to the audited site.*

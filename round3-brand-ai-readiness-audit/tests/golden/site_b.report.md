@@ -47,15 +47,15 @@
 | critical | 1 |
 | high | 2 |
 | medium | 16 |
-| low | 2 |
+| low | 1 |
 | info | 0 |
-| **total** | **21** |
+| **total** | **20** |
 
-Discoverability 13 · engagement 8.
+Discoverability 12 · engagement 8.
 
 ## Fix these first — everything else is waiting on them
 
-- 12 finding(s) are recorded but capped at medium because F-001 (robots.txt blocks 3 AI retrieval crawler(s) that cite sources at answer time) blocks them. They become relevant the moment F-001 is fixed.
+- 11 finding(s) are recorded but capped at medium because F-001 (robots.txt blocks 3 AI retrieval crawler(s) that cite sources at answer time) blocks them. They become relevant the moment F-001 is fixed.
 
 ## Reach — can a crawler get in?
 
@@ -276,7 +276,7 @@ curl -s https://harborview-clinic.test/contact | grep -cE '<(input|select|textar
 
 *Source: references/cro-frameworks.md*
 
-### F-021 · LOW · 13 form field(s) have no programmatic label
+### F-020 · LOW · 13 form field(s) have no programmatic label
 
 *confidence: confirmed · check: `act.form.unlabelled_inputs`*
 
@@ -308,7 +308,7 @@ curl -s https://harborview-clinic.test/contact | grep -c '<label'
 *Source: WCAG 2.2 Success Criterion 3.3.2 Labels or Instructions*
 
 <details>
-<summary>12 finding(s) are moot until the blockers above are fixed</summary>
+<summary>11 finding(s) are moot until the blockers above are fixed</summary>
 
 - **F-004** · medium · The page title is 'Home', which does not say what the page is about — blocked by F-001 (`extract.ans.title_not_entity_bearing`)
 - **F-005** · medium · The page title is 'Contact', which does not say what the page is about — blocked by F-001 (`extract.ans.title_not_entity_bearing`)
@@ -321,7 +321,6 @@ curl -s https://harborview-clinic.test/contact | grep -c '<label'
 - **F-016** · medium · A contact page carries only 17 words — blocked by F-001 (`extract.ans.thin_content_for_page_type`)
 - **F-017** · medium · A other page carries only 70 words — blocked by F-001 (`extract.ans.thin_content_for_page_type`)
 - **F-018** · medium · A about page carries only 8 words — blocked by F-001 (`extract.ans.thin_content_for_page_type`)
-- **F-020** · low · The heading outline does not divide this page usefully — blocked by F-001 (`extract.ans.heading_structure_unusable`)
 
 </details>
 
@@ -346,4 +345,4 @@ Findings other tools would raise that we suppressed, and why:
 
 ---
 
-*brand-ai-readiness-audit 1.0.0 · 13 of 65 checks ran · AI crawler list snapshot 2026-09-09 (commit 0e111dcc24cb) · recommend-only: nothing was written to the audited site.*
+*brand-ai-readiness-audit 1.0.0 · 12 of 65 checks ran · AI crawler list snapshot 2026-09-09 (commit 0e111dcc24cb) · recommend-only: nothing was written to the audited site.*

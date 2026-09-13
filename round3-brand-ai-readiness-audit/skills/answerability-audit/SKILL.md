@@ -84,7 +84,11 @@ so a later edit cannot quietly reintroduce chunking advice.
   and is not a generic template value; or the page type is utility.
 - `extract.ans.heading_structure_unusable` — **multiple H1 elements alone never
   fire this.** Multiple H1s are valid in HTML5 sectioning contexts and are
-  recorded as an observation, never as an error.
+  recorded as an observation, never as an error. Also suppressed on utility pages
+  (login, cart, privacy) by type, and on any page below its thin-content floor by
+  content: a functional or unrecognised page (a thank-you or confirmation page
+  typed `other`) is too small to owe an article-style H1, so it never earns a
+  heading defect — its issue, if any, is thin content instead.
 - `extract.ans.boilerplate_dominant` — the page is under 300 words, so there is
   nothing to dilute; or it is a category or listing page, where chrome-heavy
   markup is the idiom.

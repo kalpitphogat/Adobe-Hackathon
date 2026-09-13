@@ -600,37 +600,6 @@
     {
       "affected_url_count": 1,
       "affected_urls": [
-        "https://harborview-clinic.test/services"
-      ],
-      "blocked_by": "F-001",
-      "category": "discoverability",
-      "check_id": "extract.ans.heading_structure_unusable",
-      "confidence": "confirmed",
-      "evidence": "https://harborview-clinic.test/services: heading levels skip from h1 to h3. Outline: h1:'Our Services', h3:'Physiotherapy', h3:'Podiatry'. Headings are where a reader decides which part of a page answers the question, so an outline that does not divide the content leaves it to guess.",
-      "id": "F-020",
-      "severity": "low",
-      "stage": "extract",
-      "suggested_action": {
-        "effort": "low",
-        "ice": 7.0,
-        "ice_components": {
-          "confidence": 9.0,
-          "ease": 9.0,
-          "impact": 3.0
-        },
-        "mechanism": "Headings mark the boundaries a reader uses to locate the relevant part of a long page; without them the whole page is one undifferentiated block.",
-        "patch": "<h1>Our Services</h1>\n<h2>__FILL_IN__:question_this_section_answers</h2>",
-        "patch_path": "fix_patches/F-020.extract.ans.heading_structure_unusable.txt",
-        "priority": "low",
-        "source": "references/chunking-model.md",
-        "summary": "Give the page one H1 and H2 sections that name what each part answers.",
-        "verification": "curl -s https://harborview-clinic.test/services | grep -oE '<h[1-3][^>]*>' | sort | uniq -c"
-      },
-      "title": "The heading outline does not divide this page usefully"
-    },
-    {
-      "affected_url_count": 1,
-      "affected_urls": [
         "https://harborview-clinic.test/contact"
       ],
       "blocked_by": null,
@@ -638,7 +607,7 @@
       "check_id": "act.form.unlabelled_inputs",
       "confidence": "confirmed",
       "evidence": "https://harborview-clinic.test/contact: 13 of 13 fields have no <label>, aria-label or aria-labelledby: first_name, last_name, email, phone, company, job_title, dob, address1. All of them do carry a placeholder, which disappears on focus and is not exposed as a label, so this is reported at low severity.",
-      "id": "F-021",
+      "id": "F-020",
       "severity": "low",
       "stage": "act",
       "suggested_action": {
@@ -651,7 +620,7 @@
         },
         "mechanism": "A placeholder vanishes as soon as the field is focused, so a visitor who pauses mid-form loses the only description of what the field wanted.",
         "patch": "<label for=\"first_name\">First name</label>\n<input id=\"first_name\" name=\"first_name\" type=\"text\">\n<label for=\"last_name\">Last name</label>\n<input id=\"last_name\" name=\"last_name\" type=\"text\">\n<label for=\"email\">Email</label>\n<input id=\"email\" name=\"email\" type=\"email\">\n<label for=\"phone\">Phone</label>\n<input id=\"phone\" name=\"phone\" type=\"tel\">",
-        "patch_path": "fix_patches/F-021.act.form.unlabelled_inputs.txt",
+        "patch_path": "fix_patches/F-020.act.form.unlabelled_inputs.txt",
         "priority": "low",
         "source": "WCAG 2.2 Success Criterion 3.3.2 Labels or Instructions",
         "summary": "Give every field a visible, associated label.",
@@ -664,7 +633,7 @@
     "ai_bots_snapshot_date": "2026-09-09",
     "ai_bots_source_commit": "0e111dcc24cbcdf4e609edde70f9f9184eac8b02",
     "checks_available": 65,
-    "checks_run": 13,
+    "checks_run": 12,
     "name": "brand-ai-readiness-audit",
     "tool_versions": {
       "collector": "1.0.0",
@@ -690,21 +659,21 @@
   "schema_version": "1.0",
   "site": "harborview-clinic.test",
   "summary": {
-    "blocked_findings": 12,
+    "blocked_findings": 11,
     "by_category": {
-      "discoverability": 13,
+      "discoverability": 12,
       "engagement": 8
     },
     "by_stage": {
       "act": 8,
-      "extract": 10,
+      "extract": 9,
       "reach": 1,
       "trust": 2
     },
     "critical": 1,
     "high": 2,
     "info": 0,
-    "low": 2,
+    "low": 1,
     "medium": 16,
     "suppressed_by_rule": [
       {
@@ -750,6 +719,6 @@
         "rule": "suppressed by threshold"
       }
     ],
-    "total_findings": 21
+    "total_findings": 20
   }
 }

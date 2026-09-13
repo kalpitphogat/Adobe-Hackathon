@@ -182,8 +182,8 @@ SUPPRESSION_CASES: dict[str, dict] = {
         "proved_by": "site_a titles are descriptive and do not fire",
     },
     "extract.ans.heading_structure_unusable": {
-        "suppressor": "multiple H1s alone never fire; reported as info in HTML5 sectioning",
-        "proved_by": "unit case below",
+        "suppressor": "multiple H1s alone never fire (info in HTML5 sectioning); utility pages exempt by type; thin/functional/unrecognised pages exempt below the content floor",
+        "proved_by": "unit case below (multiple H1s), plus the fact_blocks heading unit case for the utility + thin-page guards",
     },
     "extract.ans.boilerplate_dominant": {
         "suppressor": "under 300 words, or a listing page type",
