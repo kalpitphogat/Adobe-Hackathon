@@ -66,6 +66,7 @@ so a later edit cannot quietly reintroduce chunking advice.
 | `extract.ans.boilerplate_dominant` | navigation and chrome dominate the page text | medium |
 | `extract.ans.no_evidence_markers` | no statistic, quotation or source behind the claims | low |
 | `extract.ans.thin_content_for_page_type` | wordcount below the profile floor for this page type | medium |
+| `extract.ans.table_not_extractable` | a data table with no `<th>`, `scope`, `<thead>` or `<caption>`, so no cell is bound to what it means | medium |
 
 ### SUPPRESS WHEN
 
@@ -100,6 +101,11 @@ so a later edit cannot quietly reintroduce chunking advice.
 - `extract.ans.thin_content_for_page_type` — the page is a category, listing or
   paginated archive; or it is a hub whose value is its links, carrying at least
   15 in-content internal links.
+- `extract.ans.table_not_extractable` — the table declares `role="presentation"`
+  or `role="none"`, so the author has said it is layout rather than data; or it
+  is smaller than 3 rows by 2 columns, which is not a data grid; or it labels its
+  data in **any** of the four supported ways (`<th>`, `scope=`, `<thead>`,
+  `<caption>`), any one of which is enough.
 
 ## Output
 

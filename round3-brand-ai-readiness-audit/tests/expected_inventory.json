@@ -16,20 +16,20 @@
     "                      fires for a URL and no rendered DOM exists for it. See gate-rules.md."
   ],
   "totals": {
-    "checks": 65,
-    "core": 62,
+    "checks": 66,
+    "core": 63,
     "enrichment": 3,
-    "discoverability": 48,
+    "discoverability": 49,
     "engagement": 17,
     "by_stage": {
       "act": 17,
-      "extract": 15,
+      "extract": 16,
       "reach": 18,
       "read": 5,
       "trust": 10
     },
     "by_skill": {
-      "answerability-audit": 8,
+      "answerability-audit": 9,
       "crawl-access-audit": 18,
       "engagement-audit": 17,
       "render-gap-audit": 5,
@@ -345,6 +345,14 @@
       "category": "discoverability",
       "tier": "core",
       "default_severity": "low"
+    },
+    {
+      "id": "extract.ans.table_not_extractable",
+      "skill": "answerability-audit",
+      "stage": "extract",
+      "category": "discoverability",
+      "tier": "core",
+      "default_severity": "medium"
     },
     {
       "id": "extract.ans.thin_content_for_page_type",

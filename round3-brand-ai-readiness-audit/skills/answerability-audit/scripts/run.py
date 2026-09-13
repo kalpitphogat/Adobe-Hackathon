@@ -23,9 +23,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import citability  # noqa: E402
 import fact_blocks  # noqa: E402
 import retrievability_sim  # noqa: E402
+import table_extractability  # noqa: E402
 from bundle import emit, load  # noqa: E402
 
-MODULES = (citability, fact_blocks, retrievability_sim,)
+MODULES = (citability, fact_blocks, retrievability_sim, table_extractability,)
 SKILL = "answerability-audit"
 STAGE = "extract"
 

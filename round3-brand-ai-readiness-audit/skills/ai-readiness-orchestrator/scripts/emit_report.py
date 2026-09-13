@@ -135,6 +135,19 @@ def render_markdown(report: dict, gate_notes: list[str]) -> str:
     add(f"*Audited {report['audited_at']} · status: **{report['audit_status']}***")
     add("")
 
+    # Coverage basis, stated before any finding. A finding describes the pages it
+    # names and nothing else; a page this crawl never fetched was not assessed and
+    # must not be read as having passed or failed.
+    ev = report.get("evidence_bundle") or {}
+    fetched = ev.get("pages_fetched", 0)
+    rendered = ev.get("pages_rendered", 0)
+    add(
+        f"*Evidence basis: **{fetched} page(s) fetched**, {rendered} rendered. Every finding "
+        f"below applies only to the URLs it lists. Pages this crawl did not fetch were not "
+        f"assessed — absence of a finding for a page is not a pass for it.*"
+    )
+    add("")
+
     if report["audit_status"] == "no_content_available":
         add("> **No page content could be assessed.** See Limitations below for why. ")
         add("> The findings that follow are limited to what could be observed without page content.")

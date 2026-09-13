@@ -118,8 +118,8 @@ SUPPRESSION_CASES: dict[str, dict] = {
         "proved_by": "site_d has no renderer and records it as not assessed",
     },
     "read.render.empty_spa_shell": {
-        "suppressor": "the framework mount point is not empty",
-        "proved_by": "test_regressions R1 plus the site_a control firing nothing",
+        "suppressor": "the framework mount point is not empty; deferred to raw_text_gap when a rendered DOM exists; downgraded to medium when content is recoverable from an embedded JSON island",
+        "proved_by": "test_regressions R1, R9 and R12 plus the site_a control firing nothing",
     },
     "read.render.nav_links_js_only": {
         "suppressor": "no rendered DOM, or raw links >=60% of rendered",
@@ -160,6 +160,10 @@ SUPPRESSION_CASES: dict[str, dict] = {
     "extract.i18n.hreflang_incomplete": {
         "suppressor": "the page declares no hreflang at all, or its cluster already carries a fallback and valid codes",
         "proved_by": "site_a declares no hreflang and does not fire; unit case below fires only on an incomplete cluster",
+    },
+    "extract.ans.table_not_extractable": {
+        "suppressor": "role=presentation/none, a grid smaller than 3x2, or any one of <th>/scope/<thead>/<caption>",
+        "proved_by": "site_a and site_f carry no unlabelled data table and do not fire; unit case below covers each suppressor and the positive case",
     },
     "trust.integrity.cloaked_text": {
         "suppressor": "the hidden text is benign UI (menus, screen-reader hints, accordions, modals); only manipulative wording fires",
@@ -407,6 +411,9 @@ try:
            "site_f: the XML sitemap response receives no HTML-page checks")
     expect(not any(u.rstrip("/").endswith("/login") for u in fp_urls),
            "site_f: the login (utility) page receives no product/CTA/heading findings")
+    # A real data table that labels its columns is extractable and must stay silent.
+    expect("extract.ans.table_not_extractable" not in fp_fired,
+           "site_f: a properly labelled spec table (caption + thead + th scope) does not fire")
 
     # extract.i18n.hreflang_incomplete: prove the check both stays silent on a
     # well-formed cluster and actually FIRES on the two defects it targets, by
@@ -508,6 +515,33 @@ try:
     ]
     for html, label in harmful:
         expect(_cloak_fires(html), f"cloaked_text: manipulative hidden text fires ({label})")
+
+    # extract.ans.table_not_extractable: a data table with no header binding is a
+    # real extraction failure, but layout tables and small grids are not. Exercise
+    # the classifier directly: each suppressor must silence it, and a genuine
+    # unlabelled data grid must still fire.
+    sys.path.insert(0, str(ROOT / "skills" / "answerability-audit" / "scripts"))
+    import table_extractability as tex  # noqa: E402
+
+    def _rows(n, cells=2, cell="td"):
+        row = "".join(f"<{cell}>v</{cell}>" for _ in range(cells))
+        return "".join(f"<tr>{row}</tr>" for _ in range(n))
+
+    unlabelled = f"<table>{_rows(3)}</table>"
+    expect(len(tex._unlabelled_tables(unlabelled)) == 1,
+           "table: a 3x2 grid with no th/scope/thead/caption fires")
+    for label, html in (
+        ("role=presentation", f'<table role="presentation">{_rows(3)}</table>'),
+        ("role=none", f'<table role="none">{_rows(3)}</table>'),
+        ("<th> header row", f"<table><tr><th>a</th><th>b</th></tr>{_rows(2)}</table>"),
+        ("scope attribute", f'<table><tr><td scope="col">a</td><td>b</td></tr>{_rows(2)}</table>'),
+        ("<thead>", f"<table><thead><tr><td>a</td><td>b</td></tr></thead>{_rows(2)}</table>"),
+        ("<caption>", f"<table><caption>Plans</caption>{_rows(3)}</table>"),
+        ("single column", f"<table>{_rows(3, cells=1)}</table>"),
+        ("only two rows", f"<table>{_rows(2)}</table>"),
+    ):
+        expect(not tex._unlabelled_tables(html),
+               f"table: suppressed by {label}")
 
     # Every registry entry must name where it is proved.
     for check_id, entry in SUPPRESSION_CASES.items():
