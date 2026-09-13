@@ -12,6 +12,7 @@ Run: python tests/test_regressions.py
 from __future__ import annotations
 
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -499,7 +500,84 @@ orch.gate_findings_on_sample([complete], truncated=False, pages_fetched=25, limi
 expect(complete["confidence"] == "confirmed" and not lims2,
        "R11: a complete crawl leaves confidence and limitations untouched")
 
-# --- R12: two rows in a report must never read identically ------------------
+# =====================================================================
+# R12. A framework shell that ships its content as a JSON island in the SAME
+# response has not lost the content: a reader that parses JSON recovers it with
+# no browser. Scoring that identically to a response carrying nothing overstates
+# the defect, so it drops to medium/confirmed and says why. A bare shell, and a
+# JSON island holding only ids/URLs, must keep the harsher verdict.
+# =====================================================================
+
+import json as _json
+import tempfile as _tempfile
+
+render2 = load("render-gap-audit", "diff_raw_rendered")
+
+_PROSE = ("Northwind Analytics is monitoring software for data engineering teams that watches "
+          "pipeline latency and freshness and alerts you before a stakeholder sees stale data.")
+_SHELL_SIG = {"body_wordcount": 2, "framework_root": "#__next", "framework_root_wordcount": 0,
+              "bundle_scripts": ["/_next/app.js"], "noscript_wordcount": 0}
+
+
+class _RootBundle:
+    def __init__(self, root, pages, degraded=()):
+        self.root = root
+        self._pages = pages
+        self._degraded = list(degraded)
+
+    def html_pages(self):
+        return self._pages
+
+    def degraded_capabilities(self):
+        return {d["capability"] for d in self._degraded}
+
+    @property
+    def degraded(self):
+        return self._degraded
+
+
+def _shell_verdict(tmpdir, name, html):
+    (tmpdir / name).write_text(html, encoding="utf-8")
+    page = {"url": "https://spa.test/", "looks_like_spa_shell": True,
+            "rendered_available": False, "main_wordcount": 2, "main_text": "Loading",
+            "spa_signals": _SHELL_SIG, "links": {"internal": []}, "raw_html_path": name}
+    f, _s, _p = render2.run(_RootBundle(tmpdir, [page]), None)
+    for x in f:
+        if x["check_id"] == "read.render.empty_spa_shell":
+            return x["severity"], x["confidence"], x["evidence"]
+    return None, None, ""
+
+
+_t = Path(_tempfile.mkdtemp(prefix="bara-state-"))
+try:
+    payload = _json.dumps({"props": {"pageProps": {
+        "a": _PROSE, "b": _PROSE, "c": _PROSE, "url": "https://spa.test/x"}}})
+    rich = (f'<html><body><div id="__next"></div>'
+            f'<script id="__NEXT_DATA__" type="application/json">{payload}</script>'
+            f'<script src="/_next/app.js"></script></body></html>')
+    sev, conf, ev = _shell_verdict(_t, "rich.html", rich)
+    expect(sev == "medium" and conf == "confirmed",
+           f"R12: a shell whose content is recoverable from its JSON island is medium/confirmed (got {sev}/{conf})")
+    expect("embedded JSON" in ev or "JSON island" in ev,
+           "R12: the finding explains that the facts are recoverable from embedded JSON")
+
+    bare = ('<html><body><div id="__next"></div>'
+            '<script src="/_next/app.js"></script></body></html>')
+    sev_b, conf_b, _ = _shell_verdict(_t, "bare.html", bare)
+    expect(sev_b == "critical" and conf_b == "confirmed",
+           f"R12: a genuinely bare shell keeps the critical verdict (got {sev_b}/{conf_b})")
+
+    noise = _json.dumps({"a": "https://spa.test/a/b/c", "b": "btn-primary", "c": "id_1234"})
+    noisy = (f'<html><body><div id="__next"></div>'
+             f'<script type="application/json">{noise}</script>'
+             f'<script src="/_next/app.js"></script></body></html>')
+    sev_n, _, _ = _shell_verdict(_t, "noise.html", noisy)
+    expect(sev_n == "critical",
+           f"R12: ids and URLs in a JSON island are not recoverable content (got {sev_n})")
+finally:
+    shutil.rmtree(_t, ignore_errors=True)
+
+# --- R13: two rows in a report must never read identically ------------------
 # collapse_sitewide folds a template defect into one finding, but only once it
 # has enough pages to call it a pattern. Below that threshold the same check
 # legitimately survives on two pages, and the report printed the same sentence
@@ -512,16 +590,16 @@ def titled(check_id, url, title="Same defect"):
 pair = [titled("act.orient.x", "https://s.test/"), titled("act.orient.x", "https://s.test/services")]
 orch.disambiguate_titles(pair)
 expect(pair[0]["title"] != pair[1]["title"],
-       "R12: the same check on two pages produces two distinguishable titles")
+       "R13: the same check on two pages produces two distinguishable titles")
 expect(pair[0]["title"].endswith("the homepage"),
-       "R12: the root URL is named 'the homepage', not '/'")
+       "R13: the root URL is named 'the homepage', not '/'")
 expect(pair[1]["title"].endswith("/services"),
-       "R12: a deep page is named by its path")
+       "R13: a deep page is named by its path")
 
 solo = [titled("act.orient.y", "https://s.test/")]
 orch.disambiguate_titles(solo)
 expect(solo[0]["title"] == "Same defect",
-       "R12: a check that fires once keeps its title unchanged")
+       "R13: a check that fires once keeps its title unchanged")
 
 # A site-wide finding already names its own scope in the title; appending a
 # page name to it would be a lie about what it covers.
@@ -529,21 +607,21 @@ wide = [{"check_id": "reach.z", "title": "Site-wide", "affected_urls": ["https:/
         titled("reach.z", "https://s.test/b")]
 orch.disambiguate_titles(wide)
 expect(wide[0]["title"] == "Site-wide" and wide[1]["title"] == "Same defect",
-       "R12: a multi-URL finding is left alone rather than labelled with one page")
+       "R13: a multi-URL finding is left alone rather than labelled with one page")
 
 # Two findings on the SAME url would produce two identical labels, which fixes
 # nothing -- leave them for the evidence to separate.
 same_url = [titled("extract.q", "https://s.test/a"), titled("extract.q", "https://s.test/a")]
 orch.disambiguate_titles(same_url)
 expect(same_url[0]["title"] == same_url[1]["title"] == "Same defect",
-       "R12: identical URLs are not papered over with identical labels")
+       "R13: identical URLs are not papered over with identical labels")
 
 # The property that actually matters, asserted on the shipped reports.
 for golden in sorted((ROOT / "tests" / "golden").glob("*.audit-report.json")):
     report = json.loads(golden.read_text(encoding="utf-8"))
     titles = [f["title"] for f in report["findings"]]
     expect(len(titles) == len(set(titles)),
-           f"R12: {golden.name} contains two findings with the same title")
+           f"R13: {golden.name} contains two findings with the same title")
 
 if FAILURES:
     print(f"FAILED {len(FAILURES)} of {COUNT} assertions:\n")

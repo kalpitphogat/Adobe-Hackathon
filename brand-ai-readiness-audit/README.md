@@ -149,11 +149,11 @@ The contract is normative and was written before the audit skills:
 ## Checks
 
 <!-- INVENTORY:AUTO -->
-**65 checks** across six audit skills (48 discoverability, 17 engagement).
+**66 checks** across six audit skills (49 discoverability, 17 engagement).
 
-- Dependency tier: **62 CORE** (Python standard library only), **3 ENRICHMENT** (cannot fire without an optional dependency).
-- By stage: reach 18, read 5, extract 15, trust 10, act 17.
-- By skill: answerability-audit 8, crawl-access-audit 18, engagement-audit 17, render-gap-audit 5, structured-data-audit 7, trust-freshness-audit 10.
+- Dependency tier: **63 CORE** (Python standard library only), **3 ENRICHMENT** (cannot fire without an optional dependency).
+- By stage: reach 18, read 5, extract 16, trust 10, act 17.
+- By skill: answerability-audit 9, crawl-access-audit 18, engagement-audit 17, render-gap-audit 5, structured-data-audit 7, trust-freshness-audit 10.
 - Engagement checks suppressed entirely under gate Rule 0b when a page has no observed rendered content: **13** of 17.
 <!-- /INVENTORY:AUTO -->
 
@@ -166,10 +166,14 @@ No count in any document here is hand-written.
 The `trust` stage also covers **content integrity** — whether a page tries to
 manipulate the machine reading it rather than serve the human. `trust-freshness-audit`
 flags prompt-injection and LLM-directive text (often buried in HTML comments or
-hidden nodes), large amounts of visually-hidden / cloaked text, and invisible
-zero-width or bidi-control Unicode. Detection is deliberately conservative — narrow
-injection phrasing, a multi-element threshold for cloaking, a run-length threshold
-for invisible characters — so an ordinary page that merely mentions AI never trips it.
+hidden nodes), cloaked text, and invisible zero-width or bidi-control Unicode.
+Detection is deliberately conservative — narrow injection phrasing, a run-length
+threshold for invisible characters — so an ordinary page that merely mentions AI
+never trips it. **Cloaking is judged by content, not volume**: hiding text with CSS
+is ordinary (menus, screen-reader hints, accordions, modals), so the check reads the
+hidden text and fires only when its wording is manipulative — a permission or
+authority grant, an instruction on how to rank or cite the brand, an order to bypass
+the machine's rules, or keyword stuffing. Ordinary hidden UI text never fires.
 
 ### Beyond the defects
 
@@ -296,7 +300,7 @@ mechanism cannot silently alter the proof of another:
 
 ## Dependencies
 
-**CORE — Python 3.9+ standard library only.** 62 of 65 checks, including every
+**CORE — Python 3.9+ standard library only.** 63 of 66 checks, including every
 `reach` check and every `act` check.
 
 Note that `urllib.robotparser` is **not** used: it implements the 1996 draft

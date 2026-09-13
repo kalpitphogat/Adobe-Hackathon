@@ -96,7 +96,7 @@ Run `python3 package_submission.py` to check all of them at once.
 | Entrypoint composes the rest into **one** report | `skills/ai-readiness-orchestrator` |
 | Report floor: `site`, `audited_at`, counts-by-severity | `references/report-schema.json`, 6 golden reports |
 | Per finding: `id`, `title`, `severity`, `evidence`, `suggested_action` | `validate_finding()` rejects malformed findings at the boundary |
-| Detects **both** discoverability and engagement | 65 checks — 48 discoverability, 17 engagement |
+| Detects **both** discoverability and engagement | 66 checks — 49 discoverability, 17 engagement |
 | Proactive suggestions beyond detected defects | `proactive_recommendations` in every report |
 | Recommend-only; never alters a live site | `tests/test_ssrf.py` — method allowlist is `{GET, HEAD}` |
 | No authenticated areas, no credentials | opener built with no cookie processor and no auth handler |
@@ -138,7 +138,7 @@ in `robots.txt` and nothing visible to anyone browsing the site. It is off by
 default because sending named-crawler user-agents at a site you do not own is
 not something an audit should do unless asked.
 
-Python 3.9+, standard library only for 62 of 65 checks. Playwright is optional
+Python 3.9+, standard library only for 63 of 66 checks. Playwright is optional
 and upgrades the render-stage checks; without it the audit still runs and says
 what it could not see.
 
@@ -152,7 +152,7 @@ Full command reference: [`COMMANDS.txt`](COMMANDS.txt).
 cd brand-ai-readiness-audit
 python3 tests/validate_marketplace.py   # 69 structure / spec / doc-drift checks
 python3 tests/run_offline.py            # 6 golden reports, byte-for-byte, + determinism matrix
-for t in tests/test_*.py; do python3 "$t"; done   # 2,207 assertions across 10 suites
+for t in tests/test_*.py; do python3 "$t"; done   # 2,223 assertions across 10 suites
 ```
 
 Six fixture sites, six separable claims, kept apart so a change to one mechanism

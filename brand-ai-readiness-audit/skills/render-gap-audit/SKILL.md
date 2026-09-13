@@ -52,7 +52,7 @@ under gate Rule 2 and suppresses 13 engagement checks under Rule 0b.
 | check_id | detects | default severity |
 |---|---|---|
 | `read.render.raw_text_gap` | rendered text substantially exceeds raw HTML text | high |
-| `read.render.empty_spa_shell` | served HTML is an empty application mount point | critical, or high without a renderer |
+| `read.render.empty_spa_shell` | served HTML is an empty application mount point | critical, high without a renderer, medium if the content is recoverable from an embedded JSON island |
 | `read.render.nav_links_js_only` | the internal link graph exists only after hydration | high |
 | `read.nontext.key_fact_image_only` | a price, phone or spec exists only inside an image | high |
 | `read.nontext.informative_image_no_alt` | content-bearing images carry no alt text | medium |
@@ -77,7 +77,12 @@ high/likely whenever the renderer was simply unavailable.
   bundle scripts are present, or a `<noscript>` block carries the key facts. If
   a rendered DOM was captured for the same page, this defers to
   `read.render.raw_text_gap`, which reports the same defect with a quantified
-  gap instead of a signature match.
+  gap instead of a signature match. **Downgraded to medium** when the same
+  response embeds a JSON island (`__NEXT_DATA__`, `__NUXT_DATA__`,
+  `application/json`) carrying real prose: the facts are then present in the
+  initial HTML and recoverable by a reader that parses JSON, so this is a
+  text-extraction gap rather than missing content. Only string values that look
+  like prose count — ids, class names and URLs never do.
 - `read.render.nav_links_js_only` — no rendered DOM, or raw links are already at
   least 60% of rendered.
 - `read.nontext.key_fact_image_only` — the fact appears in page text or in

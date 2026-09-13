@@ -11,7 +11,7 @@ the one exception and runs from the repository root.
 --------------------------------------------------------------------------------
 0) REQUIREMENTS
 --------------------------------------------------------------------------------
-Python 3.9 or newer. Nothing to install: 62 of the 65 checks run on the standard
+Python 3.9 or newer. Nothing to install: 63 of the 66 checks run on the standard
 library alone, and that includes every reach-stage and every act-stage check.
 
     python3 --version
@@ -126,7 +126,7 @@ differs between machines fails the build.
 
     for t in tests/test_*.py; do python3 "$t"; done
 
-Expected: ten PASS lines, 2,207 assertions total.
+Expected: ten PASS lines, 2,223 assertions total.
 
     tests/test_collector.py      bundle contract + 5 hostile seeds
     tests/test_deadline.py       the <5 minute ceiling actually holds

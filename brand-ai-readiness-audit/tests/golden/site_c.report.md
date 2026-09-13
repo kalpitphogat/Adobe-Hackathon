@@ -2,6 +2,8 @@
 
 *Audited 2026-05-28T20:26:40Z · status: **no_content_available***
 
+*Evidence basis: **0 page(s) fetched**, 0 rendered. Every finding below applies only to the URLs it lists. Pages this crawl did not fetch were not assessed — absence of a finding for a page is not a pass for it.*
+
 > **No page content could be assessed.** See Limitations below for why. 
 > The findings that follow are limited to what could be observed without page content.
 
@@ -81,4 +83,4 @@ Findings other tools would raise that we suppressed, and why:
 
 ---
 
-*brand-ai-readiness-audit 1.0.0 · 1 of 65 checks ran · AI crawler list snapshot 2026-09-09 (commit 0e111dcc24cb) · recommend-only: nothing was written to the audited site.*
+*brand-ai-readiness-audit 1.0.0 · 1 of 66 checks ran · AI crawler list snapshot 2026-09-09 (commit 0e111dcc24cb) · recommend-only: nothing was written to the audited site.*
