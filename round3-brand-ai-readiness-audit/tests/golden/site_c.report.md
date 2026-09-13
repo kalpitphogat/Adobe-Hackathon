@@ -69,25 +69,15 @@ That sends ONE request per crawler, to the homepage only, with an auditor token 
   - Checks not run: reach.edge.bot_ua_blocked, reach.edge.bot_ua_challenged
 - **site** — No page content was collected, so only origin-level policy could be assessed. robots.txt disallows this auditor from fetching the seed URL. robots.txt is a hard constraint on our own crawling, so no page content was fetched. The robots policy itself is still reported.
   - Checks not run: reach.agent.llms_txt_absent, reach.edge.bot_ua_blocked, reach.edge.bot_ua_challenged, reach.http.broken_internal_links, reach.http.insecure_or_mixed_scheme, reach.http.soft_404, reach.index.canonical_conflict, reach.index.noindex_on_content …
+- **audit environment** — 11 check(s) were not assessed in this run, because an optional capability was unavailable (such as a headless browser or an opt-in probe) or the page carried too little evidence to judge. These are limits on what this run could evaluate, not defects of the site: `act.perf.above_fold_weight`, `extract.sd.identity_graph_weak`, `reach.edge.bot_ua_blocked`, `reach.edge.bot_ua_challenged`, `reach.perf.slow_median_ttfb`, `read.render.nav_links_js_only`, `read.render.raw_text_gap`, `trust.entity.no_external_corroboration`, `trust.integrity.cloaked_text`, `trust.integrity.invisible_unicode`, `trust.integrity.prompt_injection`
 
 ## Deliberately not reported
 
 Findings other tools would raise that we suppressed, and why:
 
-- `act.perf.above_fold_weight` ×1 — not assessed
 - `act.trust.no_policy_or_contact_path` ×1 — suppressed entirely
-- `extract.sd.identity_graph_weak` ×1 — not assessed
 - `reach.agent.llms_txt_absent` ×1 — suppressed by design
-- `reach.edge.bot_ua_blocked` ×1 — not assessed
-- `reach.edge.bot_ua_challenged` ×1 — not assessed
-- `reach.perf.slow_median_ttfb` ×1 — not assessed
 - `reach.sitemap.absent_or_invalid` ×1 — suppressed by threshold
-- `read.render.nav_links_js_only` ×1 — not assessed
-- `read.render.raw_text_gap` ×1 — not assessed
-- `trust.entity.no_external_corroboration` ×1 — not assessed
-- `trust.integrity.cloaked_text` ×1 — not assessed
-- `trust.integrity.invisible_unicode` ×1 — not assessed
-- `trust.integrity.prompt_injection` ×1 — not assessed
 
 ---
 

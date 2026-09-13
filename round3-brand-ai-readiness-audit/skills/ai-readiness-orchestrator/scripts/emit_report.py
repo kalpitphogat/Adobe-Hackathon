@@ -246,9 +246,16 @@ def render_markdown(report: dict, gate_notes: list[str]) -> str:
             add(rec["rationale"])
             add("")
 
+    # A check recorded as "not assessed" is a capability limit of THIS audit run
+    # (for example, no headless browser was configured, or an opt-in probe was not
+    # requested) - not a defect of the site and not a finding we chose to suppress.
+    # It belongs with the transparency notes, never in the suppressed-findings list.
+    not_assessed = [it for it in s["suppressed_by_rule"] if it.get("reason") == "not assessed"]
+    deliberate = [it for it in s["suppressed_by_rule"] if it.get("reason") != "not assessed"]
+
     add("## What this audit could not assess")
     add("")
-    if not report["limitations"]:
+    if not report["limitations"] and not not_assessed:
         add("Nothing material. Every check ran against collected evidence.")
     else:
         for lim in report["limitations"]:
@@ -256,14 +263,21 @@ def render_markdown(report: dict, gate_notes: list[str]) -> str:
             if lim.get("checks_not_run"):
                 add(f"  - Checks not run: {', '.join(lim['checks_not_run'][:8])}"
                     + (" …" if len(lim["checks_not_run"]) > 8 else ""))
+        if not_assessed:
+            names = ", ".join(f"`{it['check_id']}`" for it in not_assessed[:12])
+            add(f"- **audit environment** — {len(not_assessed)} check(s) were not assessed in this "
+                f"run, because an optional capability was unavailable (such as a headless browser or "
+                f"an opt-in probe) or the page carried too little evidence to judge. These are limits "
+                f"on what this run could evaluate, not defects of the site: {names}"
+                + (" …" if len(not_assessed) > 12 else ""))
     add("")
 
-    if s["suppressed_by_rule"]:
+    if deliberate:
         add("## Deliberately not reported")
         add("")
         add("Findings other tools would raise that we suppressed, and why:")
         add("")
-        for item in s["suppressed_by_rule"][:20]:
+        for item in deliberate[:20]:
             add(f"- `{item['check_id']}` ×{item['count']} — {item.get('reason', '')}")
         add("")
 

@@ -343,6 +343,20 @@ try:
                      "act.perf.above_fold_weight"):
         expect(check_id in d_skipped, f"records 'not assessed' with no renderer: {check_id}")
 
+    # A tool/capability limit ("not assessed") is auditor-side transparency, never
+    # a finding and never a "deliberately suppressed" editorial choice about the
+    # site. In the human-readable report it must appear under "could not assess",
+    # not under "Deliberately not reported".
+    d_md = (tmp / "d" / "report.md").read_text(encoding="utf-8")
+    could_not = d_md.split("## What this audit could not assess")[1].split("\n## ")[0]
+    expect("were not assessed in this run" in could_not,
+           "render: 'not assessed' capability limits appear under 'What this audit could not assess'")
+    deliberate = d_md.split("## Deliberately not reported")[1] if "## Deliberately not reported" in d_md else ""
+    expect("not assessed" not in deliberate,
+           "render: 'not assessed' items are NOT listed under 'Deliberately not reported'")
+    expect("read.render.raw_text_gap" not in deliberate,
+           "render: the missing-renderer limit is not framed as a suppressed finding")
+
     b = audit("site_b", tmp / "b")
     b_skipped = {s["check_id"] for s in b["summary"]["suppressed_by_rule"]}
     expect(

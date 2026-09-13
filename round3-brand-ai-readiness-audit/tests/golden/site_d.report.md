@@ -229,6 +229,7 @@ That sends ONE request per crawler, to the homepage only, with an auditor token 
   - Checks not run: reach.edge.bot_ua_blocked, reach.edge.bot_ua_challenged
 - **site** — Every one of the 4 crawled pages serves an unhydrated application shell, and no rendered DOM was captured for any of them, so the page a visitor actually sees was never observed. All engagement checks are suppressed site-wide rather than reported at reduced confidence, because there is no evidence to reduce. This includes the normally site-scoped act.trust.no_policy_or_contact_path, which would otherwise be evidenced from other pages: on this site there are no other pages either. Re-run with a renderer available to assess engagement.
   - Checks not run: act.blocker.content_gated_by_interaction, act.context.assumes_prior_context, act.context.no_onward_path, act.cta.absent_for_page_type, act.cta.ambiguous_primary_label, act.cta.competing_primaries, act.form.field_count_excessive, act.form.high_friction_required_fields …
+- **audit environment** — 6 check(s) were not assessed in this run, because an optional capability was unavailable (such as a headless browser or an opt-in probe) or the page carried too little evidence to judge. These are limits on what this run could evaluate, not defects of the site: `act.perf.above_fold_weight`, `extract.ans.fact_coverage_gap`, `reach.edge.bot_ua_blocked`, `reach.edge.bot_ua_challenged`, `read.render.nav_links_js_only`, `read.render.raw_text_gap`
 
 ## Deliberately not reported
 
@@ -238,16 +239,10 @@ Findings other tools would raise that we suppressed, and why:
 - `act.context.no_onward_path` ×1 — suppressed entirely
 - `act.cta.absent_for_page_type` ×2 — suppressed entirely
 - `act.orient.no_value_proposition` ×2 — suppressed entirely
-- `act.perf.above_fold_weight` ×1 — not assessed
 - `act.trust.no_policy_or_contact_path` ×1 — suppressed entirely
-- `extract.ans.fact_coverage_gap` ×4 — not assessed
 - `extract.ans.no_evidence_markers` ×3 — suppressed by threshold
 - `extract.sd.absent_on_eligible_page` ×4 — suppressed by design
 - `reach.agent.llms_txt_absent` ×1 — suppressed by design
-- `reach.edge.bot_ua_blocked` ×1 — not assessed
-- `reach.edge.bot_ua_challenged` ×1 — not assessed
-- `read.render.nav_links_js_only` ×1 — not assessed
-- `read.render.raw_text_gap` ×1 — not assessed
 - `trust.authorship.unattributed` ×1 — suppressed by design
 
 ---

@@ -330,17 +330,15 @@ curl -s https://harborview-clinic.test/contact | grep -c '<label'
     orchestrate.py <url> --out ./audit-output --probe-bot-ua
 That sends ONE request per crawler, to the homepage only, with an auditor token appended to the user-agent string so it is identifiable in your logs. It is off by default because sending named-crawler user-agents to a site you do not own is not something an audit should do without being asked.
   - Checks not run: reach.edge.bot_ua_blocked, reach.edge.bot_ua_challenged
+- **audit environment** — 3 check(s) were not assessed in this run, because an optional capability was unavailable (such as a headless browser or an opt-in probe) or the page carried too little evidence to judge. These are limits on what this run could evaluate, not defects of the site: `extract.ans.fact_coverage_gap`, `reach.edge.bot_ua_blocked`, `reach.edge.bot_ua_challenged`
 
 ## Deliberately not reported
 
 Findings other tools would raise that we suppressed, and why:
 
-- `extract.ans.fact_coverage_gap` ×4 — not assessed
 - `extract.ans.no_evidence_markers` ×2 — suppressed by threshold
 - `extract.sd.absent_on_eligible_page` ×4 — suppressed by design
 - `reach.agent.llms_txt_absent` ×1 — suppressed by design
-- `reach.edge.bot_ua_blocked` ×1 — not assessed
-- `reach.edge.bot_ua_challenged` ×1 — not assessed
 - `reach.sitemap.absent_or_invalid` ×1 — suppressed by threshold
 
 ---
