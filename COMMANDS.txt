@@ -1,138 +1,211 @@
 ================================================================================
- BRAND AI-READINESS AUDIT  —  HOW TO RUN
+ BRAND AI-READINESS AUDIT  —  COMMAND REFERENCE
  Adobe University Hackathon 2026 · Round 3 · Agent Skill Marketplace
 ================================================================================
 
-All commands are run from the repository root unless a `cd` says otherwise.
-The marketplace itself lives in the `brand-ai-readiness-audit/` folder.
+The marketplace root is the `brand-ai-readiness-audit/` folder. Commands below
+are run from inside it unless a path says otherwise; the packaging command is
+the one exception and runs from the repository root.
 
 
 --------------------------------------------------------------------------------
 0) REQUIREMENTS
 --------------------------------------------------------------------------------
-- Python 3.8 or newer.
-- The audit uses ONLY the Python standard library for crawling/parsing/checks,
-  so no install is needed for the basic run.
-- OPTIONAL: for the `--render` JavaScript fact-gap check you need Playwright +
-  headless Chromium:
-
-    pip install playwright
-    python -m playwright install --with-deps chromium
-
-  Without Playwright the audit still runs and degrades gracefully (it keeps a
-  thin-HTML heuristic and notes that the direct render check was skipped).
-
-Check your Python:
+Python 3.9 or newer. Nothing to install: 63 of the 66 checks run on the standard
+library alone, and that includes every reach-stage and every act-stage check.
 
     python3 --version
 
+OPTIONAL — Playwright + headless Chromium. This upgrades the render-stage
+checks from "a client-rendered shell is detectable" to "here is exactly how much
+text a non-JavaScript crawler loses":
 
---------------------------------------------------------------------------------
-1) RUN AN AUDIT  (the main thing)
---------------------------------------------------------------------------------
-Enter the marketplace folder first:
+    pip install playwright
+    python3 -m playwright install --with-deps chromium
 
-    cd brand-ai-readiness-audit
-
-Basic audit of a website (prints the JSON report to the screen):
-
-    python3 skills/audit-orchestrator/scripts/run_audit.py https://example.com
-
-Save the JSON report to a file:
-
-    python3 skills/audit-orchestrator/scripts/run_audit.py https://example.com --out report.json
-
-Full audit: add --render (JS fact-gap) and --html (readable report page):
-
-    python3 skills/audit-orchestrator/scripts/run_audit.py https://example.com \
-        --render --out report.json --html report.html
-
-Then open report.html in any browser.
-
-Available flags:
-    --max-pages N     how many pages to sample (default 12)
-    --render          use headless Chromium to measure the raw-vs-rendered gap
-    --out FILE        write the JSON report to FILE
-    --html FILE       also write a human-readable HTML report to FILE
-
-Exit code is 0 on success; non-zero if the site is unreachable, the crawl
-fails, or a sub-audit could not run (so an incomplete report is never silent).
+Without it the audit still runs. It does not quietly pass the checks it could
+not perform — it reports them as `not assessed` in the report's limitations,
+and lowers confidence on the checks that depend on a rendered DOM.
 
 
 --------------------------------------------------------------------------------
-2) VALIDATE THE MARKETPLACE (structure / spec compliance)
+1) AUDIT A WEBSITE  (the main thing)
 --------------------------------------------------------------------------------
     cd brand-ai-readiness-audit
-    python3 scripts/validate.py
+    python3 skills/ai-readiness-orchestrator/scripts/orchestrate.py https://example.com \
+        --out ./audit-output
 
-Expected: "OK: 7 skills, 1 entrypoint (audit-orchestrator), all SKILL.md ..."
+Writes two files into --out:
+
+    audit-report.json   the fixed-schema report (findings + suggested actions)
+    report.md           the same thing written for a non-engineer
+    fix_patches/        paste-ready patch text per finding, where one applies
+
+The command prints a small JSON summary to stdout so it can be piped.
+
+
+AUDITING YOUR OWN SITE? ADD --probe-bot-ua
+------------------------------------------
+    python3 skills/ai-readiness-orchestrator/scripts/orchestrate.py https://your-site.com \
+        --out ./audit-output --probe-bot-ua
+
+This is the single highest-value check in the marketplace and it is OFF by
+default. It detects whether your CDN or WAF returns 403 to AI crawlers — a rule
+that removes your brand from those assistants entirely while leaving NO trace in
+robots.txt and nothing visible to anyone browsing the site. Bot-protection
+defaults do this routinely, to sites whose owners have no idea.
+
+It sends ONE request per crawler, homepage only, with an auditor token appended
+to the user-agent so your logs show it was an audit. It is off by default
+because sending named-crawler user-agents at a site you do not own is not
+something an audit should do unless asked. Without it those two checks report
+`not assessed` — a blind spot, not a pass.
+
+
+FLAGS
+-----
+    --out DIR               where to write the report        (default ./audit-output)
+    --max-pages N           pages to sample                  (default 25)
+    --render N              pages to render with Chromium    (default 6)
+    --no-render             skip rendering entirely
+    --workers N             concurrent fetches               (default 5)
+    --delay SECONDS         per-host politeness delay        (default 0.4)
+    --time-budget SECONDS   hard ceiling on the whole run    (default 300; 0 disables)
+    --probe-bot-ua          probe CDN/WAF reachability for named AI crawlers
+    --allow-private-hosts   permit seeds/redirects resolving to private or
+                            loopback addresses (see section 6)
+    --offline-root DIR      audit a local fixture directory instead of the network
+    --bundle DIR            re-analyse an existing evidence bundle, no refetch
+    --explain-gates         print the gate cascade state to stderr
+
+EXIT CODES. Exit 0 whenever a schema-valid report was written, whatever it
+contains. A site that does not resolve, 404s, or forbids crawling still gets a
+report and still exits 0 — the outcome lives in the report's `audit_status`
+field, never in the exit code, because a grading harness may read any non-zero
+exit as a crash. Non-zero is reserved for: no report could be produced (1), the
+output path is unusable (2), arguments are invalid (3).
 
 
 --------------------------------------------------------------------------------
-3) RUN THE TEST SUITE (offline, no network)
+2) RUN WITHOUT A NETWORK  (fixtures)
 --------------------------------------------------------------------------------
-    cd brand-ai-readiness-audit
-    python3 tests/run_tests.py
+Six fixture sites ship with the marketplace. Audit any of them offline:
 
-Add --render to also exercise the headless-browser path:
+    python3 skills/ai-readiness-orchestrator/scripts/orchestrate.py \
+        --offline-root tests/fixtures/site_b --out ./audit-output
 
-    python3 tests/run_tests.py --render
-
-Expected: "Ran 9 tests ... OK"
-
-
---------------------------------------------------------------------------------
-4) RENDER A REPORT TO HTML SEPARATELY (optional)
---------------------------------------------------------------------------------
-If you already have a report.json and just want the HTML page:
-
-    cd brand-ai-readiness-audit
-    python3 skills/audit-orchestrator/scripts/render_report.py report.json report.html
+    site_a   a well-built site            -> zero high or critical findings
+    site_b   a broken clinic site         -> one critical, downstream capped
+    site_c   blanket Disallow: /          -> fetches nothing, reports one critical
+    site_d   an all-shell SPA             -> zero engagement findings site-wide
+    site_e   mixed AI-bot robots policy   -> training INFO, dual-purpose MEDIUM
+    site_f   a well-built tool site       -> zero findings (false-positive control)
 
 
 --------------------------------------------------------------------------------
-5) PACKAGE THE SUBMISSION ZIP
+3) VALIDATE THE MARKETPLACE (structure / spec compliance / doc drift)
 --------------------------------------------------------------------------------
-    cd brand-ai-readiness-audit
-    zip -r ../submission.zip . -x '*__pycache__*' -x '*.pyc' -x 'tests/*cache*'
+    python3 tests/validate_marketplace.py
 
-The zip lands at the repo root as submission.zip (well under the 50 MB limit).
+Expected: "73 passed, 0 skipped, 0 failed".
+
+Checks the manifest, every SKILL.md against the agentskills.io spec, the
+allowed-tools declarations, that no skill imports another, that every check_id
+named in documentation exists in code, and that no count written in prose
+disagrees with the live check registry.
 
 
 --------------------------------------------------------------------------------
-6) RUN IT IN GITHUB ACTIONS (no local machine needed)
+4) RUN THE TEST SUITES
 --------------------------------------------------------------------------------
-CI (validate + tests) runs automatically on every push/pull request.
+    python3 tests/run_offline.py        # 6 golden reports byte-for-byte + determinism
+
+Expected: "PASS: offline, deterministic, goldens current, control clean."
+Also re-runs two fixtures across a TZ x PYTHONHASHSEED matrix, so a report that
+differs between machines fails the build.
+
+    for t in tests/test_*.py; do python3 "$t"; done
+
+Expected: ten PASS lines, 2,223 assertions total.
+
+    tests/test_collector.py      bundle contract + 5 hostile seeds
+    tests/test_deadline.py       the <5 minute ceiling actually holds
+    tests/test_gate_cascade.py   the cascade, Rule 0b, the control
+    tests/test_politeness.py     RFC 9309 conformance
+    tests/test_proactive.py      beyond-defect recommendations, archetype-gated
+    tests/test_profile.py        classifier + misclassification regressions
+    tests/test_regressions.py    every false positive found and fixed
+    tests/test_ssrf.py           private-address refusal + read-only transport
+    tests/test_suppression.py    one case per documented SUPPRESS WHEN
+    tests/test_traps.py          crawler traps and sampling
+
+
+--------------------------------------------------------------------------------
+5) BUILD AND VERIFY THE SUBMISSION ZIP
+--------------------------------------------------------------------------------
+From the REPOSITORY ROOT (not the marketplace folder):
+
+    python3 package_submission.py           # build submission.zip, then verify it
+    python3 package_submission.py --check   # verify the existing zip, no rebuild
+
+The zip is flat: marketplace.json, README.md and skills/ sit at its root, so a
+grader who unzips it finds the manifest where the handout says it will be. The
+build is deterministic — rebuilding from unchanged sources produces a
+byte-identical file — and it refuses to write a zip that breaks any packaging
+rule in the handout (one entrypoint, valid SKILL.md everywhere, <= 50 MB, no
+model weights).
+
+Sanity-check the artifact the way a grader would:
+
+    mkdir /tmp/grader && cd /tmp/grader
+    unzip -q /path/to/submission.zip
+    python3 skills/ai-readiness-orchestrator/scripts/orchestrate.py \
+        --offline-root tests/fixtures/site_b --out ./out
+
+
+--------------------------------------------------------------------------------
+6) AUDITING A SITE YOU HOST LOCALLY
+--------------------------------------------------------------------------------
+By default the auditor refuses any host that resolves into private, loopback or
+link-local address space — on the seed AND on every redirect hop. Auditing a
+public brand never requires reaching internal address space, and a redirect is
+the ordinary way a public host hands a crawler an internal one.
+
+To audit something you host yourself, opt in explicitly:
+
+    python3 -m http.server 8000 --directory tests/fixtures/site_b &
+    NO_PROXY=127.0.0.1 python3 skills/ai-readiness-orchestrator/scripts/orchestrate.py \
+        http://127.0.0.1:8000/ --out ./audit-output --allow-private-hosts
+    kill %1
+
+Prefer --offline-root (section 2) when you just want to see the auditor work;
+it needs no server and no flag.
+
+
+--------------------------------------------------------------------------------
+7) RUN IT IN GITHUB ACTIONS (no local machine needed)
+--------------------------------------------------------------------------------
+CI (validator + all suites + goldens + zip verification) runs automatically on
+every push and pull request.
 
 To audit a URL in the cloud on demand:
   1. Open the repo on GitHub -> "Actions" tab.
   2. Select the "Run Audit" workflow -> "Run workflow".
-  3. Enter the URL (and optionally max_pages / render).
+  3. Enter the URL, and optionally max_pages / render / probe_bot_ua.
   4. When it finishes, a findings table appears in the run summary, and
-     report.json + report.html are attached as a downloadable artifact.
-
-
---------------------------------------------------------------------------------
-7) QUICK LOCAL DEMO (audit a site you serve yourself)
---------------------------------------------------------------------------------
-The repo ships fixture sites used by the tests; you can audit one directly:
-
-    cd brand-ai-readiness-audit
-    python3 -m http.server 8000 --directory tests/fixtures/badsite &
-    NO_PROXY=127.0.0.1 python3 skills/audit-orchestrator/scripts/run_audit.py \
-        http://127.0.0.1:8000 --render --out demo.json --html demo.html
-    # stop the server when done:
-    kill %1
-
-badsite is deliberately broken (expect many findings); goodsite is healthy
-(expect very few).
+     audit-report.json + report.md are attached as a downloadable artifact.
 
 
 --------------------------------------------------------------------------------
 NOTES
 --------------------------------------------------------------------------------
-- Read-only: the audit never modifies the site, only fetches (GET) and reports.
-- Respects robots.txt: URLs disallowed for the crawler are never fetched.
-- Runs in well under 5 minutes for a typical site.
-- More detail: see README.md (repo root) and brand-ai-readiness-audit/README.md.
+- Read-only. The HTTP layer validates every request method against a {GET, HEAD}
+  allowlist, so no code path in the marketplace can alter a live site.
+- No cookies, no credentials, no authenticated areas: the opener is built
+  without a cookie processor and without an auth handler.
+- robots.txt is a hard constraint on our own crawling, not advice.
+- The whole run is bounded by --time-budget (default 300s). Every stage draws
+  from one shared clock, so the five-minute ceiling holds even if a stage hangs.
+- More detail: README.md (repo root), brand-ai-readiness-audit/README.md for the
+  short tour, brand-ai-readiness-audit/DESIGN.md for the design notes.
 ================================================================================

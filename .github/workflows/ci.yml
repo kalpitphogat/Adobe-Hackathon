@@ -1,6 +1,7 @@
 name: CI
 
-# Quality gate: validate the marketplace and run the test suite on every push/PR.
+# Quality gate: everything the handout constrains is checked here on every
+# push and PR, so a regression cannot reach the submission unnoticed.
 on:
   push:
     branches: ["**"]
@@ -9,21 +10,75 @@ on:
 jobs:
   validate-and-test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: brand-ai-readiness-audit
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.9 is the floor the skills declare; 3.12 catches anything that only
+        # works on an older interpreter.
+        python-version: ["3.9", "3.12"]
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
 
-      - name: Validate marketplace (manifest + SKILL.md compliance)
-        run: python scripts/validate.py
+      - name: Compile every script
+        working-directory: brand-ai-readiness-audit
+        run: python -m compileall -q skills tests
 
-      - name: Compile all scripts
-        run: python -m py_compile $(find . -name '*.py')
+      - name: Validate marketplace (manifest, SKILL.md spec, doc drift)
+        working-directory: brand-ai-readiness-audit
+        run: python tests/validate_marketplace.py
 
-      - name: Run test suite (offline fixtures)
-        run: python tests/run_tests.py
+      - name: Unit suites
+        working-directory: brand-ai-readiness-audit
+        run: |
+          status=0
+          for t in tests/test_*.py; do
+            echo "::group::$t"
+            python "$t" || status=1
+            echo "::endgroup::"
+          done
+          exit $status
+
+      - name: Golden reports, byte-for-byte, and the determinism matrix
+        working-directory: brand-ai-readiness-audit
+        run: python tests/run_offline.py
+
+      # The deliverable itself, not just the tree it is built from: this fails
+      # if the zip would break any packaging rule in the handout.
+      - name: Build and verify submission.zip
+        run: python package_submission.py
+
+      - name: The zip must run standalone, the way a grader will use it
+        run: |
+          mkdir -p /tmp/grader
+          unzip -q submission.zip -d /tmp/grader
+          cd /tmp/grader
+          entry=$(python -c "import json;m=json.load(open('marketplace.json'));print(next(s['path'] for s in m['skills'] if s.get('entrypoint')))")
+          python "$entry/scripts/orchestrate.py" \
+            --offline-root tests/fixtures/site_b --out ./out
+          python - <<'PY'
+          import json, sys
+          report = json.load(open("/tmp/grader/out/audit-report.json"))
+          required = {"site", "audited_at", "summary", "findings"}
+          missing = required - set(report)
+          if missing:
+              sys.exit(f"report is missing required keys: {sorted(missing)}")
+          for key in ("total_findings", "critical", "high", "medium", "low"):
+              if key not in report["summary"]:
+                  sys.exit(f"summary is missing required key: {key}")
+          per_finding = {"id", "title", "severity", "evidence", "suggested_action"}
+          for finding in report["findings"]:
+              gap = per_finding - set(finding)
+              if gap:
+                  sys.exit(f"{finding.get('id', '?')} is missing {sorted(gap)}")
+          print(f"report schema OK: {len(report['findings'])} findings, all required fields present")
+          PY
+
+      - name: submission.zip must be in sync with the marketplace
+        run: |
+          git diff --exit-code -- submission.zip \
+            || { echo "submission.zip is stale; run: python package_submission.py"; exit 1; }

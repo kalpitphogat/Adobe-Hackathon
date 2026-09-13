@@ -1,107 +1,165 @@
-# brand-ai-readiness-audit
+# Brand AI-Readiness Audit
 
-An **Agent Skill Marketplace** that audits any website for the two problems from
-Round 2 — poor **AI discoverability** (the brand isn't found or cited by AI assistants)
-and poor **on-site engagement** (visitors who arrive don't stay) — and emits one
-structured report of evidence-backed findings plus prioritized, actionable fixes.
+**Adobe University Hackathon 2026 — Round 3, Build the Agent Skill Marketplace**
+Team: Lakshya, Tanmay, Kalpit · MIT
 
-**Recommend-only.** Every skill runs read-only in a sandbox, respects `robots.txt`, and
-never modifies, authenticates to, or rate-abuses the audited site. Suggested actions are
-recommendations, not changes applied to the site.
+Point this at a website. It tells you why AI assistants do not find, cite or
+correctly describe the brand, and why visitors who do arrive leave without
+acting — with evidence for every claim, a paste-ready fix, and an order to do
+them in. Read-only; it never modifies the site it audits.
 
-## Quick start
 ```bash
-# audit a site (add --render to measure the JS fact gap with headless Chromium)
-python skills/audit-orchestrator/scripts/run_audit.py https://example.com --render \
-    --out report.json --html report.html
+python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://example.com --out ./audit-output
 ```
-The entrypoint crawls the site once, runs every other skill against a shared page cache,
-and prints the final JSON report. `--out` writes the JSON, `--html` additionally writes a
-readable, severity-ranked HTML report a non-expert can act on. Runs in well under 5
-minutes for a typical site.
 
-## Why these skills (concern → skill map)
-The report's reasoning is decomposed into one focused skill per **mechanism** behind AI
-visibility (drawn from the Round-2 appendix), so each concern is independently testable
-and the entrypoint just composes them:
+Outputs `audit-report.json` (fixed schema) and `report.md`, written for someone
+who is not an engineer. Python 3.9+; 63 of 66 checks need nothing but the
+standard library.
 
-| Skill | Round-2 mechanism | The question it answers |
-|-------|-------------------|-------------------------|
-| **audit-orchestrator** *(entrypoint)* | — | Crawl once, run the others, compose the one report |
-| **crawl-access-audit** | A — *let the crawler in* | Can an (AI) crawler reach & index the site? (robots, AI-bot rules, sitemap, noindex, status, HTTPS) |
-| **render-extraction-audit** | C — *read the page* | Are the facts in raw HTML, or only after JS? (static-vs-rendered gap, thin shells, image-locked facts) |
-| **structured-data-audit** | A/C — *pick out the fact* | Can a machine extract & attribute the fact? (JSON-LD coverage/validity, entity identity, metadata, headings) |
-| **freshness-corroboration-audit** | D — *agreement across the web* | Is the fact current & cross-verifiable? (stale dates, sameAs, identity collision, unattributed claims) |
-| **answerability-audit** | B — *easy to quote* | Is the key fact stated as short, self-contained, quotable text? (FAQ markup, thin content, clear homepage, chunkable structure) |
-| **integrity-audit** | trust / safety | Does the page manipulate the machine? (prompt-injection, hidden/cloaked text, invisible Unicode) |
-| **engagement-audit** | on-site retention | Will an arriving visitor stay? (viewport, weight/latency, CTA, navigation, interstitials) |
+> **Design rationale, the full check inventory, guardrails and known limitations
+> are in [DESIGN.md](DESIGN.md).** This file is the short tour the submission
+> asks for: what each skill does, and how the entrypoint composes them.
 
-Discoverability is covered by the first six (integrity is a trust signal on that side);
-engagement by the last. The report tags
-every finding with its `dimension` and summarizes both halves separately.
+---
 
-## How the entrypoint composes the others
-`audit-orchestrator` holds **no checks of its own**. It:
-1. Runs `crawler.py` once → a shared cache (`meta.json` + raw/extracted/rendered text per
-   page). One polite crawl feeds all sub-audits.
-2. Invokes each sub-audit script on that cache; each returns an envelope
-   `{ skill, findings[] }` (contract in
-   `skills/audit-orchestrator/references/report-format.md`).
-3. Merges, tags dimension, sorts by severity, assigns stable `F-NNN` ids, counts by
-   severity → emits the fixed-schema report.
+## What each skill does
 
-Adding or swapping a concern = add a skill folder + one line in `marketplace.json`; the
-orchestrator needs no change beyond its sub-audit list.
+Nine skills. One entrypoint.
 
-## Output schema
-Meets the required floor (`site`, `audited_at`, `summary` counts, and per finding `id`,
-`title`, `severity`, `evidence`, `suggested_action`) and adds `url`, `auditor`, `scope`,
-`summary.by_dimension`, and per-finding `dimension` / `skill` / `checked`. Severity is
-computed from evidence per `skills/audit-orchestrator/references/severity-rubric.md`, not
-hardcoded, so it generalizes to unseen sites.
+| skill | what it does | stage |
+|---|---|---|
+| **ai-readiness-orchestrator** | **Entrypoint.** Runs every other skill, applies the gate cascade, dedupes, scores and ranks, and emits the single audit report. | — |
+| site-evidence-collector | Fetches and renders the site **exactly once** and writes the shared evidence bundle. The only skill that touches the network. | — |
+| site-profile-classifier | Detects the site archetype and per-page type, then selects the thresholds every other skill scores against. | — |
+| crawl-access-audit | Can an AI crawler get in? robots.txt against a dated AI-bot snapshot, CDN/WAF reachability, `noindex`, canonicals, redirects, soft 404s, broken links, sitemaps, `llms.txt`. | reach |
+| render-gap-audit | Can it read the page without running JavaScript? Raw-vs-rendered diff, unhydrated SPA shells, JSON-island recovery, facts locked in images. | read |
+| structured-data-audit | Is the fact machine-typed? JSON-LD, microdata, RDFa and OpenGraph — presence, validity, correct type, required properties, markup-vs-visible contradictions, `hreflang`. | extract |
+| answerability-audit | Is the fact quotable? Simulates retrieval over no-JS windows and tests whether each claim survives self-contained: no dangling pronoun, subject named, plus tables, headings and direct-answer blocks. | extract |
+| trust-freshness-audit | Would a machine believe it? Date coherence across schema/visible/sitemap/headers, entity identity and NAP consistency, external corroboration, authorship — plus prompt-injection, cloaking and invisible-Unicode integrity checks. | trust |
+| engagement-audit | Does the visitor stay and act? First-screen orientation, CTA clarity, form friction, dead ends, interstitials, mobile viewport, page weight, social proof, cost signals. | act |
 
-## Layout
+`site-evidence-collector` and `site-profile-classifier` emit no findings, and
+that is deliberate. The **collector** is why six audit skills cannot disagree
+about what the site served, and why one crawl fits the time budget. The
+**classifier** is where generalisation lives: no check anywhere hardcodes a
+threshold, every one asks the profile. Neither performs a check; both are
+load-bearing.
+
+---
+
+## How the entrypoint composes them
+
+By **subprocess**, never by import:
+
 ```
-brand-ai-readiness-audit/
-  marketplace.json            # manifest: every skill + the one entrypoint
-  README.md
-  scripts/validate.py         # convenience: sanity-check manifest + all SKILL.md files
-  skills/
-    audit-orchestrator/       # ENTRYPOINT — crawler.py, run_audit.py, auditlib.py, refs
-    crawl-access-audit/
-    render-extraction-audit/
-    structured-data-audit/
-    freshness-corroboration-audit/
-    answerability-audit/
-    integrity-audit/
-    engagement-audit/
+orchestrate.py  (ai-readiness-orchestrator)
+  → collect.py           writes the evidence bundle          (network, once)
+  → profile.py           archetype + page types + thresholds
+  → 6 × run.py           each reads that bundle, prints one JSON object
+  → gate cascade         cap, tag blocked_by, suppress per Rule 0b
+  → dedupe, score, rank  severity → ICE → stage → check_id
+  → emit                 audit-report.json + report.md + fix_patches/
 ```
-Each skill folder is an independent, agentskills.io-compliant skill (SKILL.md with YAML
-frontmatter + `scripts/` + `references/`). Detailed check catalogs and paste-ready fixes
-live in each skill's `references/` (progressive disclosure).
 
-## Requirements
-- Python 3.8+ (standard library only for crawling/parsing/checks).
-- Optional: `playwright` + Chromium for `--render` (the static-vs-rendered fact gap). The
-  audit degrades gracefully without it, keeping the thin-HTML heuristic.
+Every audit skill is invoked as
+`python <skill>/scripts/run.py --bundle <dir> [--profile <file>]`, returns one
+JSON object on stdout, and exits 0 (ran), 3 (precondition unmet) or 1 (error).
+The orchestrator holds **no checks of its own** — it is pure composition.
 
-## Validate & test
+Because nothing imports across skill folders, **any skill folder can be lifted
+out of this marketplace and run alone**. Where two skills need the same
+predicate it is duplicated on purpose, and a test walks the AST of every script
+to fail the build on a cross-skill import, including the `sys.path` dodge.
+
+The ordering is the design. The Round-2 appendix says three things must succeed
+**in order** — the crawler is let in, the page can be read, the fact can be
+picked out — so when an upstream stage fails, downstream findings are recorded
+but **capped and tagged with the id of the finding blocking them**. You get the
+root cause first instead of forty equal-looking problems.
+See [DESIGN.md](DESIGN.md) for the cascade and Rule 0b in full.
+
+The skill contract is normative and was written before the audit skills:
+[`skill-cli-contract.md`](skills/ai-readiness-orchestrator/references/skill-cli-contract.md).
+
+---
+
+## The report
+
+```jsonc
+{
+  "site": "example.com",
+  "audited_at": "2026-09-20T14:32:00Z",
+  "summary": { "total_findings": 6, "critical": 1, "high": 2, "medium": 3,
+               "by_category": { "discoverability": 5, "engagement": 1 } },
+  "findings": [{
+    "id": "F-001",
+    "title": "...",
+    "severity": "critical",
+    "evidence": "...",                  // what was observed, with counts and URLs
+    "suggested_action": {
+      "summary": "...", "priority": "critical",
+      "mechanism": "...",               // why the fix works
+      "patch": "...",                   // paste-ready
+      "ice": 9.3, "effort": "low",
+      "verification": "..."             // how to confirm it worked
+    },
+    "stage": "reach", "confidence": "confirmed", "blocked_by": null
+  }],
+  "proactive_recommendations": [ /* improvements where no defect was found */ ],
+  "limitations": [ /* what could not be assessed, and why */ ]
+}
+```
+
+Findings are ordered by what to fix first. Anything the audit could not assess
+is stated in `limitations` rather than passed silently.
+
+---
+
+## Running it
+
 ```bash
-python scripts/validate.py          # manifest well-formedness + one entrypoint + each SKILL.md
-python tests/run_tests.py           # full offline test suite (add --render for the browser path)
-# or, if available:  skills-ref validate ./skills/<folder>
+# audit a site
+python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://example.com --out ./audit-output
+
+# your own site? adds the highest-value check in the marketplace (see DESIGN.md)
+python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://your-site.com \
+    --out ./audit-output --probe-bot-ua
+
+# no network required
+python skills/ai-readiness-orchestrator/scripts/orchestrate.py \
+    --offline-root tests/fixtures/site_b --out ./audit-output
 ```
-`tests/` ships two local fixture sites — a deliberately-broken one (`badsite`) and a
-healthy one (`goodsite`). The suite boots each, runs the real end-to-end audit, and
-asserts that the expected problems are detected on the broken site and *not* falsely
-raised on the healthy one — plus schema-floor conformance, severity sorting, and the HTML
-renderer. Standard-library `unittest`; no network required.
 
-## Scope & guardrails
-Read-only; GET only; no destructive, authenticated, or rate-abusing actions; respects
-`robots.txt`. Submission is self-contained — no external service resolves the
-marketplace. Suggested actions may go beyond detected defects (proactive improvements
-like adding `llms.txt`, FAQ schema, or `sameAs` identity links) but never modify the site.
+Playwright is optional and upgrades the render-stage checks; without it the
+audit still runs and reports what it could not see. Exit code is 0 whenever a
+schema-valid report was written — the outcome lives in `audit_status`, never in
+the exit code.
 
-## License
-MIT (per-skill in each SKILL.md).
+**Tests** — `python tests/validate_marketplace.py` (structure, spec, doc drift),
+`python tests/run_offline.py` (6 golden reports byte-for-byte + a determinism
+matrix), and `python tests/test_*.py` (10 suites). Details in
+[DESIGN.md](DESIGN.md).
+
+---
+
+## Guardrails
+
+- **Recommend-only.** No skill modifies a live site. The HTTP layer validates
+  every method against a `{GET, HEAD}` allowlist, so no code path can POST.
+- **robots.txt is a hard constraint** on our own crawling, not advice.
+- **No authenticated areas, no cookies, no credentials.**
+- **Private, loopback and link-local hosts are refused**, on the seed and on
+  every redirect hop.
+- **Polite:** 5 workers, 0.4s per-host delay, `Retry-After` honoured, backoff on
+  429/5xx, crawler-trap guards, 25-page cap.
+- **Bounded runtime.** Every stage draws from one shared clock, so the run
+  cannot outrun `--time-budget` (default 300s).
+- **No hosted API, key or account.** The manifest is self-contained.
+
+Full statements, and the reasoning behind each, in [DESIGN.md](DESIGN.md).
+
+---
+
+*Licence: MIT, declared in every skill's `SKILL.md`, in `marketplace.json`, and
+in [`LICENSE`](LICENSE). Third-party sources credited in
+[`ATTRIBUTIONS.md`](ATTRIBUTIONS.md).*
