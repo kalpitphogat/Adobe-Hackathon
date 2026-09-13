@@ -6,12 +6,24 @@ zero-dependency tier:
 
   raw_text_gap      quantified diff of raw versus rendered text. Needs a
                     renderer, so it is ENRICHMENT. When no rendered DOM exists
-                    it does not fire at all - it becomes a limitation.
+                    it does not fire at all - it becomes a limitation. It is
+                    HIGH, not critical: firing it means we rendered the page and
+                    the content demonstrably EXISTS after JavaScript runs, so a
+                    JS-executing crawler (Googlebot, and increasingly others)
+                    recovers it. The residual, real risk is the non-executing
+                    half of the ecosystem - many retrieval fetchers, and the
+                    fast initial fetch an assistant makes before deciding whether
+                    to spend a render - which is serious but not invisibility.
   empty_spa_shell   static signature of an unhydrated mount point. Needs no
                     browser, so it is CORE, and it is how a zero-install run
                     still reports a render-stage problem. It fires at high /
                     likely instead of critical / confirmed, because without a
                     render we cannot quantify what is missing.
+
+Modern web architecture is NOT penalised for being client-rendered. When a page
+is a shell in raw HTML but we captured a rendered DOM, empty_spa_shell is
+suppressed and we reason from raw_text_gap instead - a measured, HIGH finding
+about what a non-rendering reader loses, never a blanket "invisible" verdict.
 
 The shell signature is deliberately conservative: all four signals must agree.
 A false positive here caps the site's whole discoverability report under gate
@@ -25,7 +37,7 @@ from bundle import action, finding, threshold
 
 CHECKS = [
     {"id": "read.render.raw_text_gap", "stage": "read", "category": "discoverability",
-     "tier": "enrichment", "default_severity": "critical", "skill": "render-gap-audit"},
+     "tier": "enrichment", "default_severity": "high", "skill": "render-gap-audit"},
     {"id": "read.render.empty_spa_shell", "stage": "read", "category": "discoverability",
      "tier": "core", "default_severity": "critical", "skill": "render-gap-audit"},
     {"id": "read.render.nav_links_js_only", "stage": "read", "category": "discoverability",
@@ -90,12 +102,15 @@ def run(b, profile) -> tuple[list[dict], list[dict], list[dict]]:
             findings.append(finding(
                 check_id="read.render.raw_text_gap",
                 title=f"Most of this page's text only exists after JavaScript runs",
-                severity="critical", confidence="confirmed", stage="read",
+                severity="high", confidence="confirmed", stage="read",
                 category="discoverability", scope="url",
                 evidence=(
                     f"{page['url']}: raw HTML main content is {raw_words} words, the rendered DOM "
-                    f"is {rendered_words} words, so a crawler that does not execute JavaScript "
-                    f"sees {ratio:.0%} of the content. Present only after rendering: {quoted}"
+                    f"is {rendered_words} words. AI crawlers differ here: a JavaScript-executing "
+                    f"crawler (Googlebot, and increasingly others) renders this and recovers the "
+                    f"content, but a non-executing fetcher — and the fast initial fetch many "
+                    f"assistants make before deciding whether to spend a render — sees only "
+                    f"{ratio:.0%} of it. Present only after rendering: {quoted}"
                 ),
                 affected_urls=[page["url"]],
                 action=action(

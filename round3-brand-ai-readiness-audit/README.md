@@ -276,10 +276,13 @@ lowers its confidence and says why, or reports *not assessed* in `limitations[]`
 It never quietly passes.
 
 The one place the zero-install guarantee bends, stated plainly:
-`read.render.raw_text_gap` is `critical` and genuinely needs a renderer. CORE
-ships `read.render.empty_spa_shell` as the zero-install path to a render-stage
-finding, at high/likely instead of critical/confirmed. A zero-install run still
-detects and reports the render gap; it cannot quantify it.
+`read.render.raw_text_gap` is `high` and genuinely needs a renderer. It is high,
+not critical, because firing it means the content demonstrably exists once
+JavaScript runs — a JS-executing crawler recovers it, so the real risk is the
+non-executing fetchers, not invisibility. CORE ships `read.render.empty_spa_shell`
+as the zero-install path to a render-stage finding, at high/likely instead of
+critical/confirmed. A zero-install run still detects and reports the render gap;
+it cannot quantify it.
 
 ---
 

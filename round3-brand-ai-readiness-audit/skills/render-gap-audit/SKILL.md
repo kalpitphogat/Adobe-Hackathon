@@ -51,11 +51,21 @@ under gate Rule 2 and suppresses 13 engagement checks under Rule 0b.
 
 | check_id | detects | default severity |
 |---|---|---|
-| `read.render.raw_text_gap` | rendered text substantially exceeds raw HTML text | critical |
+| `read.render.raw_text_gap` | rendered text substantially exceeds raw HTML text | high |
 | `read.render.empty_spa_shell` | served HTML is an empty application mount point | critical, or high without a renderer |
 | `read.render.nav_links_js_only` | the internal link graph exists only after hydration | high |
 | `read.nontext.key_fact_image_only` | a price, phone or spec exists only inside an image | high |
 | `read.nontext.informative_image_no_alt` | content-bearing images carry no alt text | medium |
+
+**Client-side rendering is not, by itself, a defect.** A React/Vue/Next site
+whose content is present once JavaScript runs is normal modern architecture, and
+JS-executing crawlers recover it. This skill never flags "SPA" as a verdict. When
+a rendered DOM is available it reasons only from the *measured* raw-versus-rendered
+gap (`raw_text_gap`, **high** — a real risk to non-executing fetchers, not
+invisibility), and `empty_spa_shell` is suppressed in that case. The critical,
+core-only `empty_spa_shell` fires only when the served HTML is a bare mount point
+**and** no render could be captured to prove otherwise — and even then it drops to
+high/likely whenever the renderer was simply unavailable.
 
 ### SUPPRESS WHEN
 

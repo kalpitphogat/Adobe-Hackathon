@@ -195,7 +195,7 @@
       "stage": "read",
       "category": "discoverability",
       "tier": "enrichment",
-      "default_severity": "critical",
+      "default_severity": "high",
       "requires": "rendered_dom"
     },
     {

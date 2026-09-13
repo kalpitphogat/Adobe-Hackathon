@@ -314,6 +314,97 @@ expect(
     "R8: a genuine listing page is not emptied by link-block stripping",
 )
 
+# =====================================================================
+# R9. Modern client-rendered architecture must not be penalised as a blanket
+# "invisible to crawlers" critical defect.
+#
+# A React/Vue/Next site whose content is present after JavaScript runs is normal.
+# When we DID capture a rendered DOM:
+#   * read.render.empty_spa_shell must be SUPPRESSED (deduped into raw_text_gap),
+#     never fired — the shell signature is not a verdict on a rendered page.
+#   * read.render.raw_text_gap reports the MEASURED gap at HIGH (a real risk to
+#     non-executing fetchers), never critical/invisible.
+#   * a site-rendered page (content already in raw) fires NOTHING.
+# When no renderer was available, empty_spa_shell fires at high/likely, not
+# critical/confirmed, because we could not measure what a visitor sees.
+# =====================================================================
+
+render_mod = load("render-gap-audit", "diff_raw_rendered")
+
+
+class _StubBundle:
+    def __init__(self, pages, degraded=()):
+        self._pages = pages
+        self._degraded = list(degraded)
+
+    def html_pages(self):
+        return self._pages
+
+    def degraded_capabilities(self):
+        return {d["capability"] for d in self._degraded}
+
+    @property
+    def degraded(self):
+        return self._degraded
+
+
+_RENDERED_PROSE = (
+    "OpenTelemetry pipelines give data teams full visibility into their systems. "
+    "Our platform ingests traces and metrics at scale for large deployments. "
+    "Start a free trial today and see measurable results within the first week."
+)
+_SHELL_SIGNALS = {"body_wordcount": 3, "framework_root": "#root",
+                  "framework_root_wordcount": 0, "bundle_scripts": ["/static/app.abc.js"],
+                  "noscript_wordcount": 0}
+
+# Scenario 1: SPA shell in raw, full content after render.
+spa_rendered = _StubBundle([{
+    "url": "https://spa.test/", "looks_like_spa_shell": True, "rendered_available": True,
+    "main_wordcount": 3, "rendered_main_wordcount": 400, "rendered_wordcount": 420,
+    "main_text": "Loading", "rendered_text": _RENDERED_PROSE,
+    "spa_signals": _SHELL_SIGNALS, "links": {"internal": []}, "rendered_internal_link_count": 0,
+}])
+f1, s1, _ = render_mod.run(spa_rendered, None)
+fired1 = {f["check_id"]: f for f in f1}
+skipped1 = {s["check_id"] for s in s1}
+expect("read.render.empty_spa_shell" not in fired1,
+       "R9: empty_spa_shell is NOT fired on an SPA whose content we rendered")
+expect("read.render.empty_spa_shell" in skipped1,
+       "R9: empty_spa_shell defers to raw_text_gap when a rendered DOM exists")
+expect("read.render.raw_text_gap" in fired1,
+       "R9: the measured render gap is reported instead")
+expect(fired1.get("read.render.raw_text_gap", {}).get("severity") == "high",
+       "R9: a measured render gap is HIGH, not critical (JS-executing crawlers recover it)")
+
+# Scenario 2: SPA shell, no renderer available (core-only).
+spa_core_only = _StubBundle(
+    [{
+        "url": "https://spa.test/", "looks_like_spa_shell": True, "rendered_available": False,
+        "main_wordcount": 3, "main_text": "Loading", "spa_signals": _SHELL_SIGNALS,
+        "links": {"internal": []},
+    }],
+    degraded=[{"capability": "rendered_dom", "reason": "no headless browser available"}],
+)
+f2, s2, _ = render_mod.run(spa_core_only, None)
+fired2 = {f["check_id"]: f for f in f2}
+shell2 = fired2.get("read.render.empty_spa_shell", {})
+expect(shell2.get("severity") == "high" and shell2.get("confidence") == "likely",
+       "R9: without a renderer, empty_spa_shell is high/likely, not critical/confirmed")
+expect("read.render.raw_text_gap" not in fired2,
+       "R9: raw_text_gap does not fire without a rendered DOM")
+
+# Scenario 3: content already present in raw HTML (server-rendered) — nothing fires.
+server_rendered = _StubBundle([{
+    "url": "https://ssr.test/", "looks_like_spa_shell": False, "rendered_available": True,
+    "main_wordcount": 380, "rendered_main_wordcount": 400, "rendered_wordcount": 400,
+    "main_text": _RENDERED_PROSE, "rendered_text": _RENDERED_PROSE,
+    "spa_signals": {}, "links": {"internal": ["/a", "/b"]}, "rendered_internal_link_count": 2,
+}])
+f3, _, _ = render_mod.run(server_rendered, None)
+fired3 = {f["check_id"] for f in f3}
+expect("read.render.raw_text_gap" not in fired3 and "read.render.empty_spa_shell" not in fired3,
+       "R9: a page whose content is already in raw HTML triggers no render-gap finding")
+
 if FAILURES:
     print(f"FAILED {len(FAILURES)} of {COUNT} assertions:\n")
     for f in FAILURES:
