@@ -179,6 +179,52 @@ SITEWIDE_COLLAPSE_RATIO = 0.5
 SITEWIDE_COLLAPSE_MIN = 5
 
 
+def gate_findings_on_sample(findings: list[dict], truncated: bool,
+                            pages_fetched: int, limitations: list[dict]) -> None:
+    """Reduce confidence on SITE-WIDE claims when the crawl sample is incomplete.
+
+    A crawl stopped early by its time budget saw only part of the site, so a
+    finding scoped to the whole site is a generalisation from a partial sample
+    and should not be stated as confidently as one drawn from a complete crawl.
+    We lower its confidence one step (which also lowers its ICE rank), but never
+    its severity: the defect's impact is unchanged, only our certainty that the
+    pattern holds everywhere. Per-URL findings are direct observations of pages
+    we did fetch and are left exactly as they were - seeing fewer pages does not
+    make what we saw on a page any less true. Mutates findings in place.
+    """
+    if not truncated:
+        return
+    from severity import downgrade_confidence
+
+    gated = []
+    for f in findings:
+        if f.get("scope") != "site":
+            continue
+        before = f.get("confidence", "likely")
+        after = downgrade_confidence(before)
+        if after != before:
+            f["confidence"] = after
+            f["evidence"] = (
+                f"{f.get('evidence', '')} (Confidence reduced from {before} to {after}: the crawl "
+                f"was stopped by its time budget after {pages_fetched} page(s), so this site-wide "
+                f"claim rests on a partial sample of the site.)"
+            )
+            gated.append(f.get("check_id", "unknown"))
+    if gated:
+        limitations.append({
+            "scope": "audit environment",
+            "reason": (
+                f"The crawl was stopped by its time budget after fetching {pages_fetched} page(s), "
+                f"so it saw only part of the site. Confidence on {len(gated)} site-wide finding(s) "
+                f"was reduced by one level to reflect the partial sample; per-page findings are "
+                f"unaffected. Re-run with a larger time budget for full-coverage confidence."
+            ),
+            "checks_not_run": sorted(set(gated)),
+            "confidence_effect": "site-wide confidence reduced one level",
+            "optional_feature": True,
+        })
+
+
 def collapse_sitewide(findings: list[dict], pages_crawled: int) -> tuple[list[dict], list[str]]:
     """Report a defect present on most of the site ONCE, not once per page.
 
@@ -412,6 +458,19 @@ def main(argv=None) -> int:
     )
     for note in collapse_notes:
         suppressed_counts[("sitewide_collapse", note)] = 1
+
+    # Confidence gate on an incomplete sample: when the crawl was cut short by its
+    # time budget, any SITE-WIDE claim generalises from a partial view of the site,
+    # so its confidence is reduced one step. Per-URL findings are untouched - they
+    # are direct observations of a page we did fetch, and stay as confident as they
+    # were. Severity (a defect's impact) is not lowered; only our confidence that
+    # the pattern holds site-wide is, which also lowers the finding's ICE rank.
+    gate_findings_on_sample(
+        findings,
+        truncated=bool(meta.get("crawl", {}).get("truncated_by_budget")),
+        pages_fetched=meta.get("crawl", {}).get("pages_fetched", 0),
+        limitations=limitations,
+    )
 
     # ids are assigned during report build; the cascade needs stable handles, so
     # assign provisional ids first, cascade, then let build_report finalise.

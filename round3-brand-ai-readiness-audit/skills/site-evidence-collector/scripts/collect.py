@@ -329,6 +329,10 @@ class Collector:
 
         self.origin = self._origin_of(self.seed)
         self.status = "complete"
+        # True when the time budget cut the page crawl short: we fetched fewer
+        # pages than we had queued, so the sample is a partial view of the site.
+        # Distinct from a naturally small site, which is fetched completely.
+        self.truncated_by_budget = False
         self.pages: list[dict] = []
         self.headers: dict[str, dict] = {}
         self.robots_text = ""
@@ -575,6 +579,7 @@ class Collector:
         self.pages.sort(key=lambda p: p["url"])
         if len(self.pages) < len(allowed):
             self.status = "partial"
+            self.truncated_by_budget = True
             self.notes.append(
                 f"time budget reached after {len(self.pages)} of {len(allowed)} pages; "
                 f"the audit continues with what was collected"
@@ -886,6 +891,7 @@ class Collector:
             "crawl": {
                 "pages_requested": self.args.max_pages,
                 "pages_fetched": len(self.pages),
+                "truncated_by_budget": self.truncated_by_budget,
                 "pages_rendered": sum(1 for p in self.pages if p.get("rendered_available")),
                 "workers": self.args.workers,
                 "per_host_delay_s": self.args.delay,

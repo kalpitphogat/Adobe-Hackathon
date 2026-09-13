@@ -115,6 +115,23 @@ is fixed. It is capped because right now it changes nothing.
 `blocked_by` names exactly one finding: the most upstream one. The report points
 at a root cause, not a chain. `reach` outranks `read`.
 
+## Rule 4b — confidence gate on an incomplete sample
+
+A site-wide claim is only as trustworthy as the sample it generalises from. When
+the crawl is stopped early by its time budget (`meta.crawl.truncated_by_budget`),
+every finding with `scope: "site"` has its `confidence` lowered one step, because
+it now generalises from a partial view of the site. This also lowers the
+finding's ICE rank. Two things it deliberately does **not** do:
+
+- it never lowers **severity** — a defect's impact does not shrink because we saw
+  fewer pages; only our certainty that the pattern holds site-wide does;
+- it never touches **per-URL** findings — those are direct observations of pages
+  we did fetch, and seeing fewer pages does not make what we saw less true. So a
+  single page missing JSON-LD is reported as exactly that: one page, confirmed,
+  not a sweeping site-wide verdict from a sample of one.
+
+A `limitations[]` entry records the reduction and names the affected checks.
+
 ## Rule 5 — reporting
 
 `summary.blocked_findings` counts capped findings. `summary.suppressed_by_rule`

@@ -463,6 +463,42 @@ real_content = {
 expect(_heading_fires(real_content),
        "R10: a substantial content page missing its H1 still fires (guard does not over-suppress)")
 
+# =====================================================================
+# R11. A crawl truncated by its time budget must not state site-wide claims at
+# full confidence off a partial sample. Confidence on scope="site" findings drops
+# one step (which lowers ICE rank too); severity is never lowered (the defect's
+# impact is unchanged); and per-URL findings — direct observations of pages we DID
+# fetch — are left exactly as they were. A complete crawl changes nothing.
+# =====================================================================
+
+orch = load("ai-readiness-orchestrator", "orchestrate")
+
+url_finding = {"check_id": "extract.sd.absent_on_eligible_page", "scope": "url",
+               "confidence": "confirmed", "severity": "high", "evidence": "page p1 has no JSON-LD",
+               "affected_urls": ["https://s.test/p1"]}
+site_finding = {"check_id": "act.blocker.not_mobile_ready", "scope": "site",
+                "confidence": "confirmed", "severity": "high", "evidence": "no viewport",
+                "affected_urls": ["https://s.test/p1", "https://s.test/p2"]}
+lims: list[dict] = []
+orch.gate_findings_on_sample([url_finding, site_finding], truncated=True, pages_fetched=1, limitations=lims)
+expect(url_finding["confidence"] == "confirmed",
+       "R11: a per-URL finding keeps its confidence on a truncated crawl (we saw that page)")
+expect(site_finding["confidence"] == "likely",
+       "R11: a site-wide finding's confidence drops one step on a truncated crawl")
+expect(url_finding["severity"] == "high" and site_finding["severity"] == "high",
+       "R11: the sample gate lowers confidence, never severity")
+expect("partial sample" in site_finding["evidence"],
+       "R11: the site-wide finding's evidence explains the reduced confidence")
+expect(any(l.get("confidence_effect") == "site-wide confidence reduced one level" for l in lims),
+       "R11: a limitation records that the sample was partial")
+
+complete = {"check_id": "c", "scope": "site", "confidence": "confirmed", "severity": "high",
+            "evidence": "z", "affected_urls": []}
+lims2: list[dict] = []
+orch.gate_findings_on_sample([complete], truncated=False, pages_fetched=25, limitations=lims2)
+expect(complete["confidence"] == "confirmed" and not lims2,
+       "R11: a complete crawl leaves confidence and limitations untouched")
+
 if FAILURES:
     print(f"FAILED {len(FAILURES)} of {COUNT} assertions:\n")
     for f in FAILURES:
