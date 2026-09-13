@@ -1,7 +1,7 @@
 name: Run Audit
 
-# On-demand deployment of the auditor: trigger from the Actions tab, enter a URL,
-# and download the JSON + HTML report as a build artifact. No local machine needed.
+# On-demand deployment of the auditor: trigger from the Actions tab, enter a
+# URL, and download the report as a build artifact. No local machine needed.
 on:
   workflow_dispatch:
     inputs:
@@ -12,17 +12,26 @@ on:
       max_pages:
         description: "Max pages to sample"
         required: false
-        default: "12"
+        default: "25"
         type: string
       render:
-        description: "Use headless Chromium to measure the JS fact-gap"
+        description: "Use headless Chromium to measure the raw-vs-rendered gap"
         required: false
         default: true
+        type: boolean
+      probe_bot_ua:
+        description: "Probe CDN/WAF reachability for named AI crawlers (only for a site you own)"
+        required: false
+        default: false
         type: boolean
 
 jobs:
   audit:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: brand-ai-readiness-audit
+
     steps:
       - uses: actions/checkout@v4
 
@@ -30,7 +39,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Playwright + Chromium (for --render)
+      # Optional: the audit runs without it and reports what it could not see.
+      - name: Install Playwright + Chromium
         if: ${{ inputs.render }}
         run: |
           pip install playwright
@@ -38,40 +48,52 @@ jobs:
 
       - name: Run audit
         run: |
-          cd brand-ai-readiness-audit
-          ARGS="--max-pages ${{ inputs.max_pages }} --out ../report.json --html ../report.html"
-          if [ "${{ inputs.render }}" = "true" ]; then ARGS="$ARGS --render"; fi
-          python skills/audit-orchestrator/scripts/run_audit.py "${{ inputs.url }}" $ARGS
+          ARGS="--max-pages ${{ inputs.max_pages }} --out ../audit-output"
+          if [ "${{ inputs.render }}" != "true" ]; then ARGS="$ARGS --no-render"; fi
+          if [ "${{ inputs.probe_bot_ua }}" = "true" ]; then ARGS="$ARGS --probe-bot-ua"; fi
+          python skills/ai-readiness-orchestrator/scripts/orchestrate.py "${{ inputs.url }}" $ARGS
 
       - name: Write job summary
         if: always()
+        working-directory: .
         run: |
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
-          import json, os
+          import json
           try:
-              r = json.load(open("report.json"))
-          except Exception as e:
-              print(f"No report produced: {e}"); raise SystemExit(0)
+              r = json.load(open("audit-output/audit-report.json"))
+          except Exception as exc:
+              print(f"No report produced: {exc}")
+              raise SystemExit(0)
+
           s = r["summary"]
-          print(f"## Audit — {r.get('site','?')}")
-          print(f"Pages crawled: {r['scope']['pages_crawled']} · render used: {r['scope']['render_used']}\n")
+          print(f"## AI-readiness audit — {r.get('site', '?')}")
+          print(f"Status: **{r.get('audit_status', '?')}** · "
+                f"{r['evidence_bundle'].get('pages_fetched', '?')} pages fetched\n")
           print(f"**{s['total_findings']} findings** — "
-                f"🔴 {s['critical']} critical · 🟠 {s['high']} high · 🟡 {s['medium']} medium · ⚪ {s['low']} low")
-          print(f"(discoverability {s['by_dimension']['discoverability']} · engagement {s['by_dimension']['engagement']})\n")
-          print("| Sev | Finding | Fix |")
-          print("|-----|---------|-----|")
-          for f in r["findings"]:
-              fix = f["suggested_action"]["summary"].replace("|", "\\|")
-              title = f["title"].replace("|", "\\|")
-              print(f"| {f['severity']} | {title} | {fix} |")
+                f"🔴 {s['critical']} critical · 🟠 {s['high']} high · "
+                f"🟡 {s['medium']} medium · ⚪ {s['low']} low")
+          by_cat = s.get("by_category", {})
+          print(f"(discoverability {by_cat.get('discoverability', 0)} · "
+                f"engagement {by_cat.get('engagement', 0)})\n")
+
+          if r["findings"]:
+              print("| Sev | Stage | Finding | Fix |")
+              print("|-----|-------|---------|-----|")
+              for f in r["findings"]:
+                  esc = lambda t: str(t).replace("|", "\\|")
+                  print(f"| {f['severity']} | {f.get('stage', '-')} | {esc(f['title'])} "
+                        f"| {esc(f['suggested_action']['summary'])} |")
+
+          if r.get("limitations"):
+              print("\n### What could not be assessed\n")
+              for lim in r["limitations"]:
+                  print(f"- {lim['reason']}")
           PY
 
-      - name: Upload report artifacts
+      - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: audit-report
-          path: |
-            report.json
-            report.html
+          path: audit-output/
           if-no-files-found: warn
