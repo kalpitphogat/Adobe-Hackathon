@@ -246,7 +246,7 @@ python tests/test_suppression.py          # one case per documented SUPPRESS WHE
 python tests/test_gate_cascade.py         # the cascade, Rule 0b, the control
 ```
 
-Five fixture sites, five separable claims, kept apart so a change to one
+Six fixture sites, six separable claims, kept apart so a change to one
 mechanism cannot silently alter the proof of another:
 
 | fixture | proves |
@@ -256,6 +256,7 @@ mechanism cannot silently alter the proof of another:
 | `site_c` | a blanket `Disallow: /` fetches nothing and reports one critical |
 | `site_d` | an all-shell site produces **zero** engagement findings site-wide |
 | `site_e` | the bot taxonomy: training INFO, dual-purpose MEDIUM, no cascade |
+| `site_f` | a well-built tool site produces **zero** false positives on cookie banners, muted autoplay, XML sitemaps, footer newsletters, login pages, and a free tool with no price |
 
 ---
 

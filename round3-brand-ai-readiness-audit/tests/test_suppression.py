@@ -376,6 +376,38 @@ try:
         "blocking only training and dual-purpose bots does not fire the retrieval finding",
     )
 
+    # ------------------------------------------------------------------ site_f
+    # The dedicated FALSE-POSITIVE suite. A well-built developer-tools site that
+    # carries every construct known to trip a naive auditor; NONE may fire, and
+    # the whole site must stay clean of high/critical.
+    fp = audit("site_f", tmp / "f")
+    fp_fired = {f["check_id"] for f in fp["findings"]}
+    fp_supp = {s["check_id"] for s in fp["summary"].get("suppressed_by_rule", [])}
+
+    expect(
+        not [f for f in fp["findings"] if f["severity"] in ("critical", "high")],
+        "site_f: a well-built tool site produces zero high/critical findings",
+    )
+    # Cookie/consent banner and footer newsletter must not read as an entry overlay.
+    expect("act.blocker.load_time_interstitial" not in fp_fired,
+           "site_f: a cookie banner / footer newsletter does not fire load_time_interstitial")
+    expect("act.blocker.load_time_interstitial" in fp_supp,
+           "site_f: the on-load cookie banner is explicitly recognised and suppressed")
+    # A free tool that states no numeric price must not be asked for one.
+    expect("act.trust.no_cost_signal" not in fp_fired,
+           "site_f: a free tool page does not fire no_cost_signal")
+    expect("act.trust.no_cost_signal" in fp_supp,
+           "site_f: the free tool page's cost signal is explicitly recognised and suppressed")
+    # A noindex belongs on the XML sitemap and the login page; neither is content.
+    expect("reach.index.noindex_on_content" not in fp_fired,
+           "site_f: noindex on the sitemap response and the login page never fires noindex_on_content")
+    # The XML sitemap and the utility login page get no HTML-page/product checks.
+    fp_urls = [u for f in fp["findings"] for u in f.get("affected_urls", [])]
+    expect(not any("/sitemap.xml" in u for u in fp_urls),
+           "site_f: the XML sitemap response receives no HTML-page checks")
+    expect(not any(u.rstrip("/").endswith("/login") for u in fp_urls),
+           "site_f: the login (utility) page receives no product/CTA/heading findings")
+
     # extract.i18n.hreflang_incomplete: prove the check both stays silent on a
     # well-formed cluster and actually FIRES on the two defects it targets, by
     # calling the module directly against tiny synthetic pages. Silence alone

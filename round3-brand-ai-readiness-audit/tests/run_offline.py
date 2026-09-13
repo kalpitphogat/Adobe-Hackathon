@@ -37,7 +37,7 @@ GOLDEN = ROOT / "tests" / "golden"
 ORCH = ROOT / "skills" / "ai-readiness-orchestrator" / "scripts" / "orchestrate.py"
 SCHEMA = ROOT / "skills" / "ai-readiness-orchestrator" / "references" / "report-schema.json"
 
-SITES = ["site_a", "site_b", "site_c", "site_d", "site_e"]
+SITES = ["site_a", "site_b", "site_c", "site_d", "site_e", "site_f"]
 PINNED_EPOCH = "1780000000"
 MIN_FREE_BYTES = 64 * 1024 * 1024
 
@@ -239,7 +239,7 @@ def main(argv=None) -> int:
                     failures.append(f"{site}: output drifted from the checked-in golden")
 
         # ---------------------------------------------------- clean assertions
-        clean = args.assert_clean if args.assert_clean is not None else ["site_a"]
+        clean = args.assert_clean if args.assert_clean is not None else ["site_a", "site_f"]
         if clean:
             print("\nfalse-positive control")
             for site in clean:
