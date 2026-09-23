@@ -1,4 +1,4 @@
-TEST_SITE_URLS: https://docs.pytest.org/, https://docs.djangoproject.com/
+TEST_SITE_URLS: https://docs.pytest.org/, https://www.theguardian.com/
 LLM_MODEL: Claude Opus 5.5 (API model id: claude-opus-5-5), runs of 2026-09
 AGENT_HARNESS: Claude Code v2.1.281
 ENV_SETUP: uv python install 3.11.15 && uv venv --python 3.11.15 .venv && . .venv/bin/activate && uv pip install playwright==1.63.0 && python -m playwright install chromium
@@ -96,6 +96,24 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #   python skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle ./audit-output/evidence --out ./audit-replay
 # Tested 2026-09-24: identical findings; the only field that differs is
 # evidence_bundle.path.
+#
+# ---- WHAT TO EXPECT ON THE SECOND TEST URL (stable while its robots.txt is) --
+# https://www.theguardian.com/ (rehearsed 2026-09-24, Opus 5.5 and Playwright):
+#   F-001 critical, confirmed, ICE 9.3, reach.robots.ai_search_bot_blocked:
+#     robots.txt line 102 "Disallow: /" blocks six AI retrieval crawlers
+#     (Amazonbot, Claude-SearchBot, Claude-User, DuckAssistBot,
+#     Google-CloudVertexBot, PerplexityBot). Anyone can check it at
+#     https://www.theguardian.com/robots.txt
+#   The gate cascade: most downstream discoverability findings are capped at
+#     medium with blocked_by: F-001 (45 of 52 on that run). Engagement (act.*)
+#     findings are never capped. Training-only crawlers are reported
+#     separately and are not treated as a defect.
+#   Page-level findings change as the site publishes; F-001 and the cascade
+#   stay the same while robots.txt is unchanged.
+#
+# The first test URL (https://docs.pytest.org/) is the video's live run. The
+# audit had never seen it before that run, so there is no expected result
+# listed here.
 #
 # ---- IMPORTANT: RUN FROM THE MARKETPLACE ROOT -------------------------------
 # A relative --out path only works when the current directory is the

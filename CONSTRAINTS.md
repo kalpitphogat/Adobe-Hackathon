@@ -62,7 +62,7 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 |---|---|---|---|
 | 6.1 | **Integrity floor**: fabricated findings, different engine, spliced run, REPLAY contradicting the video | ✅ 🎬 | Frozen zip + hash; the agent may not add findings; one take; section F cross-check |
 | 6.2 | **Unverified floor (ran-blocked)**: unparseable REPLAY, no working invoke path, engine won't run | ✅ | Main path rehearsed from empty folders (`rehearsal/`); `tools/check_replay.py`; fallbacks A, B, C tested |
-| 6.3 | **Nondeterminism flag**: replay gives materially different findings | ✅ ⚠️ ⏳ | Deterministic engine (`tests/run_offline.py` PASS on 3.11.15); Django gave the same 24 findings on two runs a day apart (`rehearsal/`). Playwright vs no-Playwright difference measured and documented in REPLAY Fallback A; `--bundle` re-analysis gives identical findings. ⏳ a stable second URL (Guardian robots.txt) |
+| 6.3 | **Nondeterminism flag**: replay gives materially different findings | ✅ ⚠️ | Deterministic engine (`tests/run_offline.py` PASS on 3.11.15); Django gave the same 24 findings on two runs a day apart (`rehearsal/`). Playwright vs no-Playwright difference measured and documented in REPLAY Fallback A; `--bundle` re-analysis gives identical findings. Second test URL https://www.theguardian.com/ has a stable critical (robots.txt line 102) and a visible cascade (45 findings `blocked_by: F-001`), with expected substance in the REPLAY |
 
 ## §7 Scope and guardrails
 
