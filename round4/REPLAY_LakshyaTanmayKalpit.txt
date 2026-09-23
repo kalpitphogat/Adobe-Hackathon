@@ -1,0 +1,148 @@
+# =============================================================================
+# REPLAY_LakshyaTanmayKalpit.txt
+# Adobe University Hackathon 2026 — Round 4
+# Team: Lakshya, Tanmay Dixit, Kalpit Phogat
+#
+# This file is the reproduction manifest. A judge reading it can replay the
+# exact session shown in the video on their own machine, including on a URL of
+# their own choosing (see FALLBACK RUN PATH below).
+# =============================================================================
+
+TEST_SITE_URLS:   https://www.adobe.com/, https://www.figma.com/
+
+LLM_MODEL:        Claude Opus 4.5 (2025-09)
+
+AGENT_HARNESS:    Antigravity IDE v1.0 (Google DeepMind)
+
+ENV_SETUP:        # Python 3.9+ required. Standard library only for 63 of 66
+                  # checks — no pip install required for the core audit.
+                  #
+                  # Optional: Playwright upgrades 3 render-stage checks from
+                  # "not assessed" to a full rendered-vs-raw DOM diff.
+                  #   pip install playwright
+                  #   python -m playwright install chromium
+                  #
+                  # The audit still runs and is complete without Playwright;
+                  # those 3 checks are reported as "not assessed" in
+                  # limitations[] rather than silently passed.
+
+TEST_STEPS:
+  1. Clone the repository and enter the marketplace root:
+
+       git clone https://github.com/kalpitphogat/Adobe-Hackathon.git
+       cd Adobe-Hackathon
+       git checkout final-submission
+
+  2. Verify the engine is intact and the machine is ready:
+
+       python round4/demo_cli.py doctor
+
+     Expected: all rows show "ok", engine fingerprint 3251f79064da printed.
+     If any row is FAIL, fix it before proceeding (see ENV_SETUP above).
+
+  3. Run the audit using the demo CLI (this is the command shown on camera):
+
+       python round4/demo_cli.py audit https://www.adobe.com/ --out ./audit-output
+
+     The CLI prints the exact engine command before invoking it:
+       python skills/ai-readiness-orchestrator/scripts/orchestrate.py
+         https://www.adobe.com/ --out ./audit-output --time-budget 300
+
+     Progress is read off the filesystem: each step lights up only when the
+     artifact proving it (evidence/meta.json, profile.json, audit-report.json)
+     actually appears on disk. A step that never lights up did not happen.
+
+  4. Drill into the top finding with full evidence:
+
+       python round4/demo_cli.py show ./audit-output --id F-001
+
+     Shows: evidence as observed, affected URLs, mechanism (why it hurts),
+     the fix with priority/effort/ICE score, paste-ready patch, and the
+     check_id that traces it back to the submitted code.
+
+  5. Show all findings ranked by impact:
+
+       python round4/demo_cli.py show ./audit-output --top 10
+
+  6. Prove the run is reproducible (engine identity + determinism):
+
+       python round4/demo_cli.py prove ./audit-output
+
+     This hashes every SKILL.md and script in the marketplace (fingerprint
+     must match 3251f79064da), runs the 6 golden offline fixtures byte-for-
+     byte, and re-runs the audit to diff finding sets.
+
+EXPECTED_OUTPUT:  ./audit-output/audit-report.json
+
+# =============================================================================
+# FALLBACK RUN PATH — no agent harness required
+# =============================================================================
+# The marketplace is a headless engine; the harness only drives it. Judges who
+# cannot run Antigravity IDE get identical substance by invoking the entrypoint
+# directly — no extra tools needed:
+#
+#   cd brand-ai-readiness-audit
+#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py \
+#       https://www.adobe.com/ --out ./audit-output
+#
+# Substitute any URL, including a judge-chosen one. Exit code is 0 whenever
+# a schema-valid report was written; the outcome lives in audit_status in the
+# report, never in the exit code.
+#
+# The report is written to ./audit-output/ :
+#   audit-report.json   fixed-schema findings + suggested actions
+#   report.md           the same, written for a non-engineer
+#   fix_patches/        paste-ready patch text per finding
+#
+# Findings are ranked: severity, then ICE score, then stage. Each finding
+# carries evidence, a stage, a confidence, and a blocked_by field pointing at
+# the upstream finding that gates it (null when nothing gates it).
+# =============================================================================
+
+# =============================================================================
+# DETERMINISM
+# =============================================================================
+# The engine is deterministic: same input, byte-identical report. To verify:
+#
+#   cd brand-ai-readiness-audit
+#   python tests/run_offline.py
+#   # -> "PASS: offline, deterministic, goldens current, control clean."
+#
+# That replays six fixture sites against checked-in golden reports byte-for-
+# byte and re-runs two of them across a TZ x PYTHONHASHSEED matrix.
+#
+# On a live URL, reports differ between runs only where the SITE changed or
+# the crawl sampled different pages; audited_at is the only field that always
+# moves.
+# =============================================================================
+
+# =============================================================================
+# ENGINE INTEGRITY
+# =============================================================================
+# The demo CLI drives the submitted Round 3 marketplace, not a separate demo
+# engine. To verify before watching the video:
+#
+#   python round4/check_engine_frozen.py
+#   # -> "PASS: brand-ai-readiness-audit/ is byte-identical to submission.zip"
+#
+# The engine fingerprint (3251f79064da) hashes every SKILL.md and every script
+# in the marketplace. It is printed at the start of every doctor run and at the
+# start of every audit run. The same fingerprint twice means the same engine
+# drove both — which is the integrity claim the video makes out loud.
+# =============================================================================
+
+# =============================================================================
+# WHAT THE ENGINE WILL AND WILL NOT DO
+# =============================================================================
+# Read-only. The HTTP layer validates every method against a {GET, HEAD}
+# allowlist, so no code path can alter the audited site. robots.txt is a hard
+# constraint on crawling, not advice. No cookies, credentials, or authenticated
+# areas. Hosts resolving to private/loopback/link-local space are refused on
+# the seed URL and on every redirect hop. The whole run is bounded by
+# --time-budget (default 300 s).
+#
+# Two checks are OFF by default and report "not assessed" rather than passing:
+# CDN/WAF reachability probing for named AI crawlers (--probe-bot-ua) is opt-in
+# because sending named-crawler user-agents at a site you do not own is not
+# something an audit should do unless asked.
+# =============================================================================

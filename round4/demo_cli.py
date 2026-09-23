@@ -40,6 +40,27 @@ import threading
 import time
 from pathlib import Path
 
+# ── Windows UTF-8 fix ──────────────────────────────────────────────────────────
+# PowerShell/cmd default to cp1252 which can't encode Braille, box-drawing, or
+# ✓. Reconfigure stdout/stderr to UTF-8 if the runtime supports it (Python 3.7+)
+# and the stream is not a raw byte pipe.
+try:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass  # best-effort; fallback glyphs below handle the rest
+
+
+def _supports_unicode() -> bool:
+    """True when stdout can actually encode the characters we want to draw."""
+    enc = getattr(sys.stdout, "encoding", None) or ""
+    return enc.lower().replace("-", "") in ("utf8", "utf16", "utf32")
+
+
+_UNICODE = _supports_unicode()
+
 ROOT = Path(__file__).resolve().parent.parent
 MARKETPLACE = ROOT / "brand-ai-readiness-audit"
 ENTRYPOINT = MARKETPLACE / "skills" / "ai-readiness-orchestrator" / "scripts" / "orchestrate.py"
@@ -86,13 +107,21 @@ STAGE_BLURB = {
     "act": "does an arriving visitor stay",
 }
 
+# Glyph sets — Unicode when the terminal supports it, ASCII otherwise.
+_G_OK    = "\u2713" if _UNICODE else "ok"
+_G_RULE  = "\u2500" if _UNICODE else "-"
+_G_RULE2 = "\u2501" if _UNICODE else "="
+_G_SPIN  = "\u280b\u2819\u2839\u2838\u283c\u2834\u2826\u2827\u2807\u280f" if _UNICODE else "|/-\\|/-\\"
+_SPIN_FRAMES = list(_G_SPIN)
+
 
 def width() -> int:
     return min(shutil.get_terminal_size((100, 24)).columns, 100)
 
 
-def rule(char: str = "─") -> str:
-    return ink.grey(char * width())
+def rule(char: str | None = None) -> str:
+    c = char if char is not None else _G_RULE
+    return ink.grey(c * width())
 
 
 def heading(text: str) -> None:
@@ -210,7 +239,6 @@ class Progress:
         self._thread = threading.Thread(target=self._run, daemon=True)
 
     def _run(self) -> None:
-        frames = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
         i = 0
         started = time.perf_counter()
         while not self._stop.is_set():
@@ -221,12 +249,13 @@ class Progress:
                     self.done.add(rel)
                     elapsed = time.perf_counter() - started
                     sys.stdout.write("\r\033[K")
-                    print(f"  {ink.green('✓')} {label:<26} "
+                    print(f"  {ink.green(_G_OK)} {label:<26} "
                           f"{ink.grey(skill)} {ink.grey(f'{elapsed:5.1f}s')}")
             if not self._stop.is_set():
                 pending = next((s for r, s, _ in self.STEPS if r not in self.done), "")
+                frame = _SPIN_FRAMES[i % len(_SPIN_FRAMES)]
                 sys.stdout.write(
-                    f"\r\033[K  {ink.blue(frames[i % len(frames)])} {pending}"
+                    f"\r\033[K  {ink.blue(frame)} {pending}"
                     f"{ink.grey(f'   {time.perf_counter() - started:5.1f}s')}"
                 )
                 sys.stdout.flush()
@@ -400,7 +429,7 @@ def cmd_show(args) -> int:
 
 def render_finding(f: dict, out: Path) -> None:
     a = f["suggested_action"]
-    print(f"\n{rule('━')}")
+    print(f"\n{rule(_G_RULE2)}")
     meta = f"{f['stage']}  ·  {f['category']}  ·  {f['confidence']}"
     print(f"{ink.bold(f['id'])}   {sev_tag(f['severity'])}{ink.grey(meta)}")
     print(wrap(ink.bold(f["title"]), indent=0))
