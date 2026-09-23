@@ -24,7 +24,7 @@ the command line against a site the audit has never seen.
 ## Replaying it
 
 The exact commands and the verbatim prompt are in **`REPLAY_IT_Professionals.txt`**. Every path
-below was run on this machine (`rehearsal/` has the transcripts):
+below was actually run: on our Windows machine (`rehearsal/` has the transcripts) or in CI (Linux/macOS row):
 
 | path | who it's for | tested |
 |---|---|---|
@@ -60,7 +60,8 @@ We didn't take the engine's word for it. `SCOUTING.md` covers 25 live sites; `NO
 verified behaviours (with the fix for each in how we set up and run it); `COMPARISON_ikea.md`
 compares our REPLAY and Lakshya's on an unseen site. Known engine false positives (the engine
 stays frozen) include `read.render.nav_links_js_only` on pages with many off-site links, and a
-structured-data price mismatch on IKEA. The agent's evidence check caught both live.
+structured-data price mismatch on IKEA. The agent's evidence check caught both in rehearsals
+(`rehearsal/2026-09-24_django_*.md`, `rehearsal/2026-09-24_ikea_opus_newprompt.md`).
 
 ## Repo layout
 
@@ -71,7 +72,8 @@ structured-data price mismatch on IKEA. The agent's evidence check caught both l
 | `CONSTRAINTS.md` | every rule in the Round 4 brief, with status and evidence |
 | `round3-frozen/` | the Round 3 upload and its hash; never edited |
 | `rehearsal/` | agent transcripts from every rehearsal, dated |
-| `tools/` | `check_replay.py`, `rehearse.ps1`, `prescreen.py`, `scout.py`, `summarize.py`, `diff_reports.py`, `count_links.py`, `check_price.py` |
+| `tools/` | `check_replay.py`, `verify_engine.py`, `rehearse.ps1`, `tool_calls.py`, `prescreen.py`, `scout.py`, `summarize.py`, `diff_reports.py`, `count_links.py`, `check_price.py` |
+| `.github/workflows/` | `replay-portability.yml`: the REPLAY on Ubuntu and macOS |
 | `NOTES.md`, `SCOUTING.md`, `COMPARISON_ikea.md` | findings about the engine |
 
 ## Local setup (Windows, PowerShell)
@@ -88,7 +90,7 @@ cd demo; ..\.venv\Scripts\python.exe tests\run_offline.py   # PASS on 3.11.15
 ## Deliverables
 
 - [x] `REPLAY_IT_Professionals.txt`, rehearsed from clean unzips, with three tested fallbacks
-- [x] `VIDEO_PART1_SCRIPT.md`: 379 words (~2:42), every claim tied to a file and line
+- [x] `VIDEO_PART1_SCRIPT.md`: 380 words (~2:43), every claim tied to a file and line
 - [x] `VIDEO_PART2_RUNSHEET.md`: live run on https://docs.pytest.org/
 - [ ] The video: Part 1 ≤ 3:00, Part 2 ≤ 2:00, total ≤ 5:00
 

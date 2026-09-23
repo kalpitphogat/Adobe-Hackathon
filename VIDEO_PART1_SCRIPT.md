@@ -125,7 +125,7 @@ Tip: highlight the line you are talking about (click the line number) so the vie
 
 ## Checklist before hitting record
 
-- [ ] `sha256sum -c round3-frozen/SHA256SUMS` passes (the engine on screen is the submitted one)
+- [ ] `.venv\Scripts\python.exe tools\verify_engine.py round3-frozen\submission.zip demo` ends `ENGINE UNCHANGED` (the engine on screen is the submitted one)
 - [ ] VS Code is showing `demo/` (the unzip), not any other copy
 - [ ] All 13 tabs open, in order, scrolled to the listed lines
 - [ ] Timer: Beats 1–3 done by 2:30 in rehearsal; if not, drop Beat 4
