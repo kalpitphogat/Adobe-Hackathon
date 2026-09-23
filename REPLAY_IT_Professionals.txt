@@ -3,14 +3,15 @@ LLM_MODEL: Claude Opus 5.5 (API model id: claude-opus-5-5), runs of 2026-09
 AGENT_HARNESS: Claude Code v2.1.281
 ENV_SETUP: uv python install 3.11.15 && uv venv --python 3.11.15 .venv && . .venv/bin/activate && uv pip install playwright==1.63.0 && python -m playwright install chromium
 TEST_STEPS:
- 1. From the folder that holds submission.zip and the activated .venv, unpack the Round 3 submission (this command is the same in bash, PowerShell and cmd), enter the marketplace root, and start Claude Code:
+ 1. From the folder that holds submission.zip and the activated .venv, unpack the Round 3 submission, enter the marketplace root, make its skills discoverable to Claude Code (an unchanged copy in .claude/skills; the agent still runs the scripts in skills/), and start Claude Code. The first three commands are the same in bash, PowerShell and cmd:
       python -m zipfile -e submission.zip brand-ai-readiness-audit
       cd brand-ai-readiness-audit
-      claude --model claude-opus-5-5 --allowedTools "Bash(python:*)" "Read"
+      python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
+      claude --model claude-opus-5-5 --allowedTools "Skill" "Bash(python:*)" "PowerShell(python:*)" "Read"
  2. Paste this prompt verbatim, replacing <URL> at the very end with one of the TEST_SITE_URLS (the video uses https://docs.pytest.org/) or any URL of your choice:
-      Read skills/ai-readiness-orchestrator/SKILL.md and follow its Procedure to audit the URL given at the end of this message. Run the orchestrator from this directory with --out ./audit-output. Do not create, change or delete any file yourself, and do not add findings that are not in the report. When the report is written, read audit-output/audit-report.json and give: (1) audit_status, the counts by severity, and the checks listed as not assessed; (2) the top 10 findings in report order, which is the engine's priority order (severity, then ICE), as a table of rank, id, severity, confidence, ICE and title; (3) an evidence check: for every critical or high finding whose confidence is confirmed (at most 5, in report order; if there are none, the first 3 findings), fetch one affected URL yourself with an inline python -c command and say in one line whether what you see supports the evidence (supported, partly supported, or not supported), quoting the numbers you saw. Use urllib for the raw HTML. For any check_id starting with read.render, and whenever the evidence compares the raw HTML with the rendered page or quotes values shown only after JavaScript runs, you must also load the page with Playwright if it is installed and count the same thing on both sides, same-host links only for links. (4) A drill-down on the highest-ranked finding your check marked supported: its evidence, severity and confidence, mechanism, paste-ready patch, ICE components, how many findings have blocked_by pointing at it, and its verification step. Keep anything else to one line per finding. Report the engine's findings exactly as written; your evidence check is commentary and must not change the report. URL: <URL>
- 3. The agent runs: python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output
-    The report is written to ./audit-output/ as audit-report.json (fixed schema), report.md (plain-English version) and fix_patches/ (one paste-ready patch per finding). The agent then prints, in the terminal: the status and counts, the top 10 fixes in priority order with their ICE scores, its evidence check on the high-confidence findings, and a drill-down (evidence, severity, fix, patch) on the best-supported finding.
+      Use the ai-readiness-orchestrator skill, the entrypoint of this marketplace (skills/ai-readiness-orchestrator/SKILL.md), and follow its Procedure to audit the URL given at the end of this message. Run the orchestrator from this directory with --out ./audit-output. Do not create, change or delete any file yourself, and do not add findings that are not in the report. When the report is written, read audit-output/audit-report.json and give, briefly: (1) audit_status, the counts by severity, and the checks listed as not assessed; (2) the top 5 findings in report order, which is the engine's priority order (severity, then ICE), as a table of rank, id, severity, confidence, ICE (from suggested_action.ice) and title; (3) an evidence check: go through the critical or high findings whose confidence is confirmed, in report order (if there are none, the first findings in report order), and stop at the first one your check supports or after 5 checks; for each, fetch one affected URL yourself with an inline python -c command and say in one line whether what you see supports the evidence (supported, partly supported, or not supported), quoting the numbers you saw. Use urllib for the raw HTML. For any check_id starting with read.render, and whenever the evidence compares the raw HTML with the rendered page or quotes values shown only after JavaScript runs, you must also load the page with Playwright if it is installed and count the same thing on both sides, same-host links only for links. (4) A drill-down on the finding your check supported (if none was, say so): its evidence, severity and confidence, mechanism, paste-ready patch, ICE components, how many findings have blocked_by pointing at it, and its verification step. Report the engine's findings exactly as written; your evidence check is commentary and must not change the report. URL: <URL>
+ 3. The agent loads the entrypoint with the Skill tool (Skill: ai-readiness-orchestrator), then runs: python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output
+    The report is written to ./audit-output/ as audit-report.json (fixed schema), report.md (plain-English version) and fix_patches/ (one paste-ready patch per finding). The agent then prints, in the terminal: the status and counts, the top 5 fixes in priority order with their ICE scores, its evidence check on the confirmed high findings (stopping at the first one it supports), and a drill-down (evidence, severity, fix, patch) on that finding.
 EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 
 # ============================================================================
@@ -47,7 +48,11 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #   python -m playwright install chromium
 #   python -m zipfile -e submission.zip brand-ai-readiness-audit
 #   cd brand-ai-readiness-audit
-#   claude --model claude-opus-5-5 --allowedTools "Bash(python:*)" "Read"
+#   python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
+#   claude --model claude-opus-5-5 --allowedTools "Skill" "Bash(python:*)" "PowerShell(python:*)" "Read"
+# On Windows, Claude Code also has a PowerShell tool; allowing PowerShell(python:*)
+# avoids a permission prompt for each python command. Any command the agent
+# chains (a; b) still asks for approval: approve it, it is the same python call.
 # Use "python", not "python3": on Windows "python3" is often the Microsoft
 # Store placeholder, not a real interpreter.
 # Recorded on: Windows 11 Home 10.0.26200, Python 3.11.15, Playwright 1.63.0
@@ -76,7 +81,10 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # files and run shell commands (Codex CLI, Copilot CLI, OpenCode, Antigravity,
 # or a custom runner). Start that agent in the marketplace root and paste the
 # same prompt. To use Claude Code with another model:
-#   claude --model claude-sonnet-5 --allowedTools "Bash(python:*)" "Read"
+#   claude --model claude-sonnet-5 --allowedTools "Skill" "Bash(python:*)" "PowerShell(python:*)" "Read"
+# In a harness without a Skill tool the prompt still works: it names the
+# entrypoint's path, skills/ai-readiness-orchestrator/SKILL.md, and the agent
+# reads it and follows its Procedure. The .claude/skills copy is then not needed.
 # Tested 2026-09-24 on docs.djangoproject.com with Claude Code + Sonnet 5 and
 # + Haiku 4.5: all three models got the same 24 findings in the same order as
 # Opus 5.5. The findings don't depend on the model. The agent's own evidence
@@ -115,6 +123,27 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # The first test URL (https://docs.pytest.org/) is the video's live run. The
 # audit had never seen it before that run, so there is no expected result
 # listed here.
+#
+# ---- KNOWN LIMITS OF THE FROZEN ENGINE (so you can judge a replay fairly) ---
+# The engine is unchanged from Round 3, so these are recorded, not fixed. Each
+# was reproduced by us; the agent's evidence check (prompt part 3) exists to
+# catch them live, and never edits the report.
+#  * read.render.nav_links_js_only can overstate: its rendered-side link count
+#    includes off-site links, the raw side does not. It is right when the gap
+#    is real (ikea.com/ae/ar/: 112 -> 204 same-host links) and wrong when it
+#    is not (docs.djangoproject.com: identical link sets).
+#  * extract.sd.contradicts_visible_content can misread prices written as
+#    "132€": ikea.com product pages show the schema price but were reported
+#    as disagreeing.
+#  * trust.integrity.prompt_injection fires on pages that discuss prompt
+#    injection (e.g. an acceptable-use policy), not only on pages that do it.
+#  * act.orient.no_value_proposition and act.cta.absent_for_page_type are
+#    "likely", not "confirmed", and misfire on some homepages; the CTA check
+#    counts links in the raw HTML, so a JavaScript-built page can read as empty.
+#  * A bot-protection page ("you have been blocked") can be audited as if it
+#    were the site's content.
+#  * A robots.txt Crawl-delay of about 4 s or more can exceed the default time
+#    budget: add --time-budget 600 (see troubleshooting below).
 #
 # ---- IMPORTANT: RUN FROM THE MARKETPLACE ROOT -------------------------------
 # A relative --out path only works when the current directory is the

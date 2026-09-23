@@ -35,19 +35,29 @@ Set-Location $base
 python -m zipfile -e submission.zip brand-ai-readiness-audit
 if ($LASTEXITCODE -ne 0) { throw "unzip failed" }
 Set-Location brand-ai-readiness-audit
+python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
 
 $date = Get-Date -Format "yyyy-MM-dd"
 $out = "$repo\rehearsal\${date}_$Label.md"
 $pyver = (python --version) 2>&1
 $pw = (python -c "import importlib.util as u; print('yes' if u.find_spec('playwright') else 'no')") 2>&1
 $started = Get-Date
-$answer = $prompt | claude -p --model $Model --allowedTools "Bash(python:*)" "Read" 2>&1 | Out-String
+$log = "$base\session.jsonl"
+$prompt | claude -p --model $Model --allowedTools "Skill" "Bash(python:*)" "PowerShell(python:*)" "Read" --output-format stream-json --verbose > $log 2>&1
 $code = $LASTEXITCODE
 $secs = [int]((Get-Date) - $started).TotalSeconds
 $report = Test-Path "audit-output\audit-report.json"
+# tool-call trace (proves the Skill call and the single orchestrator run) + final answer
+$answer = & "$repo\.venv\Scripts\python.exe" "$repo\tools\tool_calls.py" $log --answer | Out-String
+Set-Location $base
+$engine = (& "$repo\.venv\Scripts\python.exe" "$repo\tools\verify_engine.py" submission.zip brand-ai-readiness-audit | Select-Object -Last 2) -join "`n"
+Set-Location brand-ai-readiness-audit
 
 $header = @"
 <!-- rehearsal: $Label | url: $Url | model: $Model | harness: $(claude --version) | python: $pyver | playwright: $pw | exit: $code | seconds: $secs | report written: $report -->
+<!-- engine check after the run:
+$engine
+-->
 
 "@
 [IO.File]::WriteAllText($out, $header + $answer, (New-Object Text.UTF8Encoding $false))

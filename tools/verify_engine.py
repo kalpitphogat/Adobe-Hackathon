@@ -39,7 +39,21 @@ def main() -> int:
             else:
                 same += 1
 
-    submitted = set(names)
+    # The REPLAY copies skills/ to .claude/skills so Claude Code can load the entrypoint with its
+    # Skill tool. That copy must be byte-identical too, or the skill the agent reads would differ.
+    copy_checked = 0
+    if (folder / ".claude" / "skills").is_dir():
+        with zipfile.ZipFile(zip_path) as z:
+            for name in (n for n in names if n.startswith("skills/")):
+                target = folder / ".claude" / name
+                if not target.is_file():
+                    missing.append(f".claude/{name}")
+                elif sha256_bytes(target.read_bytes()) != sha256_bytes(z.read(name)):
+                    differ.append(f".claude/{name}")
+                else:
+                    copy_checked += 1
+
+    submitted = set(names) | {f".claude/{n}" for n in names if n.startswith("skills/")}
     extra = sorted(
         p.relative_to(folder).as_posix() for p in folder.rglob("*")
         if p.is_file() and p.relative_to(folder).as_posix() not in submitted
@@ -50,6 +64,8 @@ def main() -> int:
     print(f"submission.zip sha256 : {zip_hash}")
     print(f"files in submission   : {len(names)}")
     print(f"byte-identical        : {same}")
+    if copy_checked:
+        print(f".claude/skills copy   : {copy_checked} file(s) byte-identical to skills/")
     for label, items in (("MISSING", missing), ("DIFFERENT", differ), ("EXTRA (not from a run)", unexpected)):
         for item in items:
             print(f"{label:<22}: {item}")
