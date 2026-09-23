@@ -11,7 +11,7 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 | 1.1 | Show the Round 3 engine works live, and prove it's reproducible | ✅ | Live run in the video + `REPLAY_IT_Professionals.txt`; rehearsed from empty folders (`rehearsal/`) |
 | 1.2 | No GUI needed; a CLI session where an agent runs the marketplace is what they want | ✅ | Claude Code in a terminal (`VIDEO_PART2_RUNSHEET.md`) |
 | 2.1 | Submit a recorded video, **≤ 5:00 hard cap** | 🎬 | Part 1 script ~2:40, Part 2 ≤ 2:00 after trimming |
-| 2.2 | Submit a plain-text file named exactly `REPLAY_YourTeamName.txt` | ✅ ⏳ | `REPLAY_IT_Professionals.txt` (team name IT_Professionals); automated name check ⏳ `tools/check_replay.py` |
+| 2.2 | Submit a plain-text file named exactly `REPLAY_YourTeamName.txt` | ✅ | `REPLAY_IT_Professionals.txt` (team name IT_Professionals); name checked by `tools/check_replay.py` |
 | 2.3 | Don't resubmit Round 3; they reuse that exact package | ✅ | Nothing in this repo changes it; `round3-frozen/submission.zip` + `SHA256SUMS` |
 | 2.4 | **Live run must exercise the same submitted marketplace**, or it fails on integrity | ✅ 🎬 | Demo runs from a fresh unzip of the frozen zip; hash `1c872c59…8dcf` printed in REPLAY; checked before recording |
 | 2.5 | Judges replay the demo on their own machine, **including a URL of their choosing** | ✅ ⚠️ | Any-URL instruction in REPLAY step 2; 25-site survey + IKEA head-to-head (`SCOUTING.md`, `COMPARISON_ikea.md`). Risk: engine false positives on some site types, documented in `NOTES.md` |
@@ -50,11 +50,11 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 
 | # | rule | status | how we meet it · evidence |
 |---|---|---|---|
-| 5.1 | Fixed labelled fields: `TEST_SITE_URLS`, `LLM_MODEL`, `AGENT_HARNESS`, `ENV_SETUP`, `TEST_STEPS` (1 command, 2 prompt verbatim, 3 where the report goes), `EXPECTED_OUTPUT` | ✅ ⏳ | All six present (by eye); automated check ⏳ `tools/check_replay.py` |
-| 5.2 | **Mandatory and parseable**; missing or blank = unverified | ⏳ | `tools/check_replay.py` ⏳ |
-| 5.3 | Test URLs are **exact full URLs** | ✅ ⏳ | Both are full `https://` URLs; automated check ⏳ |
+| 5.1 | Fixed labelled fields: `TEST_SITE_URLS`, `LLM_MODEL`, `AGENT_HARNESS`, `ENV_SETUP`, `TEST_STEPS` (1 command, 2 prompt verbatim, 3 where the report goes), `EXPECTED_OUTPUT` | ✅ | `tools/check_replay.py`: all six present and non-blank; steps 1–3 present |
+| 5.2 | **Mandatory and parseable**; missing or blank = unverified | ✅ | `tools/check_replay.py` exits 1 on a missing/blank field or BOM (negative-tested with a blanked `AGENT_HARNESS`) |
+| 5.3 | Test URLs are **exact full URLs** | ✅ | `tools/check_replay.py` checks scheme + host for every entry |
 | 5.4 | Steps **copy-pasteable, in order, from a clean checkout** on the disclosed harness + model | ✅ | Rehearsed from an empty folder (`rehearsal/`) |
-| 5.5 | **Consistent with the video**: harness, model, URLs match | 🎬 | Run sheet section F cross-check before submitting |
+| 5.5 | **Consistent with the video**: harness, model, URLs match | ✅ 🎬 | `tools/check_replay.py` checks the run sheet names the same harness version, model id and on-camera URL; section F cross-checks the recorded video |
 
 ## §6 Judging gates
 
