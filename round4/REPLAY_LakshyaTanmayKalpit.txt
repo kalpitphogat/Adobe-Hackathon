@@ -3,10 +3,6 @@
 # Adobe University Hackathon 2026 — Round 4
 # Team: Lakshya Rajput, Tanmay Dixit, Kalpit Phogat
 #
-# WHAT YOU HAVE RECEIVED
-# ----------------------
-# Alongside this file you should have received (or already hold from Round 3):
-#
 # WHAT YOU HAVE / WHAT WAS SUBMITTED
 # ------------------------------------
 # Submitted alongside the video:
