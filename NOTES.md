@@ -45,3 +45,20 @@ On stripe.com, `act.orient.no_value_proposition` fires on a homepage whose H1 pl
 the offer, and `act.cta.absent_for_page_type` fires on `marketplace.stripe.com` with "0 links".
 Both are `likely`, not `confirmed`. The rubric penalises false positives in the live run.
 → Choose the demo URL deliberately; in the walkthrough, drill into a `confirmed` finding.
+The 25-site survey in `SCOUTING.md` shows this pattern across site types.
+
+## 6. A large `Crawl-delay` can crash a default run
+
+https://www.gnu.org/ sets `Crawl-delay: 4`. The collector honours it (correct), but 25 pages
+at 4 s each pushes it to ~292 s against its 180 s share of the budget. At 300 s the orchestrator
+kills it, no bundle exists, and the run exits 1 with `no evidence bundle was produced`.
+Reproduced twice. `--no-render` finished in 293 s with exit 0, so this is timing, not rendering.
+→ REPLAY troubleshooting: add `--time-budget 600` (an existing engine flag) for sites with a
+large Crawl-delay. That raises the collector's share to 360 s and the overall ceiling to 600 s.
+
+## 7. Talking about prompt injection is flagged as prompt injection
+
+`trust.integrity.prompt_injection` fires at **critical/confirmed** on pages whose text merely
+discusses the topic (linear.app/legal/aup, pydantic.dev/docs/ai). Avoid AI-topic sites for the
+demo; if a judge's site trips it, the evidence string shows the quoted phrase, which is easy to
+check by hand.
