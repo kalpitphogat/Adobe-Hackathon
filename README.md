@@ -1,4 +1,4 @@
-# Kalpit_round_4
+﻿# Kalpit_round_4
 
 Adobe University Hackathon 2026, Round 4: the Prototype Showcase (live agent demo).
 
@@ -36,7 +36,7 @@ cd demo; ..\.venv\Scripts\python.exe tests\run_offline.py
 
 - [x] `REPLAY_IT_Professionals.txt`: the reproduction manifest (Section 5 of the brief), rehearsed from a clean unzip
 - [x] `VIDEO_PART1_SCRIPT.md`: Part 1 narration, every claim tied to a file and line in the frozen engine
-- [ ] Part 2 run sheet (live run on https://docs.pytest.org/)
+- [x] `VIDEO_PART2_RUNSHEET.md`: Part 2 run sheet (live run on https://docs.pytest.org/)
 - [ ] Video, 5:00 max: Part 1 methodology (up to 3:00), Part 2 live run (up to 2:00)
 
 ## Rule for this repo

@@ -1,5 +1,6 @@
 # Unzipped working copies of the frozen engine and audit outputs are regenerated, never committed
 demo/
+demo-live/
 audit-output/
 runs/
 .venv/
