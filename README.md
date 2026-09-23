@@ -12,6 +12,25 @@ submitted in Round 3. If the engine differs, the submission fails the integrity 
 |---|---|
 | `round3-frozen/submission.zip` | The Round 3 upload, byte for byte. Never edit it. |
 | `round3-frozen/SHA256SUMS` | Its hash. Check before every recording: `sha256sum -c round3-frozen/SHA256SUMS` |
+| `NOTES.md` | Verified facts about the frozen engine that affect the demo; read before recording |
+| `tools/summarize.py` | Reads an `audit-report.json` and prints a one-screen summary for comparing runs |
+
+## Team and recording setup
+
+- Team: **IT_Professionals**; manifest file `REPLAY_IT_Professionals.txt`
+- Harness: **Claude Code 2.1.280**, model **Claude Opus 5.5** (`claude-opus-5-5`)
+- Python **3.11.15** (via `uv`), Playwright **1.63.0** + Chromium
+
+## Local setup (Windows, PowerShell)
+
+```powershell
+uv python install 3.11.15
+uv venv --python 3.11.15 .venv
+uv pip install --python .venv\Scripts\python.exe playwright==1.63.0
+.venv\Scripts\python.exe -m playwright install chromium
+Expand-Archive round3-frozen\submission.zip demo -Force
+cd demo; ..\.venv\Scripts\python.exe tests\run_offline.py
+```
 
 ## Deliverables
 

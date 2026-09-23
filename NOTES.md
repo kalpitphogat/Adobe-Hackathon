@@ -1,0 +1,47 @@
+# Verified facts about the frozen engine
+
+Each item below was reproduced on 2026-09-23 on Windows 11 with Python 3.11.15 and Playwright 1.63.0,
+against `round3-frozen/submission.zip` unzipped into `demo/`. None of it can be fixed in
+code (the engine is frozen); every item is handled by how we set up, invoke and demo it.
+
+## 1. Python version decides whether the goldens match
+
+`tests/run_offline.py` compares against goldens built with **Python 3.11.15**. The only
+field that moves between versions is `generator.tool_versions.python`, but that is enough to
+fail the byte-for-byte check. On 3.11.15 it prints
+`PASS: offline, deterministic, goldens current, control clean.` On 3.13 all six sites drift.
+→ Setup pins 3.11.15 via `uv` (python.org stops shipping Windows installers after 3.11.9).
+
+## 2. Relative `--out` only works from the marketplace root
+
+`orchestrate.py` runs the collector with `cwd=<marketplace root>`, but checks for the bundle
+relative to the caller's cwd. Run from anywhere else with a relative `--out` and it exits 1:
+`error: no evidence bundle was produced; cannot write a report` (the bundle lands under
+`demo/<out>/evidence/` instead).
+→ Always `cd` into the marketplace root and use `--out ./audit-output` (the documented form),
+or pass an absolute `--out`.
+
+## 3. `tests/test_ssrf.py` S1 fails on Windows
+
+`http://127.1/` (short-form loopback) is not refused on Windows; the other 29 assertions pass,
+and the result is the same on 3.11.15 and 3.13. Do not show this suite on camera.
+
+## 4. Playwright changes the findings
+
+stripe.com, same day:
+
+| | renderer | checks run | findings | high |
+|---|---|---|---|---|
+| no Playwright | none | 24/66 | 69 | 10 |
+| Playwright | playwright | 25/66 | 71 | 10 |
+
+With Playwright the engine adds `read.render.raw_text_gap` (confirmed): the raw-HTML-vs-rendered-DOM
+evidence the brief names first. Without it that check is "not assessed".
+→ REPLAY `ENV_SETUP` installs Playwright + Chromium, so judges get the same checks we show.
+
+## 5. Engagement checks can misfire on some sites
+
+On stripe.com, `act.orient.no_value_proposition` fires on a homepage whose H1 plainly states
+the offer, and `act.cta.absent_for_page_type` fires on `marketplace.stripe.com` with "0 links".
+Both are `likely`, not `confirmed`. The rubric penalises false positives in the live run.
+→ Choose the demo URL deliberately; in the walkthrough, drill into a `confirmed` finding.
