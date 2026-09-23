@@ -44,7 +44,7 @@ engine's crawl are the parts you cut.
 
 | time | on screen | you say |
 |---|---|---|
-| 0:00 | Terminal in `demo-live/`. Type `claude --version` → `2.1.280 (Claude Code)`. | "Part two, live. The harness is Claude Code 2.1.280…" |
+| 0:00 | Terminal in `demo-live/`. Type `claude --version` → `2.1.281 (Claude Code)`. | "Part two, live. The harness is Claude Code 2.1.281…" |
 | 0:05 | Type `claude --model claude-opus-5-5 --allowedTools "Bash(python:*)" "Read"`. Once it opens, type `/model` so the model is visible, then Esc. | "…driving Claude Opus 5.5. It starts inside the unzipped Round 3 submission, the same zip, hash unchanged." |
 | 0:15 | Paste the prompt, **type** `https://docs.pytest.org/` at the end, press Enter. | "I paste the prompt from our REPLAY file and type a site our audit has never seen." |
 | 0:25 | Agent reads `skills/ai-readiness-orchestrator/SKILL.md`, then runs `python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://docs.pytest.org/ --out ./audit-output`. **Pause on this command for 2 s.** | "Wiring: it reads our entrypoint SKILL.md and calls our orchestrator script. No demo code, no hardcoded results." |
@@ -114,7 +114,7 @@ python -c "import urllib.request as u;print(u.urlopen('https://docs.pytest.org/e
 
 ## F. After recording
 
-1. Watch the trimmed video once against the REPLAY file: harness `Claude Code v2.1.280`, model
+1. Watch the trimmed video once against the REPLAY file: harness `Claude Code v2.1.281`, model
    `Claude Opus 5.5`, URL `https://docs.pytest.org/` (or the backup, if you switched). All three must match.
 2. Copy `demo-live/audit-output/` to `recorded-run/` in this repo and commit it, along with the
    raw recording's filename, length and SHA-256 in `recorded-run/README.md` (the video file

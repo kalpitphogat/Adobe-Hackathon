@@ -70,3 +70,17 @@ Independent Playwright counts show identical same-host link sets raw vs rendered
 mozilla.org and htmx.org, where the engine reported gaps of 38, 51 and 42. The finding is
 high/confirmed and false. Found by the REPLAY prompt's evidence check on 2026-09-23. Details in
 `SCOUTING.md`.
+
+## 9. Claude Code updates itself
+
+Between 2026-09-23 and 2026-09-24 the harness went from 2.1.280 to 2.1.281 on its own. A REPLAY
+that names one version while the video shows another is an integrity failure (brief §5).
+→ `tools/check_replay.py` compares `claude --version` with `AGENT_HARNESS` and fails on a
+mismatch. Run it right before recording. Judges pin with `claude install 2.1.281`.
+
+## 10. The findings don't depend on the model; the evidence check does
+
+Same prompt, same site (docs.djangoproject.com), Claude Code 2.1.281: Opus 5.5, Sonnet 5 and
+Haiku 4.5 all got the **same 24 findings in the same order** (`tools/diff_reports.py`). Opus and
+Sonnet loaded the rendered page and flagged the three `nav_links_js_only` findings as not
+supported; Haiku didn't load it, even when the prompt required it, and called them supported.

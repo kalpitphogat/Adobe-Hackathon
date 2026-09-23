@@ -7,6 +7,8 @@ without steps 1-3, or a run sheet that names a different harness, model or URL.
 Usage: python tools/check_replay.py [REPLAY_IT_Professionals.txt] [VIDEO_PART2_RUNSHEET.md]
 """
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
@@ -93,6 +95,27 @@ def main() -> int:
                 problems.append(f"run sheet does not mention {label} {value!r}")
     else:
         problems.append(f"run sheet {runsheet} not found; cannot check consistency with the video")
+
+    # the harness actually installed on this machine must match what the REPLAY discloses
+    # (Claude Code auto-updates; a silent bump before recording would contradict the video)
+    harness_ver = re.search(r"v?(\d+\.\d+\.\d+)", fields.get("AGENT_HARNESS", ""))
+    claude = shutil.which("claude")
+    if claude and harness_ver:
+        try:
+            out = subprocess.run([claude, "--version"], capture_output=True, text=True, timeout=30).stdout
+        except (OSError, subprocess.SubprocessError):
+            out = ""
+        installed = re.search(r"(\d+\.\d+\.\d+)", out)
+        if installed and installed.group(1) == harness_ver.group(1):
+            ok.append(f"installed Claude Code {installed.group(1)} matches AGENT_HARNESS")
+        else:
+            problems.append(
+                f"installed Claude Code is {installed.group(1) if installed else 'unknown'}, "
+                f"AGENT_HARNESS says {harness_ver.group(1)}: update the REPLAY or pin with "
+                f"'claude install {harness_ver.group(1)}'"
+            )
+    else:
+        print("[ -- ] claude not on PATH; installed-version check skipped")
 
     for line in ok:
         print(f"[ OK ] {line}")
