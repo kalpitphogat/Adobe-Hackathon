@@ -1,0 +1,82 @@
+# Runs REPLAY_IT_Professionals.txt's setup and engine steps on Linux and macOS, so the
+# manifest is proven on the platforms judges are most likely to use (we record on Windows).
+# The agent step needs a Claude login, so it is not run here; everything the agent drives is.
+name: replay-portability
+
+on:
+  push:
+    paths:
+      - "REPLAY_IT_Professionals.txt"
+      - "round3-frozen/**"
+      - "tools/verify_engine.py"
+      - ".github/workflows/replay-portability.yml"
+  workflow_dispatch:
+
+jobs:
+  replay:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv (REPLAY commentary, "INSTALLING uv")
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Main path - ENV_SETUP exactly as written, unzip, engine check, offline tests, live run
+        run: |
+          set -euxo pipefail
+          mkdir work && cp round3-frozen/submission.zip work/ && cd work
+          # the ENV_SETUP field, read from the REPLAY file itself, run in this shell
+          eval "$(grep '^ENV_SETUP:' ../REPLAY_IT_Professionals.txt | sed 's/^ENV_SETUP: *//')"
+          python --version
+          # TEST_STEPS 1, minus the harness
+          python -m zipfile -e submission.zip brand-ai-readiness-audit
+          python -c "import shutil; shutil.copytree('brand-ai-readiness-audit/skills', 'brand-ai-readiness-audit/.claude/skills')"
+          python ../tools/verify_engine.py submission.zip brand-ai-readiness-audit
+          cd brand-ai-readiness-audit
+          python tests/run_offline.py
+          # TEST_STEPS 3: the command the agent runs
+          python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://www.theguardian.com/ --out ./audit-output
+          python ../../tools/summarize.py audit-output/audit-report.json --top 3
+          python - <<'EOF'
+          import json
+          r = json.load(open("audit-output/audit-report.json", encoding="utf-8"))
+          f = r["findings"][0]
+          renderer = r["generator"]["tool_versions"].get("renderer")
+          print("renderer:", renderer, "| F-001:", f["check_id"], f["severity"], f["confidence"])
+          assert renderer == "playwright", f"Playwright did not run (renderer={renderer})"
+          assert f["check_id"] == "reach.robots.ai_search_bot_blocked" and f["severity"] == "critical"
+          EOF
+
+      - name: Fallback A - no rendering (--no-render)
+        run: |
+          set -euxo pipefail
+          cd work && source .venv/bin/activate && cd brand-ai-readiness-audit
+          python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://www.theguardian.com/ --out ./audit-output-norender --no-render
+          python ../../tools/summarize.py audit-output-norender/audit-report.json --top 3
+
+      - name: Fallback C - no agent, no venv, the runner's own Python
+        run: |
+          set -euxo pipefail
+          mkdir plain && cp round3-frozen/submission.zip plain/ && cd plain
+          python3 --version
+          python3 -m zipfile -e submission.zip brand-ai-readiness-audit
+          cd brand-ai-readiness-audit
+          python3 skills/ai-readiness-orchestrator/scripts/orchestrate.py https://www.theguardian.com/ --out ./audit-output
+          test -f audit-output/report.md && grep -m1 -n "What to do first" audit-output/report.md
+          python3 - <<'EOF'
+          import json
+          r = json.load(open("audit-output/audit-report.json", encoding="utf-8"))
+          f = r["findings"][0]
+          print("status:", r["audit_status"], "| F-001:", f["check_id"], f["severity"])
+          assert f["check_id"] == "reach.robots.ai_search_bot_blocked" and f["severity"] == "critical"
+          EOF
