@@ -16,11 +16,11 @@ in this order, each already scrolled to its line:
 
 | # | tab | scroll to |
 |---|---|---|
+| 0 | `skills/answerability-audit/references/chunking-model.md` | line 40 (the brief's "reach, read, and quote" sentence); line 5 later |
 | 1 | `skills/ai-readiness-orchestrator/references/gate-rules.md` | line 10 (the quoted handout text) |
 | 2a | `skills/crawl-access-audit/references/ai-bots.json` | line 71 (GPTBot, `"category": "training"`) |
 | 2b | `skills/crawl-access-audit/scripts/check_robots.py` | line 286 (`severity="critical"`); line 318 is `severity="info"` |
-| 3 | `skills/answerability-audit/references/geo-methods.md` | line 23 |
-| 4 | `skills/answerability-audit/references/chunking-model.md` | line 5 |
+| 3 | `skills/answerability-audit/references/geo-methods.md` | line 14 (what the GEO paper found) |
 | 5 | `skills/ai-readiness-orchestrator/references/severity-model.md` | line 5 |
 | 6 | `skills/ai-readiness-orchestrator/scripts/gate_model.py` | line 117 |
 | 7 | `tests/golden/site_b.audit-report.json` | line 109 |
@@ -36,25 +36,29 @@ Tip: highlight the line you are talking about (click the line number) so the vie
 
 ## Beat 1 · How we discovered the signals (0:00 – 1:05)
 
+**[Tab 0: chunking-model.md, lines 40–43 (the brief's own sentence)]**
+> "Ask an AI assistant about a brand: it either quotes the site or acts as if it doesn't exist.
+> We're IT_Professionals, and our audit finds out why. What separates them? Sources get picked
+> when a machine can easily reach, read, and quote a clear fact."
+
 **[Tab 1: gate-rules.md, lines 10–14]**
-> "We're IT_Professionals. Our audit rests on one sentence from the brief: three things must
-> succeed *in order*. The crawler is let in, the page is read, the fact is picked out. So
-> every check has a stage: reach, read, extract, trust, and act for the human visitor."
+> "In that order. So every check has a stage: reach, read, extract, trust, and act for the
+> human visitor."
 
 **[Tab 2a: ai-bots.json, line 71 → Tab 2b: check_robots.py, lines 286 and 318]**
-> "Field research changed what we flag. We classified 29 AI crawlers by role. GPTBot collects
-> training data; blocking it doesn't remove you from ChatGPT search. So a blocked retrieval bot
-> is critical, line 286, and a blocked training bot is only info, line 318."
+> "Reach: we classified 29 crawlers by role. GPTBot only collects training data, so blocking
+> it doesn't cost you ChatGPT search. A blocked retrieval bot is critical, line 286; a training
+> bot is info, line 318."
 
-**[Tab 3: geo-methods.md, line 23 then line 41]**
-> "Where the research is weaker, severity stays low: the GEO paper measured a benchmark gain,
-> not a defect. And every number in a finding must trace to a source we actually read."
+**[Tab 3: geo-methods.md, lines 14–17]**
+> "Quote: the GEO study found pages that cite sources, statistics and quotations get used
+> more; keyword stuffing doesn't. That's a benchmark gain, not a defect, so a missing
+> evidence marker is only low."
 
-**[Tab 4: chunking-model.md, line 5]**
-> "Some rules say what we must *not* recommend. Google says don't chop content up for AI, so
-> no fix here ever tells you to split your page."
+**[Tab 0 again: chunking-model.md, line 5]**
+> "And Google says don't chop content up for AI, so no fix here tells you to split your page."
 
-*(150 words)*
+*(151 words)*
 
 ---
 

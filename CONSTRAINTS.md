@@ -23,7 +23,7 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 | 3.1 | Part 1 methodology **≤ 3:00** | ✅ 🎬 | `VIDEO_PART1_SCRIPT.md`: 379 spoken words ≈ 2:42 at 140 wpm, ~15 s for tab switches |
 | 3.2 | Part 2 trial run **≤ 2:00** | 🎬 | Run sheet timeline ends 1:55 |
 | 3.3 | May crop idle waits; **may not splice** a run that didn't happen | 🎬 | One continuous take; raw file kept; "⏩ trimmed" captions; retake = new URL, never a splice |
-| 3.4 | Part 1: how we discovered the findings (field research, what separates cited vs ignored sites, distilled into repeatable checks) | ✅ | Beat 1 of the Part 1 script |
+| 3.4 | Part 1: how we discovered the findings (field research, what separates cited vs ignored sites, distilled into repeatable checks) | ✅ | Beat 1 answers "what separates them" directly: the brief's reach/read/quote sentence (`chunking-model.md:40`), crawler roles (`ai-bots.json:71`, `check_robots.py:286/318`), the GEO finding (`geo-methods.md:14`); Beat 4: field-test miss + R1–R12 |
 | 3.5 | Part 1: how we assigned severities | ✅ | Beat 2 |
 | 3.6 | Part 1: how we derived suggested actions (mechanism-sound, prioritised) | ✅ | Beat 3 |
 | 3.7 | **Anchor every claim to code**; untraceable narration earns no credit | ✅ | Every line of the Part 1 script names a file + line in the unzipped submission; checked 2026-09-23; unanchored claims listed as excluded |
