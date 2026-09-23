@@ -14,7 +14,7 @@ the command line against a site the audit has never seen.
 |---|---|
 | Engine | Round 3 `submission.zip`, unchanged (hash above) |
 | Entrypoint skill | `skills/ai-readiness-orchestrator` (`SKILL.md` → `scripts/orchestrate.py`) |
-| Agent harness | Claude Code v2.1.281 |
+| Agent harness | Claude Code v2.1.281, loading the entrypoint with its Skill tool |
 | LLM | Claude Opus 5.5 (`claude-opus-5-5`) |
 | Live-run URL | https://docs.pytest.org/ (never audited before the recording) |
 | Second test URL | https://www.theguardian.com/ (stable: robots.txt critical + gate cascade) |
@@ -31,7 +31,8 @@ below was run on this machine (`rehearsal/` has the transcripts):
 | **Main**: Claude Code + Opus 5.5 + Playwright, REPLAY steps 1–3 | reproduces the video | Django, IKEA, Guardian |
 | **A**: no Playwright (`--no-render`) | no browser install | Django: 21 vs 24 findings; the only difference is 3 × `nav_links_js_only` |
 | **B**: another model or agent harness, same prompt | no Opus, or no Claude Code | Sonnet 5 and Haiku 4.5: same 24 findings, same order |
-| **C**: no agent at all, any Python 3.9+ | no model, no special setup | Python 3.13, no venv: exit 0; `report.md` lists "What to do first" |
+| **C**: no agent at all, any Python 3.9+ | no model, no special setup | Python 3.13 (Windows), 3.12 (Ubuntu), 3.14 (macOS), no venv: exit 0; `report.md` lists "What to do first" |
+| **Linux / macOS** | judges not on Windows | CI runs ENV_SETUP as written + steps 1 and 3 + A and C on Ubuntu and macOS: all pass |
 
 `tools/check_replay.py` checks the REPLAY file (fields, URLs, steps) and that it matches the run
 sheet and the installed harness version. It must print `0 problem(s)` before recording.

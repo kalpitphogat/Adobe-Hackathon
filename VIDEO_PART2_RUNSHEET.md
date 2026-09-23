@@ -18,18 +18,23 @@ only pre-screened for robots.txt and homepage links with `tools/prescreen.py`.
    REPLAY (it did once already, 2.1.280 → 2.1.281). If it fails on the version, update
    `AGENT_HARNESS` and this run sheet to the installed version and re-run a rehearsal
    (`tools\rehearse.ps1` on a *seen* site), or pin with `claude install <version>`.
-1. **Fresh folder, exactly as REPLAY step 1** (Windows PowerShell):
+1. **Fresh folder, exactly as REPLAY step 1** (Windows PowerShell). Stop before `claude`;
+   that part happens on camera:
    ```powershell
    cd C:\Users\kalpi\Kalpit_round_4
    Remove-Item -Recurse -Force demo-live -ErrorAction SilentlyContinue
-   mkdir demo-live; cd demo-live
-   Expand-Archive ..\round3-frozen\submission.zip .
+   mkdir demo-live; Copy-Item round3-frozen\submission.zip demo-live\; cd demo-live
    ..\.venv\Scripts\Activate.ps1
    python --version            # must print Python 3.11.15
+   python -m zipfile -e submission.zip brand-ai-readiness-audit
+   cd brand-ai-readiness-audit
+   python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
+   $env:DISABLE_AUTOUPDATER = "1"   # keep Claude Code on the disclosed version in this terminal
    ```
-   `demo-live/` is a new unzip, so there is no leftover `audit-output/`. It's git-ignored.
-2. **Integrity:** `(Get-FileHash ..\round3-frozen\submission.zip).Hash` must be
-   `1C872C598DCAC741C712CBF9E671F024881A9BBA251E2B4DA66995F81B6CF8DCF`.
+   `demo-live/` is new, so there is no leftover `audit-output/`. It's git-ignored.
+2. **Integrity:** `python ..\..\tools\verify_engine.py ..\submission.zip .` must end with
+   `RESULT : ENGINE UNCHANGED` (155 files, plus the 73-file `.claude/skills` copy). You'll run
+   this same command on camera.
 3. **Network:** open https://docs.pytest.org/ once in a browser to confirm it's up.
    (A browser visit isn't an audit run.)
 4. **Screen:** Windows Terminal maximised, font size 16+, dark theme. Close notifications
@@ -49,15 +54,15 @@ engine's crawl are the parts you cut.
 
 | time | on screen | you say |
 |---|---|---|
-| 0:00 | Terminal in `demo-live/`. Type `claude --version` → `2.1.281 (Claude Code)`. | "Part two, live. The harness is Claude Code 2.1.281…" |
-| 0:05 | Type `claude --model claude-opus-5-5 --allowedTools "Bash(python:*)" "Read"`. Once it opens, type `/model` so the model is visible, then Esc. | "…driving Claude Opus 5.5. It starts inside the unzipped Round 3 submission, the same zip, hash unchanged." |
+| 0:00 | Terminal in `demo-live\brand-ai-readiness-audit`. Run `python ..\..\tools\verify_engine.py ..\submission.zip .` → `ENGINE UNCHANGED`. Then `claude --version` → `2.1.281 (Claude Code)`. | "Part two, live. This folder is our Round 3 zip, unzipped: every file byte-identical to what we submitted. The harness is Claude Code 2.1.281…" |
+| 0:08 | Type `claude --model claude-opus-5-5 --allowedTools "Skill" "Bash(python:*)" "PowerShell(python:*)" "Read"`. Once it opens, type `/model` so the model is visible, then Esc. | "…driving Claude Opus 5.5." |
 | 0:15 | Paste the prompt, **type** `https://docs.pytest.org/` at the end, press Enter. | "I paste the prompt from our REPLAY file and type a site our audit has never seen." |
-| 0:25 | Agent reads `skills/ai-readiness-orchestrator/SKILL.md`, then runs `python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://docs.pytest.org/ --out ./audit-output`. **Pause on this command for 2 s.** | "Wiring: it reads our entrypoint SKILL.md and calls our orchestrator script. No demo code, no hardcoded results." |
-| — | *(trim the crawl wait; put a small on-screen caption "⏩ crawl, ~60 s trimmed")* | |
-| 0:35 | Orchestrator finishes, agent reads `audit-output/audit-report.json`, prints status + counts. | "The collector crawled the site once, our six audit skills ran over it, and here's the status and the counts by severity." |
-| 0:45 | Agent's **priority table** (top 10 in report order, ICE column). | "The fixes in priority order: severity first, then ICE, meaning impact, confidence and ease. This is the order to work in." |
-| 1:00 | Agent's **evidence check** on the confirmed high findings. | "Before trusting them, the agent re-fetches each page itself, raw and rendered, and says whether the evidence holds. The report stays exactly as the engine wrote it." |
-| 1:15 | Agent's **drill-down** on the best-supported finding. Optionally flip to VS Code (section D). | Name the finding; walk evidence, severity, fix and patch (section D wording). |
+| 0:22 | **`Skill(ai-readiness-orchestrator)`** appears, then `python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://docs.pytest.org/ --out ./audit-output`. **Hold on each for 2 s.** Approve any permission prompt on camera. | "Wiring: the agent loads our entrypoint skill and runs its orchestrator. No demo code, no hardcoded results." |
+| — | *(trim the crawl wait; put a small on-screen caption "⏩ crawl, ~40 s trimmed")* | |
+| 0:35 | Orchestrator finishes, agent reads `audit-output/audit-report.json`, prints status + counts. | "One crawl, six audit skills over it. The findings come from our engine; the model only runs it and double-checks it." |
+| 0:45 | Agent's **priority table** (top 5 in report order, ICE column). | "The fixes in priority order: severity first, then ICE, meaning impact, confidence and ease. This is the order to work in." |
+| 1:00 | Agent's **evidence check**: confirmed high findings in order, until one holds up. | "Before trusting them, the agent re-fetches each page itself, raw and rendered, until one finding holds up. The report stays exactly as the engine wrote it." |
+| 1:15 | Agent's **drill-down** on that finding. Optionally flip to VS Code (section D). | Name the finding; walk evidence, severity, fix and patch (section D wording). |
 | 1:50 | — | "Same steps, same URL, in REPLAY_IT_Professionals.txt." |
 
 **Wording rule:** say only what's on screen. If the report says `partial`, say partial. Don't
@@ -90,7 +95,7 @@ and `reach.robots.ai_search_bot_blocked` (Guardian). Follow the agent. Only if i
 
 ## D. The drill-in (~30 s)
 
-In VS Code (`demo-live/`), open `audit-output/audit-report.json`, `Ctrl+F` the finding's
+In VS Code (`demo-live/brand-ai-readiness-audit/`), open `audit-output/audit-report.json`, `Ctrl+F` the finding's
 `check_id`, and point at four fields in turn:
 
 | field | say |
@@ -115,8 +120,8 @@ python -c "import urllib.request as u;print(u.urlopen('https://docs.pytest.org/e
 | what happens | do this |
 |---|---|
 | The agent's evidence check says a finding is **not supported** (likely for `nav_links_js_only`) | **Keep it in.** Say: "The evidence check disagrees here, so we'd verify before acting. The report stays exactly as the engine wrote it." That's an honest, strong moment. Don't drill into that finding. |
-| Claude Code asks permission for a command | Approve it on camera ("yes"). It's part of the real run; trim the pause. |
-| Run exits with `no evidence bundle was produced` | You aren't in the marketplace root. Stop, `cd` into `demo-live`, and **start a new take on the backup URL** (below). |
+| Claude Code asks permission for a command | Approve it on camera ("yes"). It's part of the real run; trim the pause. On Windows the agent sometimes tries the orchestrator first as a chained command (`...; echo $LASTEXITCODE`), which is blocked; it then retries the plain command. Only one crawl runs (checked in `rehearsal/*_skill.md`). |
+| Run exits with `no evidence bundle was produced` | You aren't in the marketplace root. Stop, `cd` into `demo-live\brand-ai-readiness-audit`, and **start a new take on the backup URL** (below). |
 | Run takes past 5 min / crashes on a crawl delay | New take on the backup URL; REPLAY troubleshooting mentions `--time-budget 600`. |
 | Any retake | pytest is now "seen". Use **https://www.sphinx-doc.org/** (pre-screened, never audited), and **change the first `TEST_SITE_URLS` entry, step 2's example and this run sheet to match**, then re-run `tools\check_replay.py`. Never splice two takes. |
 | Output is too long for 2:00 | Scroll faster in the edit; trim the agent's thinking. Don't cut the URL entry, the command, the priority table, the evidence check or the drill-down. |
@@ -127,7 +132,10 @@ python -c "import urllib.request as u;print(u.urlopen('https://docs.pytest.org/e
 
 1. Watch the trimmed video once against the REPLAY file: harness `Claude Code v2.1.281`, model
    `Claude Opus 5.5`, URL `https://docs.pytest.org/` (or the backup, if you switched). All three must match.
-2. Copy `demo-live/audit-output/` to `recorded-run/` in this repo and commit it, along with the
-   raw recording's filename, length and SHA-256 in `recorded-run/README.md` (the video file
-   itself stays out of git).
-3. Total video (Part 1 + Part 2) ≤ 5:00. Part 1 ≤ 3:00, Part 2 ≤ 2:00, each on its own.
+2. Copy `demo-live/brand-ai-readiness-audit/audit-output/` to `recorded-run/` in this repo and commit it.
+3. **Keep the proof the run was real and continuous.** Copy the session transcript Claude Code saved,
+   `C:\Users\kalpi\.claude\projects\C--Users-kalpi-Kalpit-round-4-demo-live-brand-ai-readiness-audit\<newest>.jsonl`,
+   to `recorded-run/session.jsonl`, and write the raw (untrimmed) video's filename, length and
+   `(Get-FileHash <raw-video>).Hash` into `recorded-run/README.md`. The video file itself stays out of git.
+   Run `python tools\tool_calls.py recorded-run\session.jsonl` once to confirm it shows the Skill call.
+4. Run `tools\check_replay.py` one last time. Then check the total video (Part 1 + Part 2) is ≤ 5:00. Part 1 ≤ 3:00, Part 2 ≤ 2:00, each on its own.

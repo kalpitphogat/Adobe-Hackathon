@@ -58,8 +58,14 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # Recorded on: Windows 11 Home 10.0.26200, Python 3.11.15, Playwright 1.63.0
 # with Chromium. These Windows steps, the unzip, and TEST_STEPS 1-3 (with
 # claude -p) were rehearsed end to end in an empty folder on that machine.
-# The one-line ENV_SETUP above is the macOS/Linux form of the same commands;
-# it was not run on macOS or Linux.
+# The one-line ENV_SETUP above is the macOS/Linux form of the same commands.
+# It was run exactly as written (read from this file) on GitHub-hosted
+# ubuntu-latest and macos-latest runners on 2026-09-24, followed by the unzip,
+# a file-by-file engine check (155/155 identical), tests/run_offline.py (PASS,
+# goldens current) and the step-3 command on https://www.theguardian.com/
+# (renderer playwright; F-001 critical, confirmed). Fallback A and Fallback C
+# (runner Python 3.12.3 on Ubuntu, 3.14.7 on macOS) passed on both. Only the
+# agent step (it needs a Claude login) was not run there.
 #
 # ============================================================================
 # FALLBACKS. The findings come from the engine, not the model. Each path
