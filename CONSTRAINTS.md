@@ -31,10 +31,10 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 | 3.9 | **Enter the URL on camera**; real, continuous; interaction, not a pre-rendered report | 🎬 | REPLAY prompt ends in `URL:`; URL typed live |
 | 3.10 | Show the agent invoking the **entrypoint skill**, fetching, reasoning, producing findings | ✅ 🎬 | Prompt makes the agent read `skills/ai-readiness-orchestrator/SKILL.md` and run `orchestrate.py`; run sheet holds on that command |
 | 3.11 | **Drill into ≥ 1 finding**: real evidence, its severity, the suggested fix | ✅ 🎬 | Prompt step "drill-down"; run sheet section D |
-| 3.12 | **Show fixes sorted/prioritised by impact** | ⏳ | Current prompt sorts by ICE alone, which let mediums outrank highs on IKEA (`COMPARISON_ikea.md`). Fix ⏳: report order (severity → ICE) with ICE shown |
+| 3.12 | **Show fixes sorted/prioritised by impact** | ✅ | Prompt asks for the top 10 in report order (severity → ICE) with ICE as a column; rehearsed on IKEA (`rehearsal/2026-09-24_ikea_opus_newprompt.md`): highs first, ICE shown |
 | 3.13 | **State harness and model on camera** | 🎬 | `claude --version` + `/model` at 0:00–0:10 |
 | 3.14 | **One line on wiring**: it's really the Round 3 entrypoint, not a hardcoded demo | 🎬 | Run sheet line at 0:25 |
-| 3.15 | Everything shown comes from the submitted engine, live, so a judge reaches the same substance | ✅ | Prompt forbids adding findings; the agent's evidence check is labelled commentary |
+| 3.15 | Everything shown comes from the submitted engine, live, so a judge reaches the same substance | ✅ | Prompt: "do not add findings that are not in the report"; the evidence check is labelled commentary. On IKEA it marked the engine's price finding "not supported" without altering the report |
 
 ## §4 Harness and model
 
@@ -68,7 +68,7 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 
 | # | rule | status | evidence |
 |---|---|---|---|
-| 7.1 | Recommend-only; nothing alters a live site; read-only | ✅ | Engine permits only GET/HEAD (`SKILL.md` guardrails); prompt forbids modifying `skills/` (stricter "no file changes" wording ⏳) |
+| 7.1 | Recommend-only; nothing alters a live site; read-only | ✅ | Engine permits only GET/HEAD (`SKILL.md` guardrails); prompt: "Do not create, change or delete any file yourself" (only the engine writes `audit-output/`) |
 | 7.2 | **Respect robots.txt** | ✅ | Engine treats robots.txt as a hard rule (and honours Crawl-delay: gnu.org, `NOTES.md` §6) |
 | 7.3 | Same engine as Round 3; a demo round, not a rebuild | ✅ | No file under `demo/` is edited; checked before each recording |
 | 7.4 | AI assistance allowed | ✅ | |
