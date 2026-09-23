@@ -1,0 +1,175 @@
+# =============================================================================
+# REPLAY_IT_Professionals.txt
+# Adobe University Hackathon 2026 — Round 4
+# Team: IT_Professionals (Lakshya Rajput, Tanmay Dixit, Kalpit Phogat)
+#
+# WHAT WAS SUBMITTED
+# ------------------
+# Submitted alongside the video:
+#   REPLAY_IT_Professionals.txt    -- this file (the only additional submission)
+#
+# Already in judges' hands from Round 3:
+#   submission.zip                 -- the Round 3 marketplace (unchanged)
+#
+# Nothing else was submitted. The engine is the Round 3 zip, unchanged.
+#
+# QUICK START (copy-paste into a terminal):
+# -----------------------------------------
+#   mkdir audit-replay && cd audit-replay
+#   python -m zipfile -e /path/to/submission.zip .        # or: unzip submission.zip
+#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py \
+#       https://www.adobe.com/ --out ./audit-output
+#
+# That's it. Python 3.9+ and a network connection are the only requirements.
+# Full step-by-step with explanations follows in TEST_STEPS below.
+# =============================================================================
+
+TEST_SITE_URLS:   https://www.adobe.com/, https://www.figma.com/
+
+LLM_MODEL:        Claude Opus 4.5 (2025-09)
+
+AGENT_HARNESS:    Antigravity IDE v1.0 (Google DeepMind)
+
+ENV_SETUP:        # Python 3.9+ required. Standard library only for 63 of 66
+                  # checks — no pip install required for the core audit.
+                  #
+                  # Optional: Playwright upgrades 3 render-stage checks from
+                  # "not assessed" to a full rendered-vs-raw DOM diff.
+                  #   pip install playwright
+                  #   python -m playwright install chromium
+                  #
+                  # The audit still runs and is complete without Playwright;
+                  # those 3 checks are reported as "not assessed" in
+                  # limitations[] rather than silently passed.
+
+TEST_STEPS:
+  1. Prepare a clean working directory and unzip the marketplace:
+
+       mkdir audit-replay
+       cd audit-replay
+
+     Copy submission.zip (the Round 3 marketplace you already hold) here.
+     Unzip it — choose whichever command works on your OS:
+
+       # Windows PowerShell:
+       python -m zipfile -e submission.zip .
+
+       # macOS / Linux:
+       unzip submission.zip
+
+     Your directory should now look like:
+       audit-replay/
+         submission.zip
+         marketplace.json
+         README.md
+         skills/                <-- the 9 audit skill folders
+
+  2. Run the audit (this is the command shown on camera):
+
+       python skills/ai-readiness-orchestrator/scripts/orchestrate.py \
+           https://www.adobe.com/ --out ./audit-output --time-budget 300
+
+     What you will see:
+       - Evidence collection, then profiling, then the full audit
+       - A schema-valid JSON report written to ./audit-output/
+
+     To audit any other site (including a URL of your own choosing):
+       python skills/ai-readiness-orchestrator/scripts/orchestrate.py \
+           https://YOUR-SITE.com/ --out ./audit-output --time-budget 300
+
+  3. Read the report:
+
+       # Machine-readable findings:
+       cat audit-output/audit-report.json
+
+       # Human-readable summary:
+       cat audit-output/report.md
+
+       # Paste-ready HTML patches per finding:
+       ls  audit-output/fix_patches/
+
+     Findings are ranked by severity, then ICE score (Impact x Confidence x
+     Ease, on a 0-10 scale), then pipeline stage.
+
+  4. Drill into a specific finding (example for the top-ranked finding):
+
+     Open audit-output/audit-report.json and look at findings[0]. Each
+     finding contains:
+       - id, title, severity           (what it is)
+       - evidence                      (what was observed, with URLs)
+       - mechanism                     (why it hurts discoverability)
+       - suggested_action              (the fix, with priority and effort)
+       - check_id                      (traces back to the script that found it)
+
+  5. Verify determinism (optional — offline, no network needed):
+
+       python tests/run_offline.py
+
+     Expected: "PASS: offline, deterministic, goldens current, control clean."
+     This replays 6 fixture sites against checked-in golden reports byte-for-
+     byte and re-runs two across a TZ x PYTHONHASHSEED matrix.
+
+EXPECTED_OUTPUT:  ./audit-output/audit-report.json
+
+# =============================================================================
+# OPTIONAL: RICHER DEMO CLI (via GitHub clone)
+# =============================================================================
+# If you want the same findings with a richer terminal presentation, clone our
+# repo to get round4/demo_cli.py — a thin wrapper around orchestrate.py that
+# adds progress bars and coloured output. It contains no checks of its own.
+#
+#   git clone https://github.com/kalpitphogat/Adobe-Hackathon.git
+#   cd Adobe-Hackathon && git checkout round4-demo-cli
+#   python round4/demo_cli.py doctor
+#   python round4/demo_cli.py audit https://www.adobe.com/ --out ./audit-output
+#   python round4/demo_cli.py show ./audit-output --top 10
+#   python round4/demo_cli.py show ./audit-output --id F-001
+#   python round4/demo_cli.py prove ./audit-output
+#
+# Both paths produce byte-identical findings.
+# =============================================================================
+
+# =============================================================================
+# DETERMINISM
+# =============================================================================
+# The engine is deterministic: same input, byte-identical report. To verify:
+#
+#   python tests/run_offline.py
+#   # -> "PASS: offline, deterministic, goldens current, control clean."
+#
+# That replays six fixture sites against checked-in golden reports byte-for-
+# byte and re-runs two of them across a TZ x PYTHONHASHSEED matrix.
+#
+# On a live URL, reports differ between runs only where the SITE changed or
+# the crawl sampled different pages; audited_at is the only field that always
+# moves.
+# =============================================================================
+
+# =============================================================================
+# ENGINE INTEGRITY
+# =============================================================================
+# The engine fingerprint (3251f79064da) hashes every SKILL.md and every script
+# in the marketplace. It can be verified by running:
+#
+#   python round4/check_engine_frozen.py     (if cloned from GitHub)
+#   # -> "PASS: brand-ai-readiness-audit/ is byte-identical to submission.zip"
+#
+# The same fingerprint at the start and end of a run proves the same engine
+# drove both — which is the integrity claim the video makes out loud.
+# =============================================================================
+
+# =============================================================================
+# WHAT THE ENGINE WILL AND WILL NOT DO
+# =============================================================================
+# Read-only. The HTTP layer validates every method against a {GET, HEAD}
+# allowlist, so no code path can alter the audited site. robots.txt is a hard
+# constraint on crawling, not advice. No cookies, credentials, or authenticated
+# areas. Hosts resolving to private/loopback/link-local space are refused on
+# the seed URL and on every redirect hop. The whole run is bounded by
+# --time-budget (default 300 s).
+#
+# Two checks are OFF by default and report "not assessed" rather than passing:
+# CDN/WAF reachability probing for named AI crawlers (--probe-bot-ua) is opt-in
+# because sending named-crawler user-agents at a site you do not own is not
+# something an audit should do unless asked.
+# =============================================================================
