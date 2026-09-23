@@ -7,30 +7,42 @@
 # ----------------------
 # Alongside this file you should have received (or already hold from Round 3):
 #
-#   submission.zip          -- the Round 3 marketplace (already with judges)
-#   demo_cli.py             -- the Round 4 terminal front-end (submitted with video)
-#   REPLAY_LakshyaTanmayKalpit.txt  -- this file
+# WHAT YOU HAVE / WHAT WAS SUBMITTED
+# ------------------------------------
+# Submitted alongside the video:
+#   REPLAY_LakshyaTanmayKalpit.txt  -- this file (the only additional submission)
 #
-# QUICK START (copy-paste this block into a terminal):
-# --------------------------------------------------------
-#   1. Create a working directory anywhere on your machine:
-#        mkdir adobe-hack-replay && cd adobe-hack-replay
+# Already in judges' hands from Round 3:
+#   submission.zip          -- the Round 3 marketplace
 #
-#   2. Copy submission.zip and demo_cli.py into this directory.
+# Nothing else was submitted. The engine is the Round 3 zip, unchanged.
 #
-#   3. Unzip the marketplace:
-#        python -m zipfile -e submission.zip .
-#      (or: unzip submission.zip    if you have the unzip binary)
+# QUICK START — two options, choose either:
+# -----------------------------------------
+# OPTION A: Direct path (recommended — no extra tools needed)
+#   Works with only submission.zip, which you already have.
 #
-#   4. Run the preflight:
-#        python demo_cli.py doctor
+#   mkdir adobe-hack-replay
+#   cd adobe-hack-replay
+#   python -m zipfile -e /path/to/submission.zip .
+#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py \
+#       https://www.adobe.com/ --out ./audit-output
 #
-#   5. Run the audit:
-#        python demo_cli.py audit https://www.adobe.com/ --out ./audit-output
+# OPTION B: Full demo CLI (richer terminal output, same findings)
+#   Clones our repo to get the round4/demo_cli.py presentation layer.
+#
+#   git clone https://github.com/kalpitphogat/Adobe-Hackathon.git
+#   cd Adobe-Hackathon
+#   git checkout round4-demo-cli
+#   python round4/demo_cli.py doctor
+#   python round4/demo_cli.py audit https://www.adobe.com/ --out ./audit-output
+#
+# Both options produce byte-identical findings. demo_cli.py contains no
+# checks — it only renders what orchestrate.py returns.
 #
 # The full step-by-step with explanations follows in TEST_STEPS below.
-# For a completely harness-free run, see FALLBACK RUN PATH at the bottom.
 # =============================================================================
+
 
 TEST_SITE_URLS:   https://www.adobe.com/, https://www.figma.com/
 
