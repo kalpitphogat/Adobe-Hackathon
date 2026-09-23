@@ -10,6 +10,11 @@ reuse it unchanged, so it is **not** resubmitted.
 | 1 | Recorded video, ≤ 5:00 (Part 1 reasoning ≤ 3:00, Part 2 live run ≤ 2:00) | **Record it** with `VIDEO_SCRIPT.md` |
 | 2 | `REPLAY_IT_Professionals.txt`, the reproduction manifest | Ready, and dry-run verified from a clean unzip |
 
+> **Submit `REPLAY_IT_Professionals.txt` from this folder.** Branch `final-submission`
+> also has a separate teammate draft at `round4/REPLAY_TeamName.txt`. That one is an
+> unfilled template (`<<FILL>>` placeholders), and submitting it would leave the run
+> unverified.
+
 ## What is in this folder
 
 ```
@@ -20,6 +25,10 @@ round4-final-submission/
 └─ live-demo/                    ← Round 3 submission.zip unzipped, byte-identical. Record Part 2 here.
                                    (git-ignored: a working copy, not a deliverable)
 ```
+
+Branch `lakshya_round4` holds **only this folder**. The Round 3 engine it audits
+with is not repeated here; it stays unchanged on branch `final-submission` and in
+the `submission.zip` the judges already hold.
 
 ## Harness and model (must match the video)
 
@@ -40,7 +49,21 @@ round4-final-submission/
 | `tests/test_*.py` (10 suites) | 9 pass. `test_ssrf.py` fails 1 of 30 **on Windows only**: `http://127.1/` doesn't resolve on Windows, so the request fails before the guard is reached. Nothing is fetched either way |
 | Live audit of theguardian.com | 1 critical (`reach.robots.ai_search_bot_blocked`, `Disallow: /` at robots.txt line 102, confirmed with a live `curl`), 26–27 findings capped behind it, engagement untouched |
 | Re-analysis of the saved evidence bundle (`--bundle`) | Byte-identical report, apart from `audited_at` and `evidence_bundle.path` |
-| **REPLAY TEST_STEPS run headless** (`claude -p`) from a fresh unzip of `submission.zip` | Agent read the entrypoint `SKILL.md`, ran `orchestrate.py`, reported the counts, top 5 by ICE, and the F-001 drill-down, then corroborated it with `curl` |
+| **REPLAY TEST_STEPS run headless** (`claude -p`) from a fresh unzip of `submission.zip` | Agent read the entrypoint `SKILL.md`, ran `orchestrate.py`, reported the counts, top 5 by ICE, and the F-001 drill-down, then corroborated it with `curl`. The untrimmed session took 2:35 |
+| REPLAY setup commands | `@anthropic-ai/claude-code@2.1.280` exists on npm; `claude auth login` is the real login command; step 1's `unzip -d round3` puts `marketplace.json` at the root of `round3/` |
+
+## Known Round 3 engine limitations (frozen, so disclosed rather than fixed)
+
+Also listed in the REPLAY notes, so judges hear it from us first.
+
+- Four JSON-LD patch templates quote the page title with Python `repr()`, so the
+  patch shows `'single quotes'` where JSON needs `"double quotes"`
+  (`validate_types.py:105,154`, `date_consistency.py:167`, `non_text_facts.py:176`).
+  Keep these patches off camera; F-001's robots.txt patch is clean.
+- A URL with and without a trailing slash can be counted as two pages.
+- Small grammar slips in some titles ("a about page").
+- `DESIGN.md` and `gate-rules.md` say `site_b` caps 13 findings; the golden report
+  the code produces says 11. Quote 11.
 
 ## Recording checklist
 

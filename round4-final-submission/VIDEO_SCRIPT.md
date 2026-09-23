@@ -5,10 +5,11 @@ Paths are relative to the marketplace root, which is `brand-ai-readiness-audit/`
 in the repo and the top level of `submission.zip`. Every line number was checked
 against the Round 3 engine at commit `ede3a6b`.
 
-Part 1 narration is 420 words without the *[bracketed]* sentences, about 2:48 at
-150 words per minute. With them it is 464 words, about 3:05, which is over the
-cap. **Leave the brackets out by default.** Add them back only if a timed
-rehearsal comes in under 2:40.
+Part 1 narration is 435 words without the *[bracketed]* sentences, about 2:54 at
+150 words per minute. With them it is 479 words, about 3:12, which is over the
+cap. **Leave the brackets out, and time a rehearsal.** If it runs past 2:55,
+speak a little faster rather than drop an anchor. Judges score what you can
+point to.
 
 ---
 
@@ -31,7 +32,9 @@ block. Judges score claims they can trace to code.
 1. `skills/ai-readiness-orchestrator/references/gate-rules.md:5-19`, the appendix quote
 2. `skills/crawl-access-audit/references/ai-bots.json`, one retrieval and one training entry
 3. `skills/crawl-access-audit/scripts/check_robots.py:249-300` (retrieval → `severity="critical"` at :286)
-4. `DESIGN.md:320-341` and `DESIGN.md:367-380`
+4. `DESIGN.md:367-380` (the live-site field test), then `tests/test_regressions.py:49-58`
+   (R1). Scroll past the `# R1.` … `# R12.` headers. Each false positive found is a
+   numbered test, so the claim is code, not just prose.
 5. `skills/site-evidence-collector/scripts/dom.py:53-58` (the noscript signal)
 6. `skills/answerability-audit/scripts/retrievability_sim.py:25-35` and `:79`
 7. `skills/site-profile-classifier/references/threshold-profiles.json:1-15`
@@ -47,7 +50,8 @@ block. Judges score claims they can trace to code.
 > as medium.
 >
 > Then we audited five live sites with different architectures. That produced 365
-> findings. We named twelve false positives before touching a threshold, and one
+> findings, with false positives we named before touching a threshold. Each one is
+> now a numbered regression test, R1 to R12, in test_regressions.py. We also found a
 > false negative: our SPA-shell detector fired zero times, even on a 16-word page.
 > We rewrote it around the noscript "enable JavaScript" message in dom.py, which
 > every framework emits. Those five sites went to 205.
@@ -102,11 +106,20 @@ block. Judges score claims they can trace to code.
 
 ## Part 2: live run (≤ 2:00)
 
+The untrimmed agent session took **2:35** in our dry run (the audit itself is about
+37 s; the rest is the agent reading and answering). Cut the idle waits in editing
+to fit 2:00. Cutting idle time is allowed; cutting between the URL and the
+findings is not.
+
 ### Off camera, before you press record
 1. `live-demo/` (next to this file) is the **Round 3 `submission.zip` already
-   unzipped**, which is exactly what judges have. Record from there. To rebuild it:
-   delete the folder's contents, then
-   `Expand-Archive F:\adobe_hackathon\submission.zip -DestinationPath .\live-demo`.
+   unzipped**, which is exactly what judges have. Record from there. It is
+   git-ignored, so it exists only on the machine that made it. To rebuild it
+   anywhere, take the zip from the Round 3 branch **in Git Bash** (PowerShell's `>`
+   corrupts binary files), check it, then unzip it:
+   `git show origin/final-submission:submission.zip > submission.zip`
+   `sha256sum submission.zip` must print `1c872c598dcac741c712cbf9e671f024881a9ba251e2b4da66995f81b6cf8dcf`
+   `unzip -q submission.zip -d live-demo`
 2. Open a terminal **in `live-demo/`**. Use a large font and a dark theme. Close
    everything else.
 3. Confirm there is no `audit-output` folder in it yet. Delete any left over from
@@ -149,7 +162,8 @@ Let the agent's answer scroll to the drill-down and the `curl` verification.
 > critical because a retrieval crawler that's refused can't cite the brand at all.
 > The training-only bots on the same site are reported separately as info, because
 > that's a licensing choice. The fix is a paste-ready robots.txt patch that keeps
-> the training policy separate.
+> the training policy separate. We're recommend-only: the report states what the
+> block costs in AI visibility, and lifting it is the owner's decision.
 
 **1:30–1:52 · Show it is prioritised**
 Point at the agent's top-5 table (priority, then ICE).
