@@ -28,20 +28,27 @@ def get(url: str) -> tuple[int, dict, str]:
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8")
     for url in sys.argv[1:]:
-        host = urlparse(url).netloc
-        _, _, robots = get(urljoin(url, "/robots.txt"))
-        delay = re.findall(r"(?im)^\s*crawl-delay\s*:\s*([\d.]+)", robots)
-        status, headers, html = get(url)
-        server = (headers.get("Server") or headers.get("server") or "").lower()
-        challenge = bool(re.search(r"just a moment|cf-chl|you have been blocked|captcha", html, re.I))
-        hrefs = [urljoin(url, h) for h in re.findall(r'<a\s[^>]*href=["\']([^"\'#]+)', html, re.I)]
-        hosts = {urlparse(h).netloc for h in hrefs if h.startswith("http")}
-        base = ".".join(host.split(".")[-2:])
-        sibling = sorted(h for h in hosts if h != host and h.endswith(base))
-        ai_hits = len(AI_WORDS.findall(html))
-        print(f"{url}\n    status={status} server={server or '-'} crawl_delay={delay or 'none'} "
-              f"challenge={challenge} raw_links={len(hrefs)} sibling_subdomains={sibling} ai_terms={ai_hits}")
+        try:
+            screen(url)
+        except Exception as exc:  # noqa: BLE001 - a candidate that errors is itself the answer
+            print(f"{url}\n    UNREACHABLE: {type(exc).__name__}: {exc}")
     return 0
+
+
+def screen(url: str) -> None:
+    host = urlparse(url).netloc
+    _, _, robots = get(urljoin(url, "/robots.txt"))
+    delay = re.findall(r"(?im)^\s*crawl-delay\s*:\s*([\d.]+)", robots)
+    status, headers, html = get(url)
+    server = (headers.get("Server") or headers.get("server") or "").lower()
+    challenge = bool(re.search(r"just a moment|cf-chl|you have been blocked|captcha", html, re.I))
+    hrefs = [urljoin(url, h) for h in re.findall(r'<a\s[^>]*href=["\']([^"\'#]+)', html, re.I)]
+    hosts = {urlparse(h).netloc for h in hrefs if h.startswith("http")}
+    base = ".".join(host.split(".")[-2:])
+    sibling = sorted(h for h in hosts if h != host and h.endswith(base))
+    ai_hits = len(AI_WORDS.findall(html))
+    print(f"{url}\n    status={status} server={server or '-'} crawl_delay={delay or 'none'} "
+          f"challenge={challenge} raw_links={len(hrefs)} sibling_subdomains={sibling} ai_terms={ai_hits}")
 
 
 if __name__ == "__main__":
