@@ -25,12 +25,16 @@ $prompt = (Get-Content "$repo\REPLAY_IT_Professionals.txt" -Encoding utf8 |
 if (-not $prompt) { throw "step-2 prompt (ending 'URL: <URL>') not found in REPLAY" }
 $prompt = $prompt.Trim().Replace("URL: <URL>", "URL: $Url")
 
-$work = "$repo\runs\rehearse_$Label\brand-ai-readiness-audit"
-if (Test-Path "$repo\runs\rehearse_$Label") { Remove-Item -Recurse -Force "$repo\runs\rehearse_$Label" }
-New-Item -ItemType Directory $work | Out-Null
-Expand-Archive "$repo\round3-frozen\submission.zip" $work
-Set-Location $work
+# Mirror REPLAY step 1 exactly: a folder holding submission.zip, unpacked with python -m zipfile.
+$base = "$repo\runs\rehearse_$Label"
+if (Test-Path $base) { Remove-Item -Recurse -Force $base }
+New-Item -ItemType Directory $base | Out-Null
+Copy-Item "$repo\round3-frozen\submission.zip" $base
+Set-Location $base
 & "$repo\$Venv\Scripts\Activate.ps1"
+python -m zipfile -e submission.zip brand-ai-readiness-audit
+if ($LASTEXITCODE -ne 0) { throw "unzip failed" }
+Set-Location brand-ai-readiness-audit
 
 $date = Get-Date -Format "yyyy-MM-dd"
 $out = "$repo\rehearsal\${date}_$Label.md"

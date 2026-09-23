@@ -3,8 +3,9 @@ LLM_MODEL: Claude Opus 5.5 (API model id: claude-opus-5-5), runs of 2026-09
 AGENT_HARNESS: Claude Code v2.1.281
 ENV_SETUP: uv python install 3.11.15 && uv venv --python 3.11.15 .venv && . .venv/bin/activate && uv pip install playwright==1.63.0 && python -m playwright install chromium
 TEST_STEPS:
- 1. From the folder that holds the activated .venv, unpack the Round 3 submission and start Claude Code in the marketplace root:
-      mkdir brand-ai-readiness-audit && cd brand-ai-readiness-audit && unzip ../submission.zip
+ 1. From the folder that holds submission.zip and the activated .venv, unpack the Round 3 submission (this command is the same in bash, PowerShell and cmd), enter the marketplace root, and start Claude Code:
+      python -m zipfile -e submission.zip brand-ai-readiness-audit
+      cd brand-ai-readiness-audit
       claude --model claude-opus-5-5 --allowedTools "Bash(python:*)" "Read"
  2. Paste this prompt verbatim, replacing <URL> at the very end with one of the TEST_SITE_URLS (the video uses https://docs.pytest.org/) or any URL of your choice:
       Read skills/ai-readiness-orchestrator/SKILL.md and follow its Procedure to audit the URL given at the end of this message. Run the orchestrator from this directory with --out ./audit-output. Do not create, change or delete any file yourself, and do not add findings that are not in the report. When the report is written, read audit-output/audit-report.json and give: (1) audit_status, the counts by severity, and the checks listed as not assessed; (2) the top 10 findings in report order, which is the engine's priority order (severity, then ICE), as a table of rank, id, severity, confidence, ICE and title; (3) an evidence check: for every critical or high finding whose confidence is confirmed (at most 5, in report order; if there are none, the first 3 findings), fetch one affected URL yourself with an inline python -c command and say in one line whether what you see supports the evidence (supported, partly supported, or not supported), quoting the numbers you saw. Use urllib for the raw HTML. For any check_id starting with read.render, and whenever the evidence compares the raw HTML with the rendered page or quotes values shown only after JavaScript runs, you must also load the page with Playwright if it is installed and count the same thing on both sides, same-host links only for links. (4) A drill-down on the highest-ranked finding your check marked supported: its evidence, severity and confidence, mechanism, paste-ready patch, ICE components, how many findings have blocked_by pointing at it, and its verification step. Keep anything else to one line per finding. Report the engine's findings exactly as written; your evidence check is commentary and must not change the report. URL: <URL>
@@ -44,8 +45,8 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #   .venv\Scripts\Activate.ps1
 #   uv pip install playwright==1.63.0
 #   python -m playwright install chromium
-#   mkdir brand-ai-readiness-audit; cd brand-ai-readiness-audit
-#   Expand-Archive ..\submission.zip .
+#   python -m zipfile -e submission.zip brand-ai-readiness-audit
+#   cd brand-ai-readiness-audit
 #   claude --model claude-opus-5-5 --allowedTools "Bash(python:*)" "Read"
 # Use "python", not "python3": on Windows "python3" is often the Microsoft
 # Store placeholder, not a real interpreter.
