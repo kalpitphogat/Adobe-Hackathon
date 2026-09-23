@@ -62,3 +62,11 @@ large Crawl-delay. That raises the collector's share to 360 s and the overall ce
 discusses the topic (linear.app/legal/aup, pydantic.dev/docs/ai). Avoid AI-topic sites for the
 demo; if a judge's site trips it, the evidence string shows the quoted phrase, which is easy to
 check by hand.
+
+## 8. `read.render.nav_links_js_only` counts off-site links on the rendered side
+
+`collect.py:739` counts every rendered href; `collect.py:632` counts only internal raw hrefs.
+Independent Playwright counts show identical same-host link sets raw vs rendered on Django docs,
+mozilla.org and htmx.org, where the engine reported gaps of 38, 51 and 42. The finding is
+high/confirmed and false. Found by the REPLAY prompt's evidence check on 2026-09-23. Details in
+`SCOUTING.md`.

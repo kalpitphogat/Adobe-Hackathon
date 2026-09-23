@@ -63,11 +63,31 @@ smashingmagazine (2 pages), eff.org, fastapi, djangoproject, flask, allbirds, kh
 The crawl also follows **subdomains** (status.cal.com, swag.htmx.org, de/fr/es.bellroy.com,
 pydantic.dev from docs.pydantic.dev), which adds findings about sites the viewer did not ask about.
 
+## Correction: `read.render.nav_links_js_only` is a false positive (found by the agent's evidence check)
+
+An earlier version of this file listed this check as a strength. **That was wrong.** On the
+clean-room REPLAY rehearsal (docs.djangoproject.com), the agent's evidence check disputed all
+three nav-links findings. An independent count (raw HTML via urllib, rendered DOM via
+Playwright, same-host `<a href>` only) agreed with the agent:
+
+| page | raw same-host | rendered same-host | engine said |
+|---|---|---|---|
+| docs.djangoproject.com/el/1.11/_modules/…/api/ | 35 | 35 | raw 34, rendered 72 |
+| www.mozilla.org/en-US/about/ | 19 | 19 | raw 19, rendered 70 |
+| htmx.org/ | 11 | 11 | raw 17, rendered 59 |
+
+Cause, in the frozen engine: `site-evidence-collector/scripts/collect.py` line 739 builds
+`rendered_internal_link_count` from **every** classified href, while the raw count (line 632)
+keeps only `kind == "internal"`. The rendered side therefore includes off-site links, so any page
+with many outbound links fires at high/confirmed. **Never drill into this check on camera**; if it
+appears, the agent's evidence check will say it is unsupported, which is the honest outcome.
+
 ## What the engine does well (the demo should show this)
 
-- `extract.sd.absent_on_eligible_page`: confirmed, verified, comes with a paste-ready JSON-LD patch.
-- `read.render.nav_links_js_only` / `read.render.raw_text_gap`: confirmed, and this is exactly the
-  raw-HTML-vs-rendered-DOM evidence the brief lists first. Needs Playwright.
+- `extract.sd.absent_on_eligible_page`: confirmed, verified independently on 10 pages, comes with
+  a paste-ready JSON-LD patch. **This is the finding to drill into.**
+- `read.render.raw_text_gap`: raw-vs-rendered **word count** (not links), e.g. khanacademy raw 0
+  words vs 1155 rendered (raw HTML independently confirmed at 3 KB with 0 links). Needs Playwright.
 - `reach.robots.ai_search_bot_blocked`: theverge.com, with line numbers from robots.txt.
 - `pip.pypa.io` got 0 high findings, which fits a well-built site (control behaviour on a live site).
 
@@ -82,5 +102,5 @@ pydantic.dev from docs.pydantic.dev), which adds findings about sites the viewer
 Django docs was the cleanest run: 4 highs, all confirmed, all verified true. Use it as the
 second `TEST_SITE_URLS` entry (the "already seen" control). The first entry is the on-camera site.
 
-For the walkthrough, drill into a **confirmed** finding: the raw-vs-rendered link or text gap,
-or missing structured data with its JSON-LD patch.
+For the walkthrough, drill into **missing structured data** with its JSON-LD patch, or a
+`raw_text_gap` if one fires. Not `nav_links_js_only` (see the correction above).
