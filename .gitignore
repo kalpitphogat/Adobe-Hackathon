@@ -1,0 +1,11 @@
+# Unzipped working copies of the frozen engine and audit outputs are regenerated, never committed
+demo/
+audit-output/
+runs/
+.venv/
+__pycache__/
+*.pyc
+# Video files are large; keep them out of git
+*.mp4
+*.mov
+*.mkv
