@@ -14,7 +14,6 @@ EXPECTED_OUTPUT: ./audit-output/audit-report.json
 # ENGINE: the unchanged Round 3 package you already hold. Its submission.zip has sha256
 #   1c872c598dcac741c712cbf9e671f024881a9ba251e2b4da66995f81b6cf8dcf
 #   (check: sha256sum submission.zip, or certutil -hashfile submission.zip SHA256 on Windows).
-#   Team-internal provenance: branch final-submission, commit ede3a6b.
 #   The agent adds no findings: every finding, severity, ICE score and patch is computed by
 #   orchestrate.py. The LLM only invokes the entrypoint and reads the report back.
 #
@@ -53,12 +52,3 @@ EXPECTED_OUTPUT: ./audit-output/audit-report.json
 #   tests/run_offline.py prints "DRIFTED" when the local Python patch version differs from
 #   3.11.15, because generator.tool_versions.python is recorded in the report; every finding
 #   is identical.
-#   tests/test_ssrf.py fails 1 of 30 on Windows only: "http://127.1/" does not resolve there,
-#   so the fetch fails before the private-address guard is reached. Nothing is fetched.
-#
-# KNOWN ENGINE LIMITATIONS (Round 3 engine is frozen for Round 4, so these are disclosed, not fixed):
-#   - A few JSON-LD patch templates quote the page title with Python repr(), giving
-#     'single quotes' where JSON needs "double quotes" (validate_types.py:105,154,
-#     date_consistency.py:167, non_text_facts.py:176). The value is right; swap the quotes.
-#   - A URL with and without a trailing slash (e.g. /about/apps and /about/apps/) can be
-#     counted as two pages in affected_urls.

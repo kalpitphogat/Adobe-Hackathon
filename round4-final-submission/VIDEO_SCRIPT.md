@@ -1,26 +1,19 @@
-# Round 4 video script: IT_Professionals
+# Video script: IT_Professionals, Round 4
 
-**Hard cap: 5:00 total.** Part 1 ≤ 3:00 (reasoning), Part 2 ≤ 2:00 (live run).
-Paths are relative to the marketplace root, which is `brand-ai-readiness-audit/`
-in the repo and the top level of `submission.zip`. Every line number was checked
-against the Round 3 engine at commit `ede3a6b`.
+The narration of our Round 4 video, with the code on screen behind every claim.
 
-Part 1 narration is 435 words without the *[bracketed]* sentences, about 2:54 at
-150 words per minute. With them it is 479 words, about 3:12, which is over the
-cap. **Leave the brackets out, and time a rehearsal.** If it runs past 2:55,
-speak a little faster rather than drop an anchor. Judges score what you can
-point to.
+- **Part 1**, how we built it: 3:00 or less.
+- **Part 2**, the live run: 2:00 or less.
+
+Paths are relative to the root of the Round 3 marketplace (the top level of
+`submission.zip`). Line numbers refer to that unchanged package.
 
 ---
 
-## Part 1: how we built it (≤ 3:00)
-
-Split the screen: your face or voice, plus an editor showing the file named in the
-**SHOW** line. Open each file at the given line **before** you start speaking that
-block. Judges score claims they can trace to code.
+## Part 1: how we built it
 
 ### 0:00–0:15 · What it is
-**SHOW:** `marketplace.json`, with `"entrypoint": true` highlighted
+**On screen:** `marketplace.json`, the `"entrypoint": true` entry
 
 > We're IT_Professionals. Our Round 3 marketplace takes any URL and reports why AI
 > assistants don't find or cite the brand, and why visitors leave without acting.
@@ -28,15 +21,13 @@ block. Judges score claims they can trace to code.
 > marketplace.json.
 
 ### 0:15–1:20 · How we discovered the findings
-**SHOW, in order:**
-1. `skills/ai-readiness-orchestrator/references/gate-rules.md:5-19`, the appendix quote
-2. `skills/crawl-access-audit/references/ai-bots.json`, one retrieval and one training entry
-3. `skills/crawl-access-audit/scripts/check_robots.py:249-300` (retrieval → `severity="critical"` at :286)
-4. `DESIGN.md:367-380` (the live-site field test), then `tests/test_regressions.py:49-58`
-   (R1). Scroll past the `# R1.` … `# R12.` headers. Each false positive found is a
-   numbered test, so the claim is code, not just prose.
-5. `skills/site-evidence-collector/scripts/dom.py:53-58` (the noscript signal)
-6. `skills/answerability-audit/scripts/retrievability_sim.py:25-35` and `:79`
+**On screen, in order:**
+1. `skills/ai-readiness-orchestrator/references/gate-rules.md:5-19`: the Round-2 appendix quote
+2. `skills/crawl-access-audit/references/ai-bots.json`: one retrieval entry and one training entry
+3. `skills/crawl-access-audit/scripts/check_robots.py:249-300`: retrieval → `severity="critical"` (:286)
+4. `DESIGN.md:367-380`: the live-site field test
+5. `tests/test_regressions.py:49-58`: regression R1, then the `# R1.` … `# R12.` headers
+6. `skills/site-evidence-collector/scripts/dom.py:53-58`: the noscript signal
 7. `skills/site-profile-classifier/references/threshold-profiles.json:1-15`
 
 > Our signals start from one sentence in the Round-2 appendix: a crawler has to be
@@ -56,17 +47,15 @@ block. Judges score claims they can trace to code.
 > We rewrote it around the noscript "enable JavaScript" message in dom.py, which
 > every framework emits. Those five sites went to 205.
 >
-> *[For quotability, retrievability_sim.py splits the text a no-JavaScript reader
-> sees into 300-token windows, and checks whether each key fact survives in a
-> window that names its own subject.]* And no check hardcodes a number:
-> thresholds come from threshold-profiles.json, picked by site archetype.
+> And no check hardcodes a number: thresholds come from threshold-profiles.json,
+> picked by site archetype.
 
 ### 1:20–2:10 · How we assigned severities
-**SHOW, in order:**
-1. `skills/ai-readiness-orchestrator/references/severity-model.md`, the severity table
-2. `skills/render-gap-audit/scripts/diff_raw_rendered.py:97-104` (`default_severity` in the `CHECKS` registry)
-3. `skills/ai-readiness-orchestrator/scripts/gate_model.py:81-114` then `:117-148` (`:42` ceiling, `:129` Rule 0, `:138` `blocked_by`)
-4. `skills/engagement-audit/scripts/gating.py:32` (`RULE_0B_SUPPRESSIBLE`)
+**On screen, in order:**
+1. `skills/ai-readiness-orchestrator/references/severity-model.md`: the severity table
+2. `skills/render-gap-audit/scripts/diff_raw_rendered.py:97-104`: `default_severity` in a `CHECKS` registry
+3. `skills/ai-readiness-orchestrator/scripts/gate_model.py:81-114`, then `:117-148` (`:42` ceiling, `:129` Rule 0, `:138` `blocked_by`)
+4. `skills/engagement-audit/scripts/gating.py:32`: `RULE_0B_SUPPRESSIBLE`
 
 > Severity is what a finding costs if it's true. Critical means the machine can't
 > see the page at all. High means a specific capability is lost. Info means a
@@ -77,15 +66,13 @@ block. Judges score claims they can trace to code.
 > that gate. Downstream discoverability findings stay in the report, capped at
 > medium and tagged blocked_by the root cause, so you see one cause first instead
 > of fifteen criticals. Engagement is never capped by crawler access, because a
-> visitor from an ad doesn't care about robots.txt. *[But if we never saw the
-> rendered page, gating.py suppresses engagement checks entirely: they'd be
-> unevidenced.]*
+> visitor from an ad doesn't care about robots.txt.
 
 ### 2:10–2:55 · How we derived and prioritised the fixes
-**SHOW, in order:**
-1. `skills/answerability-audit/scripts/bundle.py:175-190` (`action()`: summary, effort, mechanism, source, patch, verification)
-2. `skills/ai-readiness-orchestrator/scripts/orchestrate.py:242-254` (`validate_finding`)
-3. `skills/structured-data-audit/scripts/check_hierarchy.py:208-225` (`__FILL_IN__`)
+**On screen, in order:**
+1. `skills/answerability-audit/scripts/bundle.py:175-190`: `action()` (summary, effort, mechanism, source, patch, verification)
+2. `skills/ai-readiness-orchestrator/scripts/orchestrate.py:242-254`: `validate_finding`
+3. `skills/structured-data-audit/scripts/check_hierarchy.py:208-225`: `__FILL_IN__`
 4. `skills/ai-readiness-orchestrator/scripts/severity.py:27-29`, `:48-53`, `:68-83`
 
 > Every fix goes through one action() contract: a mechanism for why it works, a
@@ -104,58 +91,34 @@ block. Judges score claims they can trace to code.
 
 ---
 
-## Part 2: live run (≤ 2:00)
+## Part 2: the live run
 
-The untrimmed agent session took **2:35** in our dry run (the audit itself is about
-37 s; the rest is the agent reading and answering). Cut the idle waits in editing
-to fit 2:00. Cutting idle time is allowed; cutting between the URL and the
-findings is not.
+The run follows `REPLAY_IT_Professionals.txt` step by step, from the unzipped Round
+3 package. From entering the URL to the findings it is one continuous take. Only
+idle waiting while the agent fetches and reads is trimmed.
 
-### Off camera, before you press record
-1. `live-demo/` (next to this file) is the **Round 3 `submission.zip` already
-   unzipped**, which is exactly what judges have. Record from there. It is
-   git-ignored, so it exists only on the machine that made it. To rebuild it
-   anywhere, take the zip from the Round 3 branch **in Git Bash** (PowerShell's `>`
-   corrupts binary files), check it, then unzip it:
-   `git show origin/final-submission:submission.zip > submission.zip`
-   `sha256sum submission.zip` must print `1c872c598dcac741c712cbf9e671f024881a9ba251e2b4da66995f81b6cf8dcf`
-   `unzip -q submission.zip -d live-demo`
-2. Open a terminal **in `live-demo/`**. Use a large font and a dark theme. Close
-   everything else.
-3. Confirm there is no `audit-output` folder in it yet. Delete any left over from
-   a rehearsal.
-4. Keep `REPLAY_IT_Professionals.txt` open off screen, so you can copy the step-2
-   prompt **without** its last part (`Website: https://www.theguardian.com/`).
-5. Check the Guardian's robots.txt still blocks the crawlers (PowerShell):
-   `curl.exe -s https://www.theguardian.com/robots.txt | Select-String '^Disallow: /$'`.
-   It should print one line. If it prints nothing, pick another URL **and change it
-   in REPLAY** (see below).
-
-### On camera
-
-**0:00–0:12 · State the harness and model**
-Run `claude --version` so `2.1.280 (Claude Code)` is visible, then:
+### 0:00–0:12 · Harness and model
+**On screen:** `claude --version` → `2.1.280 (Claude Code)`, then
 ```
 claude --model claude-opus-5-5 --allowedTools "Bash(python:*),Bash(python3:*),Bash(curl:*),Read"
 ```
 > Harness: Claude Code 2.1.280. Model: Claude Opus 5.5. This folder is our
 > unzipped Round 3 submission.zip, unchanged.
 
-**0:12–0:25 · Enter the URL on camera**
-Paste the prompt, then **type** `Website: https://www.theguardian.com/` live and
-press Enter.
+### 0:12–0:25 · The URL, entered on camera
+**On screen:** the step-2 prompt from the REPLAY file, with
+`Website: https://www.theguardian.com/` typed live.
 > One line on wiring: the agent is about to read our entrypoint SKILL.md and run
 > its orchestrate.py. That runs the collector, the classifier and six audit
 > skills as subprocesses. Nothing is precomputed; every finding comes from what
 > the site serves right now.
 
-**0:25–0:45 · Agent works** (trim idle waiting only)
-Keep the agent reading `SKILL.md`, the full `orchestrate.py … --no-render`
-command, and the JSON summary it prints (`"critical": 1`, `"blocked_findings": …`)
-on screen.
+### 0:25–0:45 · The agent works
+**On screen:** the agent reading `SKILL.md`, the full
+`orchestrate.py … --no-render` command, and the JSON summary it prints.
 
-**0:45–1:30 · Drill into F-001**
-Let the agent's answer scroll to the drill-down and the `curl` verification.
+### 0:45–1:30 · Drill-down: F-001
+**On screen:** the agent's drill-down and its live `curl` of the site's robots.txt.
 > The top finding is critical and confirmed. Evidence: the exact robots.txt line,
 > line 102, `Disallow: /`, blocking PerplexityBot, Claude-SearchBot and four other
 > retrieval crawlers. The agent just fetched the live file and confirmed it. It's
@@ -165,38 +128,12 @@ Let the agent's answer scroll to the drill-down and the `curl` verification.
 > the training policy separate. We're recommend-only: the report states what the
 > block costs in AI visibility, and lifting it is the owner's decision.
 
-**1:30–1:52 · Show it is prioritised**
-Point at the agent's top-5 table (priority, then ICE).
-> Fixes are sorted by impact: severity, then ICE. F-001 is 9.3. And *(read the
-> number off the screen)* findings are capped with blocked_by F-001: real, but
-> moot until it's fixed. The engagement finding just below isn't capped, because
-> visitors don't depend on crawlers.
+### 1:30–1:52 · Prioritised by impact
+**On screen:** the agent's top-5 table (priority, then ICE).
+> Fixes are sorted by impact: severity, then ICE. F-001 is 9.3. The findings
+> capped behind it carry blocked_by F-001: real, but moot until it's fixed. The
+> engagement finding just below isn't capped, because visitors don't depend on
+> crawlers.
 
-Optional, if time allows: `dir audit-output\fix_patches` to show one patch file
-per finding.
-
-**1:52–2:00 · Close**
+### 1:52–2:00 · Close
 > Everything is in audit-output/audit-report.json, the path in our REPLAY file.
-
-### Integrity rules (Section 6: breaking any of these sinks the submission)
-- **One continuous take** from typing the URL to the findings. You may cut only
-  idle waiting, never splice runs together.
-- **Read the numbers off the screen.** The Guardian publishes all day, so page-level
-  counts change between runs. Our rehearsals gave 35 and 34 findings, 27 and 26
-  capped. Never say a number from this script that isn't on screen.
-- Harness, model and URL on camera **must equal** `REPLAY_IT_Professionals.txt`.
-  If you change the URL, change it in `TEST_SITE_URLS` **and** at the end of the
-  step-2 prompt.
-- Don't touch anything under `skills/`. The engine must be byte-identical to Round 3.
-
-### Things to avoid on camera
-- **Don't open a JSON-LD patch that contains a page title.** Four Round 3
-  templates format the title with Python's `repr()`, so the patch shows
-  `'single quotes'`, which is invalid JSON-LD (`validate_types.py:105,154`,
-  `date_consistency.py:167`, `non_text_facts.py:176`). The engine can't change in
-  Round 4, so drill into F-001, whose patch is plain robots.txt. If a judge asks,
-  the honest answer is "known template bug; the value is correct but needs
-  double quotes."
-- Don't quote "13 capped" for `site_b` from DESIGN.md or gate-rules.md. The golden
-  report the code produces says **11**.
-- Don't use `--probe-bot-ua`. It is for sites you own.

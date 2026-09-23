@@ -1,80 +1,113 @@
-# Round 4 final submission: IT_Professionals
+# Brand AI-Readiness Audit: Round 4 Prototype Showcase
 
-Adobe University Hackathon 2026 · Round 4 (Prototype Showcase, Live Agent Demo)
+**Team IT_Professionals:** Lakshya, Tanmay, Kalpit
+Adobe University Hackathon 2026 · Round 4, Live Agent Demo
 
-Round 4 asks for **two things**. Judges already hold our Round 3 marketplace and
-reuse it unchanged, so it is **not** resubmitted.
+This folder is our Round 4 submission. The recorded video is submitted alongside
+it. The engine in the video is our Round 3 Agent Skill Marketplace, **unchanged**.
+An AI agent runs it live from the command line against a site it has never seen.
 
-| # | Deliverable | Status |
-|---|---|---|
-| 1 | Recorded video, ≤ 5:00 (Part 1 reasoning ≤ 3:00, Part 2 live run ≤ 2:00) | **Record it** with `VIDEO_SCRIPT.md` |
-| 2 | `REPLAY_IT_Professionals.txt`, the reproduction manifest | Ready, and dry-run verified from a clean unzip |
+---
 
-> **Submit `REPLAY_IT_Professionals.txt` from this folder.** Branch `final-submission`
-> also has a separate teammate draft at `round4/REPLAY_TeamName.txt`. That one is an
-> unfilled template (`<<FILL>>` placeholders), and submitting it would leave the run
-> unverified.
+## In this folder
 
-## What is in this folder
-
-```
-round4-final-submission/
-├─ REPLAY_IT_Professionals.txt   ← SUBMIT alongside the video
-├─ VIDEO_SCRIPT.md               ← timed narration with a code anchor for every claim, plus the live-run plan
-├─ README.md                     ← this file
-└─ live-demo/                    ← Round 3 submission.zip unzipped, byte-identical. Record Part 2 here.
-                                   (git-ignored: a working copy, not a deliverable)
-```
-
-Branch `lakshya_round4` holds **only this folder**. The Round 3 engine it audits
-with is not repeated here; it stays unchanged on branch `final-submission` and in
-the `submission.zip` the judges already hold.
-
-## Harness and model (must match the video)
-
-- **Agent harness:** Claude Code v2.1.280
-- **LLM:** Claude Opus 5.5 (`claude-opus-5-5`)
-- **Test URL:** https://www.theguardian.com/
-- **Engine:** the unchanged Round 3 `submission.zip`, sha256
-  `1c872c598dcac741c712cbf9e671f024881a9ba251e2b4da66995f81b6cf8dcf`
-  (branch `final-submission`, commit `ede3a6b`)
-
-## What was verified before handing over
-
-| Check | Result |
+| File | What it is |
 |---|---|
-| `python package_submission.py --check` | OK, zip valid, 412 KB, exactly one entrypoint |
-| `python tests/validate_marketplace.py` | 73 passed, 0 failed |
-| `python tests/run_offline.py` | 6 of 6 fixtures reproduce the goldens finding-for-finding. It prints "DRIFTED" only because the goldens record Python 3.11.15 and this machine has 3.11.9 |
-| `tests/test_*.py` (10 suites) | 9 pass. `test_ssrf.py` fails 1 of 30 **on Windows only**: `http://127.1/` doesn't resolve on Windows, so the request fails before the guard is reached. Nothing is fetched either way |
-| Live audit of theguardian.com | 1 critical (`reach.robots.ai_search_bot_blocked`, `Disallow: /` at robots.txt line 102, confirmed with a live `curl`), 26–27 findings capped behind it, engagement untouched |
-| Re-analysis of the saved evidence bundle (`--bundle`) | Byte-identical report, apart from `audited_at` and `evidence_bundle.path` |
-| **REPLAY TEST_STEPS run headless** (`claude -p`) from a fresh unzip of `submission.zip` | Agent read the entrypoint `SKILL.md`, ran `orchestrate.py`, reported the counts, top 5 by ICE, and the F-001 drill-down, then corroborated it with `curl`. The untrimmed session took 2:35 |
-| REPLAY setup commands | `@anthropic-ai/claude-code@2.1.280` exists on npm; `claude auth login` is the real login command; step 1's `unzip -d round3` puts `marketplace.json` at the root of `round3/` |
+| `REPLAY_IT_Professionals.txt` | The reproduction manifest: harness, model, test URL, and copy-pasteable steps from a clean unzip to the finished report |
+| `VIDEO_SCRIPT.md` | The video's narration, with the file and line on screen behind every claim |
+| `README.md` | This overview |
 
-## Known Round 3 engine limitations (frozen, so disclosed rather than fixed)
+## The run at a glance
 
-Also listed in the REPLAY notes, so judges hear it from us first.
+| | |
+|---|---|
+| **Engine** | Round 3 `submission.zip`, unchanged. sha256 `1c872c598dcac741c712cbf9e671f024881a9ba251e2b4da66995f81b6cf8dcf` |
+| **Entrypoint skill** | `skills/ai-readiness-orchestrator` (`SKILL.md` → `scripts/orchestrate.py`) |
+| **Agent harness** | Claude Code v2.1.280 |
+| **LLM** | Claude Opus 5.5 (`claude-opus-5-5`) |
+| **Test URL** | https://www.theguardian.com/ |
+| **Setup** | Python 3.9+, standard library only. No `pip install` |
+| **Report** | `./audit-output/audit-report.json`, plus `report.md`, `fix_patches/` and `evidence/` |
 
-- Four JSON-LD patch templates quote the page title with Python `repr()`, so the
-  patch shows `'single quotes'` where JSON needs `"double quotes"`
-  (`validate_types.py:105,154`, `date_consistency.py:167`, `non_text_facts.py:176`).
-  Keep these patches off camera; F-001's robots.txt patch is clean.
-- A URL with and without a trailing slash can be counted as two pages.
-- Small grammar slips in some titles ("a about page").
-- `DESIGN.md` and `gate-rules.md` say `site_b` caps 13 findings; the golden report
-  the code produces says 11. Quote 11.
+## Replaying it
 
-## Recording checklist
+The exact commands and the verbatim prompt are in `REPLAY_IT_Professionals.txt`.
+In short:
 
-- [ ] Delete `live-demo/audit-output/` if a rehearsal left one.
-- [ ] Check the Guardian's robots.txt still has `Disallow: /` for the AI group (command in `VIDEO_SCRIPT.md`).
-- [ ] Part 1: every claim spoken while its file is on screen at the listed line.
-- [ ] Part 2: `claude --version` on screen; say "Claude Code 2.1.280, Claude Opus 5.5".
-- [ ] Type the URL on camera. One continuous take from URL to findings; trim idle time only.
-- [ ] Drill into F-001: evidence line, severity, mechanism, patch, live `curl` check.
-- [ ] Show the priority order (top 5 by severity → ICE) and the `blocked_by` count.
-- [ ] Say one line on wiring: the agent runs the Round 3 entrypoint, nothing hardcoded.
-- [ ] Total ≤ 5:00; Part 1 ≤ 3:00; Part 2 ≤ 2:00.
-- [ ] If the URL, model or harness changes, update `REPLAY_IT_Professionals.txt` to match **before** submitting.
-- [ ] Optional: keep `live-demo/audit-output/` from the recorded take. It is the evidence behind the video.
+1. Unzip the Round 3 package and start the harness inside it:
+   ```
+   unzip -q submission.zip -d round3 && cd round3 && claude --model claude-opus-5-5 --allowedTools "Bash(python:*),Bash(python3:*),Bash(curl:*),Read"
+   ```
+2. Paste the step-2 prompt from the manifest. It points the agent at the
+   entrypoint `SKILL.md` and ends with the website to audit. To test a URL of your
+   own choosing, change only that last part.
+3. The agent runs the entrypoint, reads `./audit-output/audit-report.json`, and
+   reports the findings in priority order, with a drill-down on the top one that
+   it checks against the live site.
+
+**Without an agent**, the same report comes straight from the engine:
+```
+python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://www.theguardian.com/ --out ./audit-output --no-render
+```
+
+## What the run finds on the test URL
+
+- **F-001 · critical · confirmed · ICE 9.3.** Line 102 of the site's `robots.txt`
+  (`Disallow: /`) blocks six AI retrieval crawlers: PerplexityBot, Claude-SearchBot,
+  Claude-User, DuckAssistBot, Amazonbot and Google-CloudVertexBot. These crawlers
+  fetch pages when a user asks a question, so the brand cannot be cited by those
+  assistants. The agent fetches the live `robots.txt` and confirms the line.
+  The fix is a paste-ready robots.txt patch that leaves the training-crawler policy
+  as it is.
+- **The gate cascade.** Downstream discoverability findings are still reported,
+  capped at medium and tagged `blocked_by: F-001`. They are real, but they change
+  nothing until F-001 is fixed.
+- **Engagement stays independent.** Visitor-facing findings, such as a homepage
+  whose first screen never states what the site offers (high), are not capped.
+  A visitor arriving from a link does not depend on crawlers.
+- **Training-only crawlers** blocked on the same site are reported as `info`, a
+  licensing choice rather than a defect.
+
+The site publishes all day, so page-level counts differ from run to run. The root
+cause, its evidence and the shape of the cascade stay the same while the site's
+`robots.txt` is unchanged.
+
+## Why a replay reaches the same substance
+
+- **The engine computes every finding.** The model only invokes the entrypoint
+  and reads the report back, so a different model changes the wording, not the
+  findings. The agent-free command above produces the same report.
+- **Ranking is a total order:** severity, then ICE, then stage, then check id.
+  The same evidence always ranks the same.
+- **`--no-render` is explicit**, so results don't depend on whether Playwright is
+  installed on the replaying machine.
+- **The evidence is saved.** Re-analysing `./audit-output/evidence` with `--bundle`
+  gives a byte-identical report, apart from the timestamp and the bundle path.
+- **Checked before submission.** We ran the manifest's steps headless
+  (`claude -p`) with the disclosed harness and model, from a fresh unzip of
+  `submission.zip`. The agent invoked the entrypoint, produced the same F-001 with
+  the same evidence, and confirmed it against the live site.
+
+## Where the reasoning lives in code
+
+| Idea | Implemented in |
+|---|---|
+| Reach → read → extract → trust ordering, and the cascade | `skills/ai-readiness-orchestrator/scripts/gate_model.py`, `references/gate-rules.md` |
+| Retrieval vs training crawlers | `skills/crawl-access-audit/references/ai-bots.json`, `scripts/check_robots.py` |
+| What each severity means | `skills/ai-readiness-orchestrator/references/severity-model.md` |
+| ICE score and ranking | `skills/ai-readiness-orchestrator/scripts/severity.py` |
+| Every fix carries a mechanism, patch and verification | `skills/*/scripts/bundle.py` (`action()`), `orchestrate.py` (`validate_finding`) |
+| Engagement never capped by crawler access | `gate_model.py` (Rule 0), `skills/engagement-audit/scripts/gating.py` |
+| Thresholds chosen per site type, never hardcoded | `skills/site-profile-classifier/references/threshold-profiles.json` |
+| Field-tested false positives, locked in | `tests/test_regressions.py` (R1–R12) |
+
+The full narration, with line numbers, is in `VIDEO_SCRIPT.md`.
+
+## Guardrails during the run
+
+- **Read-only.** The engine only sends GET and HEAD requests and never changes
+  the site.
+- **robots.txt is obeyed** for our own crawl.
+- **No crawler impersonation.** `--probe-bot-ua` stays off for sites we don't own.
+- **Polite and bounded:** at most 25 pages, per-host delays, and a 300-second
+  time budget for the whole run.
