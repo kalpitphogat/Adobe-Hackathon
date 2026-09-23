@@ -133,7 +133,12 @@ time — and **never cut between typing the URL and the findings appearing.**
 
 ### Shot list
 
-**0:00–0:15 — Disclose, on camera.** Say it out loud; it is a scored field:
+The shots below use `round4/demo_cli.py`, which renders the engine's own report
+and contains no checks of its own — see [README.md](README.md). Driving the
+entrypoint directly works identically and is the documented fallback.
+
+**0:00–0:15 — Disclose, on camera.** Run `demo_cli.py doctor` so the engine
+fingerprint is on screen, then say it out loud; it is a scored field:
 
 > "This is `<harness + version>` driving `<model + version/date>`. The session is
 > reading `skills/ai-readiness-orchestrator/SKILL.md` out of the Round 3
@@ -162,7 +167,8 @@ whose evidence is *visible*, and show the evidence, not just the title:
 Say the severity **and why it is that severity** — tie it back to Beat 3. Then
 show the `suggested_action`: mechanism, patch, verification.
 
-**1:40–2:00 — Prioritisation + honesty.** Scroll `report.md` top to bottom:
+**1:40–2:00 — Prioritisation + honesty.** The ranked list from `audit` is
+already on screen; scroll back to it, or `show` the next two findings:
 
 > "Ranked by what to fix first. And this block is what the audit could **not**
 > assess — `limitations`. An unfetched page is not a pass, and we say so."

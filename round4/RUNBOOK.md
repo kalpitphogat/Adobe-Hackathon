@@ -96,6 +96,10 @@ skills copied into a harness-specific directory (`.claude/skills/` for Claude
 Code), which means the thing the judge runs is no longer the submitted layout.
 Path A points at the submission exactly as shipped.
 
+Either way, `round4/demo_cli.py` renders the run for camera. It drives the same
+entrypoint and holds no checks, so what a judge sees is the engine's own output
+— see [README.md](README.md).
+
 ### Path B — fallback, no harness at all
 
 ```bash
