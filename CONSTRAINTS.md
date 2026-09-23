@@ -10,7 +10,7 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 |---|---|---|---|
 | 1.1 | Show the Round 3 engine works live, and prove it's reproducible | ✅ | Live run in the video + `REPLAY_IT_Professionals.txt`; rehearsed from empty folders (`rehearsal/`) |
 | 1.2 | No GUI needed; a CLI session where an agent runs the marketplace is what they want | ✅ | Claude Code in a terminal (`VIDEO_PART2_RUNSHEET.md`) |
-| 2.1 | Submit a recorded video, **≤ 5:00 hard cap** | 🎬 | Part 1 script ~2:40, Part 2 ≤ 2:00 after trimming |
+| 2.1 | Submit a recorded video, **≤ 5:00 hard cap** | 🎬 | Part 1 script ≈ 2:42 + tab switches, Part 2 ≤ 2:00 after trimming |
 | 2.2 | Submit a plain-text file named exactly `REPLAY_YourTeamName.txt` | ✅ | `REPLAY_IT_Professionals.txt` (team name IT_Professionals); name checked by `tools/check_replay.py` |
 | 2.3 | Don't resubmit Round 3; they reuse that exact package | ✅ | Nothing in this repo changes it; `round3-frozen/submission.zip` + `SHA256SUMS` |
 | 2.4 | **Live run must exercise the same submitted marketplace**, or it fails on integrity | ✅ 🎬 | Demo runs from a fresh unzip of the frozen zip; hash `1c872c59…8dcf` printed in REPLAY; checked before recording |
@@ -20,7 +20,7 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 
 | # | rule | status | how we meet it · evidence |
 |---|---|---|---|
-| 3.1 | Part 1 methodology **≤ 3:00** | ✅ 🎬 | `VIDEO_PART1_SCRIPT.md`, word count checked (≤ 2:50 target) |
+| 3.1 | Part 1 methodology **≤ 3:00** | ✅ 🎬 | `VIDEO_PART1_SCRIPT.md`: 379 spoken words ≈ 2:42 at 140 wpm, ~15 s for tab switches |
 | 3.2 | Part 2 trial run **≤ 2:00** | 🎬 | Run sheet timeline ends 1:55 |
 | 3.3 | May crop idle waits; **may not splice** a run that didn't happen | 🎬 | One continuous take; raw file kept; "⏩ trimmed" captions; retake = new URL, never a splice |
 | 3.4 | Part 1: how we discovered the findings (field research, what separates cited vs ignored sites, distilled into repeatable checks) | ✅ | Beat 1 of the Part 1 script |
