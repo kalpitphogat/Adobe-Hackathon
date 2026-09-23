@@ -13,6 +13,11 @@ only pre-screened for robots.txt and homepage links with `tools/prescreen.py`.
 
 ## A. Before recording (off camera, ~10 min)
 
+0. **Run the checker** from the repo root: `.venv\Scripts\python.exe tools\check_replay.py` must print
+   `0 problem(s)`. It fails if Claude Code has auto-updated away from the version in the
+   REPLAY (it did once already, 2.1.280 → 2.1.281). If it fails on the version, update
+   `AGENT_HARNESS` and this run sheet to the installed version and re-run a rehearsal
+   (`tools\rehearse.ps1` on a *seen* site), or pin with `claude install <version>`.
 1. **Fresh folder, exactly as REPLAY step 1** (Windows PowerShell):
    ```powershell
    cd C:\Users\kalpi\Kalpit_round_4
@@ -50,18 +55,23 @@ engine's crawl are the parts you cut.
 | 0:25 | Agent reads `skills/ai-readiness-orchestrator/SKILL.md`, then runs `python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://docs.pytest.org/ --out ./audit-output`. **Pause on this command for 2 s.** | "Wiring: it reads our entrypoint SKILL.md and calls our orchestrator script. No demo code, no hardcoded results." |
 | — | *(trim the crawl wait; put a small on-screen caption "⏩ crawl, ~60 s trimmed")* | |
 | 0:35 | Orchestrator finishes, agent reads `audit-output/audit-report.json`, prints status + counts. | "The collector crawled the site once, our six audit skills ran over it, and here's the status and the counts by severity." |
-| 0:45 | Agent's **ICE-sorted table** (top 10). | "Here are the fixes sorted by ICE: impact, confidence and ease. This is the order to work in." |
-| 1:00 | Agent's walkthrough of the first three findings. | Pick the drill-in finding (section C) and say its title. |
-| 1:10 | **Drill-in (section D)** in the VS Code window. | See section D. |
-| 1:40 | Agent's **evidence check** section. | "Finally, the agent re-fetches the raw HTML itself and says whether each finding holds up. The report stays as the engine wrote it." |
-| 1:55 | — | "Same steps, same URL, in REPLAY_IT_Professionals.txt." |
+| 0:45 | Agent's **priority table** (top 10 in report order, ICE column). | "The fixes in priority order: severity first, then ICE, meaning impact, confidence and ease. This is the order to work in." |
+| 1:00 | Agent's **evidence check** on the confirmed high findings. | "Before trusting them, the agent re-fetches each page itself, raw and rendered, and says whether the evidence holds. The report stays exactly as the engine wrote it." |
+| 1:15 | Agent's **drill-down** on the best-supported finding. Optionally flip to VS Code (section D). | Name the finding; walk evidence, severity, fix and patch (section D wording). |
+| 1:50 | — | "Same steps, same URL, in REPLAY_IT_Professionals.txt." |
 
 **Wording rule:** say only what's on screen. If the report says `partial`, say partial. Don't
 claim a number of checks or pages the output doesn't show.
 
 ---
 
-## C. Which finding to drill into (decide live, in this order)
+## C. Which finding gets the drill-down
+
+The prompt makes the agent pick it: **the highest-ranked finding its own evidence check marked
+supported**. In rehearsals that was `extract.sd.absent_on_eligible_page` (Django, Sonnet and Opus),
+`read.render.nav_links_js_only` where the gap was real (IKEA, verified 112 → 204 same-host links),
+and `reach.robots.ai_search_bot_blocked` (Guardian). Follow the agent. Only if it picks one of the
+"never" checks below should you talk over a different confirmed finding from its table, in this order:
 
 1. **`extract.sd.absent_on_eligible_page` ("… carry no structured data at all")**, the first
    choice. It was confirmed on 10 of 10 pages checked independently, and comes with a paste-ready JSON-LD patch.
@@ -70,8 +80,9 @@ claim a number of checks or pages the output doesn't show.
 3. Any other **`confirmed`** finding whose evidence names a URL and a count you can check.
 
 **Never drill into:**
-- `read.render.nav_links_js_only` ("internal link graph only exists after JavaScript runs"): an
-  engine bug; it counts off-site links on the rendered side (`NOTES.md` §8).
+- `read.render.nav_links_js_only` ("internal link graph only exists after JavaScript runs"),
+  **unless** the agent's rendered-page count backs it up (as on IKEA). The engine counts
+  off-site links on the rendered side (`NOTES.md` §8), so the gap is often not real.
 - `act.orient.no_value_proposition`, `act.cta.absent_for_page_type`: `likely`, and misfire often.
 - `trust.integrity.prompt_injection` on a page that merely discusses AI.
 
@@ -107,8 +118,8 @@ python -c "import urllib.request as u;print(u.urlopen('https://docs.pytest.org/e
 | Claude Code asks permission for a command | Approve it on camera ("yes"). It's part of the real run; trim the pause. |
 | Run exits with `no evidence bundle was produced` | You aren't in the marketplace root. Stop, `cd` into `demo-live`, and **start a new take on the backup URL** (below). |
 | Run takes past 5 min / crashes on a crawl delay | New take on the backup URL; REPLAY troubleshooting mentions `--time-budget 600`. |
-| Any retake | pytest is now "seen". Use **https://www.sphinx-doc.org/** (pre-screened, never audited), and **change `TEST_SITE_URLS` and step 2 of the REPLAY file to match**. Never splice two takes. |
-| Output is too long for 2:00 | Scroll faster in the edit; trim the agent's thinking. Don't cut the URL entry, the command, the ICE table or the drill-in. |
+| Any retake | pytest is now "seen". Use **https://www.sphinx-doc.org/** (pre-screened, never audited), and **change the first `TEST_SITE_URLS` entry, step 2's example and this run sheet to match**, then re-run `tools\check_replay.py`. Never splice two takes. |
+| Output is too long for 2:00 | Scroll faster in the edit; trim the agent's thinking. Don't cut the URL entry, the command, the priority table, the evidence check or the drill-down. |
 
 ---
 
