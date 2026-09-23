@@ -1,8 +1,0 @@
-# DevTools Forge
-# Search and AI retrieval crawlers are welcome across the whole site.
-
-User-agent: *
-Disallow: /session
-Allow: /
-
-Sitemap: https://devtools-forge.test/sitemap.xml
