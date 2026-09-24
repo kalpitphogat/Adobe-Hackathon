@@ -148,6 +148,9 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #    counts links in the raw HTML, so a JavaScript-built page can read as empty.
 #  * A bot-protection page ("you have been blocked") can be audited as if it
 #    were the site's content.
+#  * A server that answers with Brotli compression (content-encoding: br)
+#    although it was asked for gzip/deflate is read as unreadable bytes, so
+#    that page appears empty (seen on berkshirehathaway.com).
 #  * A robots.txt Crawl-delay of about 4 s or more can exceed the default time
 #    budget: add --time-budget 600 (see troubleshooting below).
 #
