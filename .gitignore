@@ -1,29 +1,13 @@
-# Audit runtime artifacts
-audit_*/
-*.report.json
-report.json
-sample-audit-report.json
-
-# Packaged submission (build artifact — regenerated from source)
-submission.zip
-*.zip
-
-# Python
-__pycache__/
-*.pyc
-.venv/
-venv/
-
-# OS
-.DS_Store
-
-# --- Round 3 Brand AI-Readiness Audit (round3-brand-ai-readiness-audit/) ---
-# Added by the Round 3 submission. Some of these overlap with rules already
-# above; they are repeated here so this block is self-contained and can be
-# removed cleanly without disturbing anyone else's rules.
-__pycache__/
-*.pyc
+# Unzipped working copies of the frozen engine and audit outputs are regenerated, never committed
+demo/
+demo-live/
 audit-output/
-evidence/
+runs/
 .venv/
-*.zip
+__pycache__/
+*.pyc
+# Video files are large; keep them out of git
+*.mp4
+*.mov
+*.mkv
+.venv-norender/

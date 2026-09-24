@@ -1,0 +1,183 @@
+TEST_SITE_URLS: https://docs.pytest.org/, https://www.theguardian.com/
+LLM_MODEL: Claude Opus 5.5 (API model id: claude-opus-5-5), runs of 2026-09
+AGENT_HARNESS: Claude Code v2.1.281
+ENV_SETUP: uv python install 3.11.15 && uv venv --python 3.11.15 .venv && . .venv/bin/activate && uv pip install playwright==1.63.0 && python -m playwright install chromium
+TEST_STEPS:
+ 1. From the folder that holds submission.zip and the activated .venv, unpack the Round 3 submission, enter the marketplace root, make its skills discoverable to Claude Code (an unchanged copy in .claude/skills; the agent still runs the scripts in skills/), and start Claude Code. The first three commands are the same in bash, PowerShell and cmd:
+      python -m zipfile -e submission.zip brand-ai-readiness-audit
+      cd brand-ai-readiness-audit
+      python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
+      claude --model claude-opus-5-5 --allowedTools "Skill" "Bash(python:*)" "PowerShell(python:*)" "Read"
+ 2. Paste this prompt verbatim, replacing <URL> at the very end with one of the TEST_SITE_URLS (the video uses https://docs.pytest.org/) or any URL of your choice:
+      Use the ai-readiness-orchestrator skill, the entrypoint of this marketplace (skills/ai-readiness-orchestrator/SKILL.md), and follow its Procedure to audit the URL given at the end of this message. Run the orchestrator from this directory with --out ./audit-output. Do not create, change or delete any file yourself, and do not add findings that are not in the report. When the report is written, read audit-output/audit-report.json and give, briefly: (1) audit_status, the counts by severity, and the checks listed as not assessed; (2) the top 5 findings in report order, which is the engine's priority order (severity, then ICE), as a table of rank, id, severity, confidence, ICE (from suggested_action.ice) and title; (3) an evidence check: go through the critical or high findings whose confidence is confirmed, in report order (if there are none, the first findings in report order), and stop at the first one your check supports or after 5 checks; for each, fetch one affected URL yourself with an inline python -c command and say in one line whether what you see supports the evidence (supported, partly supported, or not supported), quoting the numbers you saw. Use urllib for the raw HTML. For any check_id starting with read.render, and whenever the evidence compares the raw HTML with the rendered page or quotes values shown only after JavaScript runs, you must also load the page with Playwright if it is installed and count the same thing on both sides, same-host links only for links. (4) A drill-down on the finding your check supported (if none was, say so): its evidence, severity and confidence, mechanism, paste-ready patch, ICE components, how many findings have blocked_by pointing at it, and its verification step. Report the engine's findings exactly as written; your evidence check is commentary and must not change the report. URL: <URL>
+ 3. The agent loads the entrypoint with the Skill tool (Skill: ai-readiness-orchestrator), then runs: python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output
+    The report is written to ./audit-output/ as audit-report.json (fixed schema), report.md (plain-English version) and fix_patches/ (one paste-ready patch per finding). The agent then prints, in the terminal: the status and counts, the top 5 fixes in priority order with their ICE scores, its evidence check on the confirmed high findings (stopping at the first one it supports), and a drill-down (evidence, severity, fix, patch) on that finding.
+EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
+
+# ============================================================================
+# Everything below this line is commentary. The labelled fields above are the
+# manifest.
+# ============================================================================
+#
+# TEAM: IT_Professionals (Lakshya, Tanmay, Kalpit)
+#
+# ---- ENGINE INTEGRITY -------------------------------------------------------
+# The run uses the Round 3 submission unchanged. SHA-256 of the submitted zip:
+#   1c872c598dcac741c712cbf9e671f024881a9ba251e2b4da66995f81b6cf8dcf  submission.zip
+# Check:  sha256sum submission.zip        (macOS: shasum -a 256 submission.zip)
+#         Windows: certutil -hashfile submission.zip SHA256
+#
+# ---- GETTING THE SAME HARNESS VERSION ---------------------------------------
+# Claude Code updates itself. To run exactly the disclosed version:
+#   claude install 2.1.281
+# then check with: claude --version   ->  2.1.281 (Claude Code)
+#
+# ---- INSTALLING uv (only needed if you do not have it) ----------------------
+#   macOS / Linux:  curl -LsSf https://astral.sh/uv/install.sh | sh
+#   Windows:        winget install --id astral-sh.uv -e
+#   Any platform:   pip install uv
+# uv is used only to get the exact interpreter: the checked-in golden reports
+# record Python 3.11.15, so tests/run_offline.py matches byte for byte on that
+# version. The engine itself runs on any Python 3.9+.
+#
+# ---- WINDOWS (PowerShell), which is what the video was recorded on ----------
+#   uv python install 3.11.15
+#   uv venv --python 3.11.15 .venv
+#   .venv\Scripts\Activate.ps1
+#   uv pip install playwright==1.63.0
+#   python -m playwright install chromium
+#   python -m zipfile -e submission.zip brand-ai-readiness-audit
+#   cd brand-ai-readiness-audit
+#   python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
+#   claude --model claude-opus-5-5 --allowedTools "Skill" "Bash(python:*)" "PowerShell(python:*)" "Read"
+# On Windows, Claude Code also has a PowerShell tool; allowing PowerShell(python:*)
+# avoids a permission prompt for each python command. Any command the agent
+# chains (a; b) still asks for approval: approve it, it is the same python call.
+# Use "python", not "python3": on Windows "python3" is often the Microsoft
+# Store placeholder, not a real interpreter.
+# Recorded on: Windows 11 Home 10.0.26200, Python 3.11.15, Playwright 1.63.0
+# with Chromium. These Windows steps, the unzip, and TEST_STEPS 1-3 (with
+# claude -p) were rehearsed end to end in an empty folder on that machine.
+# The one-line ENV_SETUP above is the macOS/Linux form of the same commands.
+# It was run exactly as written (read from this file) on GitHub-hosted
+# ubuntu-latest and macos-latest runners on 2026-09-24, followed by the unzip,
+# a file-by-file engine check (155/155 identical), tests/run_offline.py (PASS,
+# goldens current) and the step-3 command on https://www.theguardian.com/
+# (renderer playwright; F-001 critical, confirmed). Fallback A and Fallback C
+# (runner Python 3.12.3 on Ubuntu, 3.14.7 on macOS) passed on both. Only the
+# agent step (it needs a Claude login) was not run there.
+#
+# ============================================================================
+# FALLBACKS. The findings come from the engine, not the model. Each path
+# below reaches the same substance; each was tested on this machine.
+# ============================================================================
+#
+# ---- FALLBACK A: no Playwright (skip the two Playwright commands) ----------
+# The engine runs on the Python standard library alone. Without a browser it
+# reports the render-dependent checks (read.render.raw_text_gap,
+# read.render.nav_links_js_only, act.perf.above_fold_weight) as "not assessed"
+# in limitations[] and sets audit_status to "partial"; every other check runs.
+# To make that explicit, add --no-render to the orchestrate.py command.
+# Tested 2026-09-24 on docs.djangoproject.com: without Playwright, 21 findings
+# (1 high); with Playwright, 24 findings (4 high). The 3 extra highs are all
+# read.render.nav_links_js_only. Everything else is identical.
+#
+# ---- FALLBACK B: a different model, or a different agent harness -----------
+# The step-2 prompt is harness-neutral: it needs only an agent that can read
+# files and run shell commands (Codex CLI, Copilot CLI, OpenCode, Antigravity,
+# or a custom runner). Start that agent in the marketplace root and paste the
+# same prompt. To use Claude Code with another model:
+#   claude --model claude-sonnet-5 --allowedTools "Skill" "Bash(python:*)" "PowerShell(python:*)" "Read"
+# In a harness without a Skill tool the prompt still works: it names the
+# entrypoint's path, skills/ai-readiness-orchestrator/SKILL.md, and the agent
+# reads it and follows its Procedure. The .claude/skills copy is then not needed.
+# Tested 2026-09-24 on docs.djangoproject.com with Claude Code + Sonnet 5 and
+# + Haiku 4.5: all three models got the same 24 findings in the same order as
+# Opus 5.5. The findings don't depend on the model. The agent's own evidence
+# check (prompt part 3) does: Opus 5.5 and Sonnet 5 loaded the rendered page
+# and correctly flagged the engine's three read.render.nav_links_js_only
+# findings as not supported; Haiku 4.5 did not load the rendered page and
+# called them supported. For the evidence check, use Sonnet 5 or stronger.
+#
+# ---- FALLBACK C: no agent, no model, no special setup -----------------------
+# Any Python 3.9+ (no uv, no venv, no pip install), from the marketplace root:
+#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output
+# Then open audit-output/report.md: its "What to do first" section lists the
+# fixes in priority order, each with ICE, mechanism and a verify command. The
+# full data is in audit-output/audit-report.json, the same file the agent reads.
+# Tested 2026-09-24 with plain Python 3.13.15, no Playwright: exit 0, 45 s.
+#
+# ---- RE-ANALYSE WITHOUT RE-FETCHING (same evidence, same findings) ----------
+#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle ./audit-output/evidence --out ./audit-replay
+# Tested 2026-09-24: identical findings; the only field that differs is
+# evidence_bundle.path.
+#
+# ---- WHAT TO EXPECT ON THE SECOND TEST URL (stable while its robots.txt is) --
+# https://www.theguardian.com/ (rehearsed 2026-09-24, Opus 5.5 and Playwright):
+#   F-001 critical, confirmed, ICE 9.3, reach.robots.ai_search_bot_blocked:
+#     robots.txt line 102 "Disallow: /" blocks six AI retrieval crawlers
+#     (Amazonbot, Claude-SearchBot, Claude-User, DuckAssistBot,
+#     Google-CloudVertexBot, PerplexityBot). Anyone can check it at
+#     https://www.theguardian.com/robots.txt
+#   The gate cascade: most downstream discoverability findings are capped at
+#     medium with blocked_by: F-001 (45 of 52 on that run). Engagement (act.*)
+#     findings are never capped. Training-only crawlers are reported
+#     separately and are not treated as a defect.
+#   Page-level findings change as the site publishes; F-001 and the cascade
+#   stay the same while robots.txt is unchanged.
+#
+# The first test URL (https://docs.pytest.org/) is the video's live run. The
+# audit had never seen it before that run, so there is no expected result
+# listed here.
+#
+# ---- KNOWN LIMITS OF THE FROZEN ENGINE (so you can judge a replay fairly) ---
+# The engine is unchanged from Round 3, so these are recorded, not fixed. Each
+# was reproduced by us; the agent's evidence check (prompt part 3) exists to
+# catch them live, and never edits the report.
+#  * read.render.nav_links_js_only can overstate: its rendered-side link count
+#    includes off-site links, the raw side does not. It is right when the gap
+#    is real (ikea.com/ae/ar/: 112 -> 204 same-host links) and wrong when it
+#    is not (docs.djangoproject.com: identical link sets).
+#  * extract.sd.contradicts_visible_content can misread prices written as
+#    "132€": ikea.com product pages show the schema price but were reported
+#    as disagreeing.
+#  * trust.integrity.prompt_injection fires on pages that discuss prompt
+#    injection (e.g. an acceptable-use policy), not only on pages that do it.
+#  * act.orient.no_value_proposition and act.cta.absent_for_page_type are
+#    "likely", not "confirmed", and misfire on some homepages; the CTA check
+#    counts links in the raw HTML, so a JavaScript-built page can read as empty.
+#  * A bot-protection page ("you have been blocked") can be audited as if it
+#    were the site's content.
+#  * A robots.txt Crawl-delay of about 4 s or more can exceed the default time
+#    budget: add --time-budget 600 (see troubleshooting below).
+#
+# ---- IMPORTANT: RUN FROM THE MARKETPLACE ROOT -------------------------------
+# A relative --out path only works when the current directory is the
+# marketplace root (where marketplace.json is). From anywhere else, pass an
+# absolute --out path, or the run stops with
+# "error: no evidence bundle was produced".
+#
+# ---- TROUBLESHOOTING A JUDGE-CHOSEN URL -------------------------------------
+# * Site whose robots.txt sets a large Crawl-delay (e.g. 4s+): the crawl can
+#   outrun the default 300s budget and exit 1 without a report. Add
+#   --time-budget 600 (an existing engine flag) to the orchestrate.py command.
+# * Exit code is 0 whenever a schema-valid report was written; the outcome
+#   (complete / partial / no_content_available) is in audit_status.
+# * robots.txt is obeyed. A site that disallows crawling produces a report
+#   that says it could not look, not an error.
+# * Edge/CDN checks for named AI crawlers are off by default and appear in
+#   limitations[] as "not assessed". Turn them on with --probe-bot-ua, only
+#   for a site you own.
+#
+# ---- WHAT STAYS THE SAME ACROSS REPLAYS -------------------------------------
+# The engine is deterministic: the same evidence gives the same findings (see
+# the --bundle re-analysis above). Verify offline with:
+#   python tests/run_offline.py
+#   -> PASS: offline, deterministic, goldens current, control clean.
+# (That byte-for-byte golden comparison needs Python 3.11.15, the version the
+# goldens record; on other versions only generator.tool_versions.python differs.)
+# On a live URL, differences between runs come only from the site changing or
+# the crawl sampling different pages; audited_at always changes. Example:
+# docs.djangoproject.com gave the same 24 findings on 2026-09-23 and 2026-09-24.
+# The agent's wording varies by model and run; the findings, severities, ICE
+# scores and ranking do not.

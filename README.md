@@ -1,195 +1,99 @@
-# Brand AI-Readiness Audit
+# Brand AI-Readiness Audit: Round 4 live agent demo
 
-**Adobe University Hackathon 2026 — Round 3 · Build the Agent Skill Marketplace**
+**Team IT_Professionals:** Lakshya, Tanmay, Kalpit · Adobe University Hackathon 2026, Round 4
 
-Team: Lakshya, Tanmay, Kalpit
+Round 4 is a demonstration and reproducibility round, not a rebuild. We submit a video (≤ 5:00)
+and `REPLAY_IT_Professionals.txt`. The engine in the video is our Round 3 Agent Skill
+Marketplace, **unchanged**: `round3-frozen/submission.zip`, sha256
+`1c872c598dcac741c712cbf9e671f024881a9ba251e2b4da66995f81b6cf8dcf`. An AI agent runs it live from
+the command line against a site the audit has never seen.
 
-Point it at any website. It reports **why AI assistants don't find, cite, or
-correctly describe the brand**, and **why visitors who do arrive leave without
-acting** — every claim backed by evidence, every fix paste-ready and ordered by
-impact. Read-only. Never touches the live site.
+## The run at a glance
 
-> **The submission is [`brand-ai-readiness-audit/`](brand-ai-readiness-audit/)** — that
-> folder is the marketplace root, and `submission.zip` is exactly its contents.
-> Short tour in its [README](brand-ai-readiness-audit/README.md); full design notes in [DESIGN.md](brand-ai-readiness-audit/DESIGN.md).
-
-```bash
-cd brand-ai-readiness-audit
-python3 skills/ai-readiness-orchestrator/scripts/orchestrate.py https://example.com --out ./audit-output
-```
-
-Writes `audit-report.json` (fixed schema) and `report.md` (written for someone
-who is not an engineer).
-
----
-
-## The one idea
-
-The Round-2 appendix says three things must succeed **in order** for a page to
-be visible to a machine: the crawler has to be let in, it has to be able to read
-the page, and it has to be able to pick out the fact.
-
-**In order** is the whole design.
-
-A flat checklist ignores that and fires forty findings at any URL. Point it at a
-site whose CDN refuses AI crawlers and it reports fifteen criticals, fourteen of
-which are real defects that currently change nothing — because nothing is
-reaching the page to be affected by them.
-
-This marketplace encodes the ordering as a **gate cascade**. Every finding
-carries a stage — `reach`, `read`, `extract`, `trust`, `act` — and when an
-upstream stage fails, downstream findings are still recorded but capped and
-tagged with the id of the one finding blocking them. You get the root cause
-first, and the rest in the order fixing them will actually pay off.
-
----
-
-## Nine skills, one entrypoint
-
-| skill | question it answers | stage |
-|---|---|---|
-| **ai-readiness-orchestrator** | What matters most, and why? | — *(entrypoint)* |
-| site-evidence-collector | What does the site actually serve? | — |
-| site-profile-classifier | What kind of site and page is this? | — |
-| crawl-access-audit | Can an AI crawler get in? | reach |
-| render-gap-audit | Can it read the page without running JavaScript? | read |
-| structured-data-audit | Is the fact machine-typed? | extract |
-| answerability-audit | Is the fact quotable? | extract |
-| trust-freshness-audit | Would a machine believe it, and is the page honest? | trust |
-| engagement-audit | Does the visitor stay and act? | act |
-
-The two skills that emit no findings are load-bearing, not padding: the
-**collector** is the only component that touches the network, so six audit
-skills can never disagree about what the site served; the **classifier** is
-where generalisation lives, because no check anywhere hardcodes a threshold —
-every one asks the profile for the site archetype it is looking at.
-
-The entrypoint composes by **subprocess, never by import**:
-
-```
-orchestrate.py
-  → collect.py           writes the evidence bundle          (network, once)
-  → profile.py           archetype + page types + thresholds
-  → 6 × run.py           each reads the bundle, prints one JSON object
-  → gate cascade         cap, tag blocked_by, suppress per Rule 0b
-  → dedupe, score, rank  severity → ICE → stage → check_id
-  → emit                 audit-report.json + report.md + fix_patches/
-```
-
-No script imports from a sibling skill, so **any skill folder can be lifted out
-of the marketplace and run on its own**. A test walks the AST of every script
-and fails the build on a cross-skill import, including the `sys.path` dodge.
-
----
-
-## Round 3 compliance
-
-Every row is enforced by a test, not asserted in prose.
-Run `python3 package_submission.py` to check all of them at once.
-
-| Handout requirement | Where it is enforced |
+| | |
 |---|---|
-| Marketplace manifest listing every skill, **exactly one** entrypoint | `package_submission.py`, `tests/validate_marketplace.py` |
-| Every skill folder a valid agentskills.io `SKILL.md` (name, description, license) | `tests/validate_marketplace.py` — 9/9 |
-| Each skill declares its tool needs (`allowed-tools`) | `tests/validate_marketplace.py` — 9/9 |
-| Manifest self-contained, no external service to resolve it | `package_submission.py` — no URLs in the manifest |
-| Entrypoint composes the rest into **one** report | `skills/ai-readiness-orchestrator` |
-| Report floor: `site`, `audited_at`, counts-by-severity | `references/report-schema.json`, 6 golden reports |
-| Per finding: `id`, `title`, `severity`, `evidence`, `suggested_action` | `validate_finding()` rejects malformed findings at the boundary |
-| Detects **both** discoverability and engagement | 66 checks — 49 discoverability, 17 engagement |
-| Proactive suggestions beyond detected defects | `proactive_recommendations` in every report |
-| Recommend-only; never alters a live site | `tests/test_ssrf.py` — method allowlist is `{GET, HEAD}` |
-| No authenticated areas, no credentials | opener built with no cookie processor and no auth handler |
-| No rate abuse | `tests/test_politeness.py` — delay, backoff, `Retry-After`, 25-page cap |
-| Respects `robots.txt` | `tests/test_politeness.py` — 71 RFC 9309 assertions; `site_c` fetches zero pages |
-| Skills portable / provider-neutral | `tests/validate_marketplace.py` — zero cross-skill imports |
-| Runtime **< 5 minutes** | `tests/test_deadline.py` — one shared clock bounds the whole run |
-| Zip ≤ 50 MB, no model weights | `package_submission.py` — 394 KB, refuses weight formats |
-| `README.md` at the marketplace root | `package_submission.py` |
+| Engine | Round 3 `submission.zip`, unchanged (hash above) |
+| Entrypoint skill | `skills/ai-readiness-orchestrator` (`SKILL.md` → `scripts/orchestrate.py`) |
+| Agent harness | Claude Code v2.1.281, loading the entrypoint with its Skill tool |
+| LLM | Claude Opus 5.5 (`claude-opus-5-5`) |
+| Live-run URL | https://docs.pytest.org/ (never audited before the recording) |
+| Second test URL | https://www.theguardian.com/ (stable: robots.txt critical + gate cascade) |
+| Setup | Python 3.11.15 + Playwright 1.63.0 (Chromium); fallbacks need neither |
+| Report | `audit-output/audit-report.json`, plus `report.md` and `fix_patches/` |
 
-Two guardrails go beyond the brief: the auditor **refuses hosts that resolve
-into private, loopback or link-local space**, on the seed and on every redirect
-hop (`--allow-private-hosts` opts out for a site you host yourself); and
-**bot-user-agent probing is opt-in**, so we never silently impersonate a named
-crawler at a site we don't own.
+## Replaying it
 
----
+The exact commands and the verbatim prompt are in **`REPLAY_IT_Professionals.txt`**. Every path
+below was actually run: on our Windows machine (`rehearsal/` has the transcripts) or in CI (Linux/macOS row):
 
-## Running it
+| path | who it's for | tested |
+|---|---|---|
+| **Main**: Claude Code + Opus 5.5 + Playwright, REPLAY steps 1–3 | reproduces the video | Django, IKEA, Guardian |
+| **A**: no Playwright (`--no-render`) | no browser install | Django: 21 vs 24 findings; the only difference is 3 × `nav_links_js_only` |
+| **B**: another model or agent harness, same prompt | no Opus, or no Claude Code | Sonnet 5 and Haiku 4.5: same 24 findings, same order |
+| **C**: no agent at all, any Python 3.9+ | no model, no special setup | Python 3.13 (Windows), 3.12 (Ubuntu), 3.14 (macOS), no venv: exit 0; `report.md` lists "What to do first" |
+| **Linux / macOS** | judges not on Windows | CI runs ENV_SETUP as written + steps 1 and 3 + A and C on Ubuntu and macOS: all pass |
 
-```bash
-cd brand-ai-readiness-audit
+`tools/check_replay.py` checks the REPLAY file (fields, URLs, steps) and that it matches the run
+sheet and the installed harness version. It must print `0 problem(s)` before recording.
 
-# audit a site
-python3 skills/ai-readiness-orchestrator/scripts/orchestrate.py https://example.com --out ./audit-output
+## Where the reasoning lives in code
 
-# auditing your own site? add the highest-value check in the marketplace
-python3 skills/ai-readiness-orchestrator/scripts/orchestrate.py https://your-site.com \
-    --out ./audit-output --probe-bot-ua
+All paths are inside the unzipped submission; line numbers were checked against it.
 
-# no network needed — audit a fixture
-python3 skills/ai-readiness-orchestrator/scripts/orchestrate.py \
-    --offline-root tests/fixtures/site_b --out ./audit-output
+| idea | implemented in |
+|---|---|
+| reach → read → extract → trust ordering and the gate cascade | `skills/ai-readiness-orchestrator/scripts/gate_model.py:117` (`apply_cascade`), `references/gate-rules.md` |
+| engagement is never capped by crawler access (Rule 0) | `gate_model.py:128`; Rule 0b in `skills/engagement-audit/scripts/gating.py:32` |
+| retrieval vs training crawlers | `skills/crawl-access-audit/references/ai-bots.json` (29 bots); `scripts/check_robots.py:286` critical, `:318` info |
+| what each severity means; confidence kept separate | `skills/ai-readiness-orchestrator/references/severity-model.md` |
+| every fix carries a mechanism, or the finding is rejected | `orchestrate.py:242` (`validate_finding`) |
+| missing values say `__FILL_IN__`, never a guess | e.g. `skills/structured-data-audit/scripts/check_hierarchy.py:211` |
+| ICE score and total ranking order | `skills/ai-readiness-orchestrator/scripts/severity.py:26–29`, `:68` |
+| fixed false positives can't come back | `tests/test_regressions.py` R1–R12 |
+
+The Part 1 narration with the same anchors is `VIDEO_PART1_SCRIPT.md`.
+
+## What we verified, including where the engine is wrong
+
+We didn't take the engine's word for it. `SCOUTING.md` covers 25 live sites; `NOTES.md` has 10
+verified behaviours (with the fix for each in how we set up and run it); `COMPARISON_ikea.md`
+compares our REPLAY and Lakshya's on an unseen site. Known engine false positives (the engine
+stays frozen) include `read.render.nav_links_js_only` on pages with many off-site links, and a
+structured-data price mismatch on IKEA. The agent's evidence check caught both in rehearsals
+(`rehearsal/2026-09-24_django_*.md`, `rehearsal/2026-09-24_ikea_opus_newprompt.md`).
+
+## Repo layout
+
+| path | what |
+|---|---|
+| `REPLAY_IT_Professionals.txt` | the reproduction manifest (submitted with the video) |
+| `VIDEO_PART1_SCRIPT.md`, `VIDEO_PART2_RUNSHEET.md` | narration and live-run sheet |
+| `CONSTRAINTS.md` | every rule in the Round 4 brief, with status and evidence |
+| `round3-frozen/` | the Round 3 upload and its hash; never edited |
+| `rehearsal/` | agent transcripts from every rehearsal, dated |
+| `tools/` | `check_replay.py`, `verify_engine.py`, `rehearse.ps1`, `tool_calls.py`, `prescreen.py`, `scout.py`, `summarize.py`, `diff_reports.py`, `count_links.py`, `check_price.py` |
+| `.github/workflows/` | `replay-portability.yml`: the REPLAY on Ubuntu and macOS |
+| `NOTES.md`, `SCOUTING.md`, `COMPARISON_ikea.md` | findings about the engine |
+
+## Local setup (Windows, PowerShell)
+
+```powershell
+uv python install 3.11.15
+uv venv --python 3.11.15 .venv
+uv pip install --python .venv\Scripts\python.exe playwright==1.63.0
+.venv\Scripts\python.exe -m playwright install chromium
+Expand-Archive round3-frozen\submission.zip demo -Force
+cd demo; ..\.venv\Scripts\python.exe tests\run_offline.py   # PASS on 3.11.15
 ```
 
-`--probe-bot-ua` detects whether a CDN or WAF returns 403 to AI crawlers — a
-rule that removes a brand from those assistants entirely while leaving no trace
-in `robots.txt` and nothing visible to anyone browsing the site. It is off by
-default because sending named-crawler user-agents at a site you do not own is
-not something an audit should do unless asked.
+## Deliverables
 
-Python 3.9+, standard library only for 63 of 66 checks. Playwright is optional
-and upgrades the render-stage checks; without it the audit still runs and says
-what it could not see.
+- [x] `REPLAY_IT_Professionals.txt`, rehearsed from clean unzips, with three tested fallbacks
+- [x] `VIDEO_PART1_SCRIPT.md`: 380 words (~2:43), every claim tied to a file and line
+- [x] `VIDEO_PART2_RUNSHEET.md`: live run on https://docs.pytest.org/
+- [ ] The video: Part 1 ≤ 3:00, Part 2 ≤ 2:00, total ≤ 5:00
 
-Full command reference: [`COMMANDS.txt`](COMMANDS.txt).
+## How this was built
 
----
-
-## Tests
-
-```bash
-cd brand-ai-readiness-audit
-python3 tests/validate_marketplace.py   # 73 structure / spec / doc-drift checks
-python3 tests/run_offline.py            # 6 golden reports, byte-for-byte, + determinism matrix
-for t in tests/test_*.py; do python3 "$t"; done   # 2,223 assertions across 10 suites
-```
-
-Six fixture sites, six separable claims, kept apart so a change to one mechanism
-cannot silently alter the proof of another — including two dedicated
-false-positive controls (`site_a`: zero high or critical; `site_f`: zero
-findings at all).
-
----
-
-## Packaging
-
-```bash
-python3 package_submission.py           # build submission.zip and verify it
-python3 package_submission.py --check   # verify the existing zip without rebuilding
-```
-
-The zip is **flat** — `marketplace.json`, `README.md` and `skills/` sit at its
-root — and the build is deterministic, so rebuilding from unchanged sources
-produces a byte-identical artifact.
-
----
-
-## Repository layout
-
-```
-Adobe-Hackathon/
-├─ README.md                    ← this file
-├─ COMMANDS.txt                 ← every command, with expected output
-├─ package_submission.py        ← builds + validates submission.zip
-├─ submission.zip               ← the deliverable (built from the folder below)
-└─ brand-ai-readiness-audit/    ← THE MARKETPLACE ROOT
-   ├─ marketplace.json          ← manifest: 9 skills, 1 entrypoint
-   ├─ README.md                 ← design notes, check inventory, guardrails
-   ├─ ATTRIBUTIONS.md
-   ├─ LICENSE                   ← MIT
-   ├─ skills/                   ← 9 skill folders, each independently runnable
-   └─ tests/                    ← validator, 9 suites, 6 fixture sites, goldens
-```
-
-*License: MIT, declared per skill and at the marketplace root.*
+One change per commit, pushed as it happened: `git log --oneline` reads as the build history.
