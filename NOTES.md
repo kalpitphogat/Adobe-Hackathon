@@ -84,12 +84,3 @@ Same prompt, same site (docs.djangoproject.com), Claude Code 2.1.281: Opus 5.5, 
 Haiku 4.5 all got the **same 24 findings in the same order** (`tools/diff_reports.py`). Opus and
 Sonnet loaded the rendered page and flagged the three `nav_links_js_only` findings as not
 supported; Haiku didn't load it, even when the prompt required it, and called them supported.
-
-## 11. github.com is sensitive to cwd and time budget
-
-github.com (a large JS-rendered site) succeeds from the marketplace root with `--time-budget 120`
-(61 findings, 51.7 s, status=complete). But it can fail with exit 1 if:
-- the engine is invoked from a parent directory with a relative `--out` path (§2), or
-- a slow network pushes the crawl past the default 300 s budget.
-Tested 2026-09-24: `--time-budget 600` from the marketplace root succeeds reliably.
-→ The QUICK START and Fallback C now recommend `--time-budget 600` as the default.

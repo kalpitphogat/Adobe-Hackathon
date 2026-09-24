@@ -25,7 +25,7 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #   python -m zipfile -e /path/to/submission.zip brand-ai-readiness-audit
 #   cd brand-ai-readiness-audit
 #   python skills/ai-readiness-orchestrator/scripts/orchestrate.py \
-#       https://www.adobe.com/ --out ./audit-output --time-budget 600
+#       https://www.adobe.com/ --out ./audit-output
 #   # -> audit-output/audit-report.json  (machine-readable)
 #   #    audit-output/report.md           (human-readable summary)
 #
@@ -114,7 +114,7 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #
 # ---- FALLBACK C: no agent, no model, no special setup -----------------------
 # Any Python 3.9+ (no uv, no venv, no pip install), from the marketplace root:
-#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output --time-budget 600
+#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output
 # Then open audit-output/report.md: its "What to do first" section lists the
 # fixes in priority order, each with ICE, mechanism and a verify command. The
 # full data is in audit-output/audit-report.json, the same file the agent reads.
