@@ -43,7 +43,7 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 | 4.1 | Disclose LLM **name and version/date** | ✅ | `LLM_MODEL: Claude Opus 5.5 (API model id: claude-opus-5-5), runs of 2026-09` |
 | 4.2 | Disclose harness **name and version** | ✅ ⚠️ | `AGENT_HARNESS: Claude Code v2.1.281`. Claude Code auto-updated 2.1.280 → 2.1.281 on 2026-09-24; `tools/check_replay.py` now fails if the installed version differs from the REPLAY; judges pin with `claude install 2.1.281` |
 | 4.3 | **Exact invoke commands**, clean checkout → emitted report | ✅ | TEST_STEPS 1–3; rehearsed verbatim with `claude -p` |
-| 4.4 | Closed/paid harness → **document a fallback run path** | ✅ | REPLAY fallbacks, each tested 2026-09-24: **A** no Playwright / `--no-render` (21 vs 24 findings, difference = 3 `nav_links_js_only`); **B** other model or harness (Sonnet 5 and Haiku 4.5: same 24 findings, same order); **C** no agent, plain Python 3.13, no venv (exit 0, `report.md` "What to do first") |
+| 4.4 | Closed/paid harness → **document a fallback run path** | ✅ | REPLAY fallbacks, each tested 2026-09-24: **A** no Playwright / `--no-render` (21 vs 24 findings, difference = 3 `nav_links_js_only`); **B** other model or harness (Sonnet 5 and Haiku 4.5: same 24 findings, same order); **C** no agent, plain Python 3.13, no venv (exit 0, `report.md` "What to do first"); **D** richer terminal via `demo_cli.py` (GitHub clone, progress bars + colour tables, byte-identical findings) |
 | 4.5 | Judged on substance, not exact strings | ✅ | Deterministic engine; the agent only reads the report back |
 
 ## §5 REPLAY file

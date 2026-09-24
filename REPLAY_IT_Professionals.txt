@@ -19,6 +19,19 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # manifest.
 # ============================================================================
 #
+# QUICK START (no agent needed — just Python 3.9+ and the zip you already have)
+# ------------------------------------------------------------------------------
+#   mkdir replay && cd replay
+#   python -m zipfile -e /path/to/submission.zip brand-ai-readiness-audit
+#   cd brand-ai-readiness-audit
+#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py \
+#       https://www.adobe.com/ --out ./audit-output --time-budget 600
+#   # -> audit-output/audit-report.json  (machine-readable)
+#   #    audit-output/report.md           (human-readable summary)
+#
+# For the full agent-driven experience (as shown in the video), follow the
+# TEST_STEPS above with Claude Code. For more options see Fallbacks A–D below.
+#
 # TEAM: IT_Professionals (Lakshya, Tanmay, Kalpit)
 #
 # ---- ENGINE INTEGRITY -------------------------------------------------------
@@ -101,11 +114,23 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #
 # ---- FALLBACK C: no agent, no model, no special setup -----------------------
 # Any Python 3.9+ (no uv, no venv, no pip install), from the marketplace root:
-#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output
+#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output --time-budget 600
 # Then open audit-output/report.md: its "What to do first" section lists the
 # fixes in priority order, each with ICE, mechanism and a verify command. The
 # full data is in audit-output/audit-report.json, the same file the agent reads.
 # Tested 2026-09-24 with plain Python 3.13.15, no Playwright: exit 0, 45 s.
+#
+# ---- FALLBACK D: richer terminal output, no agent needed --------------------
+# For a formatted experience (progress bars, colour-coded finding tables,
+# drill-down by finding ID) without an LLM or agent harness:
+#   git clone https://github.com/kalpitphogat/Adobe-Hackathon.git
+#   cd Adobe-Hackathon && git checkout round4-demo-cli
+#   python round4/demo_cli.py doctor
+#   python round4/demo_cli.py audit <URL> --out ./audit-output
+#   python round4/demo_cli.py show ./audit-output --top 10
+#   python round4/demo_cli.py show ./audit-output --id F-001
+# demo_cli.py is a thin wrapper around orchestrate.py — it contains no checks
+# of its own. Findings are byte-identical to Fallback C.
 #
 # ---- RE-ANALYSE WITHOUT RE-FETCHING (same evidence, same findings) ----------
 #   python skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle ./audit-output/evidence --out ./audit-replay
