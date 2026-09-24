@@ -1,0 +1,152 @@
+{
+  "audit_status": "complete",
+  "audited_at": "2026-05-28T20:26:40Z",
+  "evidence_bundle": {
+    "degraded_capabilities": [],
+    "pages_fetched": 4,
+    "pages_rendered": 3,
+    "path": "evidence"
+  },
+  "findings": [],
+  "generator": {
+    "ai_bots_snapshot_date": "2026-09-09",
+    "ai_bots_source_commit": "0e111dcc24cbcdf4e609edde70f9f9184eac8b02",
+    "checks_available": 66,
+    "checks_run": 0,
+    "name": "brand-ai-readiness-audit",
+    "tool_versions": {
+      "collector": "1.0.0",
+      "python": "3.11.15",
+      "renderer": "offline-fixture",
+      "transport": "offline"
+    },
+    "version": "1.0.0"
+  },
+  "limitations": [
+    {
+      "checks_not_run": [
+        "reach.edge.bot_ua_blocked",
+        "reach.edge.bot_ua_challenged"
+      ],
+      "confidence_effect": "not assessed; re-run with --probe-bot-ua to close this gap",
+      "optional_feature": true,
+      "reason": "Edge and CDN reachability for named AI crawlers was not assessed, because --probe-bot-ua was not set. This is the highest-value check in this marketplace: a CDN or WAF rule that returns 403 to OAI-SearchBot, PerplexityBot or Claude-SearchBot removes a brand from those assistants entirely, and leaves no trace in robots.txt or in what a human sees. If you own this site, re-run the orchestrator with the --probe-bot-ua flag:\n    orchestrate.py <url> --out ./audit-output --probe-bot-ua\nThat sends ONE request per crawler, to the homepage only, with an auditor token appended to the user-agent string so it is identifiable in your logs. It is off by default because sending named-crawler user-agents to a site you do not own is not something an audit should do without being asked.",
+      "scope": "site"
+    }
+  ],
+  "proactive_recommendations": [
+    {
+      "applies_to_archetype": [
+        "developer-platform",
+        "docs"
+      ],
+      "check_id": "reach.agent.no_markdown_negotiation",
+      "id": "P-001",
+      "rationale": "A request for https://devtools-forge.test/ with Accept: text/markdown returned content-type text/html. Agents that consume documentation handle Markdown with less loss than HTML, because there is no navigation chrome to strip. This is an ergonomics improvement for agent readers, with no evidence of a retrieval or ranking effect, which is why it is a recommendation and not a finding.",
+      "suggested_action": {
+        "effort": "medium",
+        "mechanism": "Markdown carries the document structure without the navigation and styling wrapper, so an agent extracting a fact has less to discard.",
+        "patch": "# Route /docs/<slug>.md to the same content rendered as Markdown.",
+        "source": "No primary source claims a retrieval benefit; offered on ergonomics grounds only.",
+        "summary": "Serve .md alongside .html for documentation routes, or honour Accept: text/markdown.",
+        "verification": "curl -sH 'Accept: text/markdown' -I https://devtools-forge.test/ | grep -i content-type"
+      },
+      "title": "Consider serving a Markdown representation of documentation pages"
+    },
+    {
+      "applies_to_archetype": [
+        "docs"
+      ],
+      "id": "P-002",
+      "rationale": "This is a docs site with valid structured data already in place. Typing procedural pages specifically as HowTo or TechArticle, rather than generically, tells a consumer that the page contains ordered steps, which is what a how-do-I question needs.",
+      "suggested_action": {
+        "effort": "medium",
+        "mechanism": "A typed step list is directly reusable as an answer to a procedural question, where untyped prose has to be re-derived.",
+        "patch": "{\"@type\": \"HowTo\", \"step\": [{\"@type\": \"HowToStep\", \"text\": \"__FILL_IN__:step_1\"}]}",
+        "priority": "low",
+        "source": "schema.org/HowTo",
+        "summary": "Add HowTo or TechArticle typing with step properties to procedural pages.",
+        "verification": "Confirm the page emits a HowTo node with at least two steps."
+      },
+      "title": "Mark up your how-to and reference pages as HowTo or TechArticle"
+    }
+  ],
+  "schema_version": "1.0",
+  "site": "devtools-forge.test",
+  "summary": {
+    "blocked_findings": 0,
+    "by_category": {
+      "discoverability": 0,
+      "engagement": 0
+    },
+    "by_stage": {},
+    "critical": 0,
+    "high": 0,
+    "info": 0,
+    "low": 0,
+    "medium": 0,
+    "suppressed_by_rule": [
+      {
+        "check_id": "act.blocker.load_time_interstitial",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "act.trust.no_cost_signal",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "extract.ans.no_direct_answer_block",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "extract.ans.no_evidence_markers",
+        "count": 1,
+        "reason": "suppressed by threshold",
+        "rule": "suppressed by threshold"
+      },
+      {
+        "check_id": "extract.sd.absent_on_eligible_page",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "reach.agent.llms_txt_absent",
+        "count": 1,
+        "reason": "not applicable",
+        "rule": "not applicable"
+      },
+      {
+        "check_id": "reach.edge.bot_ua_blocked",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "reach.edge.bot_ua_challenged",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "trust.entity.name_collision",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "trust.entity.no_external_corroboration",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      }
+    ],
+    "total_findings": 0
+  }
+}

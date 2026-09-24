@@ -1,0 +1,40 @@
+{
+  "_comment": [
+    "site_f: the DEDICATED FALSE-POSITIVE SUITE. A well-built developer-tools /",
+    "documentation site that deliberately carries every construct known to trip a",
+    "naive auditor, each of which is CORRECT and must NOT be reported:",
+    "",
+    "  * a cookie/consent banner wired to show on load  -> NOT an entry interstitial",
+    "  * a muted, playsinline autoplay demo video        -> NOT autoplay-with-sound",
+    "  * an XML sitemap response                         -> gets NO HTML-page checks",
+    "  * an X-Robots-Tag: noindex on that sitemap        -> NOT noindex-on-content",
+    "  * a newsletter sign-up in the FOOTER (plain form) -> NOT an entry overlay",
+    "  * a /login page (utility)                         -> gets NO product/CTA/heading checks",
+    "  * a free tool page that states no numeric price   -> NOT 'no cost signal' (it says free)",
+    "",
+    "Expected outcome: ZERO findings at high or critical severity, and NONE of the",
+    "false-positive-prone checks above fire. Asserted by tests/run_offline.py",
+    "--assert-clean and by the dedicated block in tests/test_suppression.py.",
+    "",
+    "Routes not listed return default_status with not_found_file."
+  ],
+  "origin": "https://devtools-forge.test",
+  "default_status": 404,
+  "not_found_file": "404.html",
+  "ttfb_ms": [96.0, 104.0, 99.0],
+  "routes": {
+    "/": { "status": 200, "file": "index.html", "headers": { "last-modified": "Tue, 05 May 2026 10:00:00 GMT" } },
+    "/robots.txt": { "status": 200, "content_type": "text/plain; charset=utf-8", "file": "robots.txt" },
+    "/sitemap.xml": { "status": 200, "content_type": "application/xml", "file": "sitemap.xml", "headers": { "x-robots-tag": "noindex" } },
+    "/docs/getting-started": { "status": 200, "file": "docs.html", "headers": { "last-modified": "Mon, 20 Apr 2026 08:30:00 GMT" } },
+    "/products/pdf-merge": { "status": 200, "file": "product.html" },
+    "/privacy": { "status": 200, "file": "privacy.html" },
+    "/login": { "status": 200, "file": "login.html" },
+    "/llms.txt": { "status": 200, "content_type": "text/plain; charset=utf-8", "file": "llms.txt" }
+  },
+  "rendered": {
+    "/": "index.html",
+    "/products/pdf-merge": "product.html",
+    "/docs/getting-started": "docs.html"
+  }
+}

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DevTools Forge — free browser-based developer tools</title>
+<meta name="description" content="DevTools Forge is a free suite of browser-based developer tools: merge PDFs, format JSON, and convert data locally in your browser with no upload and no account.">
+<link rel="canonical" href="https://devtools-forge.test/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://devtools-forge.test/#org",
+      "name": "DevTools Forge",
+      "url": "https://devtools-forge.test/",
+      "description": "A free suite of browser-based developer tools.",
+      "email": "hello@devtools-forge.test",
+      "sameAs": [
+        "https://github.com/devtools-forge",
+        "https://www.linkedin.com/company/devtools-forge"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://devtools-forge.test/#website",
+      "url": "https://devtools-forge.test/",
+      "name": "DevTools Forge",
+      "publisher": { "@id": "https://devtools-forge.test/#org" }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<header>
+  <a href="/">DevTools Forge</a>
+  <nav aria-label="Main">
+    <a href="/products/pdf-merge">PDF merge</a>
+    <a href="/docs/getting-started">Docs</a>
+    <a href="/login">Log in</a>
+  </nav>
+</header>
+
+<!-- Cookie consent banner, configured to appear on load. This is a GDPR/cookie
+     consent notice, NOT a marketing interstitial, and must not be reported. -->
+<div class="cookie-consent" data-modal-on="load" role="dialog" aria-label="Cookie consent">
+  <p>We use only strictly necessary cookies. This site stores no analytics or
+  advertising cookies. See our <a href="/docs/getting-started">privacy note</a>.</p>
+  <button type="button">Accept necessary cookies</button>
+</div>
+
+<main>
+  <h1>Free developer tools that run in your browser</h1>
+  <p>DevTools Forge is a free suite of developer tools that run entirely in your browser. Merge PDFs,
+  format and validate JSON, and convert between data formats without uploading a single file and
+  without creating an account. Everything runs locally, so your data never leaves your machine.</p>
+  <p><a href="/products/pdf-merge">Open the PDF merge tool</a></p>
+
+  <video autoplay muted playsinline loop poster="/demo-poster.png" aria-label="Product demo">
+    <source src="/demo.mp4" type="video/mp4">
+  </video>
+
+  <h2>What DevTools Forge does</h2>
+  <p>DevTools Forge gives you a set of focused, single-purpose tools. The PDF merge tool combines
+  several PDF files into one in the order you choose. The JSON formatter pretty-prints and validates
+  JSON and reports the line and column of the first syntax error. Each tool loads in under a second
+  and works offline once the page has loaded, because the processing happens in your browser.</p>
+
+  <h2>Who it is for</h2>
+  <p>DevTools Forge is built for developers, analysts and writers who need a quick, private,
+  no-login way to fix a file and get back to work. There is nothing to install and nothing to sign up
+  for to use any of the free tools.</p>
+
+  <h2>What people say</h2>
+  <blockquote>&ldquo;I merged a stack of invoices in ten seconds without uploading them anywhere.&rdquo;
+  &mdash; Dana Okafor, Staff Engineer, Meridian Data</blockquote>
+  <p>Trusted by more than 12,000 developers each month.</p>
+</main>
+
+<footer>
+  <a href="/privacy">Privacy</a>
+  <a href="/docs/getting-started">Docs</a>
+  <a href="/products/pdf-merge">PDF merge</a>
+  <a href="/login">Log in</a>
+
+  <!-- Newsletter sign-up living in the footer as a plain inline form. It is not
+       an overlay and is not triggered on load, so it must not be reported as an
+       entry interstitial. -->
+  <section class="footer-newsletter" aria-label="Newsletter">
+    <h2>Get new tools in your inbox</h2>
+    <form action="/subscribe" method="post">
+      <label for="nl-email">Email address</label>
+      <input id="nl-email" name="email" type="email" autocomplete="email">
+      <button type="submit">Subscribe</button>
+    </form>
+  </section>
+
+  <p>&copy; 2026 DevTools Forge Ltd, 8 Rivergate, Bristol BS1 6EH. hello@devtools-forge.test</p>
+</footer>
+</body>
+</html>
