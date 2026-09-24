@@ -84,3 +84,11 @@ Same prompt, same site (docs.djangoproject.com), Claude Code 2.1.281: Opus 5.5, 
 Haiku 4.5 all got the **same 24 findings in the same order** (`tools/diff_reports.py`). Opus and
 Sonnet loaded the rendered page and flagged the three `nav_links_js_only` findings as not
 supported; Haiku didn't load it, even when the prompt required it, and called them supported.
+
+## 11. Brotli responses are read as garbage
+
+https://www.berkshirehathaway.com/ answers with `content-encoding: br` even though the engine asks
+for `Accept-Encoding: gzip, deflate` (`fetch.py:260`). `_decompress` (`fetch.py:197–207`) handles
+only gzip and deflate, so the saved "HTML" is compressed bytes: the page reads as 0 links and 0 words
+and the audit sees nothing. A browser decodes it fine. Found by `JS_DETECTION_STUDY.md` on
+2026-09-25. Frozen engine: recorded, not fixed.
