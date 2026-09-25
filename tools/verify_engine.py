@@ -15,6 +15,11 @@ from pathlib import Path
 
 RUN_OUTPUTS = ("audit-output", "audit-precheck", "audit-replay", ".claude", "__pycache__")
 
+# Files package_submission.py deliberately keeps OUT of the zip. Present in a git
+# checkout, absent from the artifact, and not engine drift -- flagging them made
+# the check report DIFFERS on a tree whose 155 engine files were all identical.
+NOT_PACKAGED = (".gitattributes", ".gitignore", ".DS_Store")
+
 
 def sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -59,7 +64,8 @@ def main() -> int:
         if p.is_file() and p.relative_to(folder).as_posix() not in submitted
     )
     run_made = [e for e in extra if e.split("/")[0] in RUN_OUTPUTS or "/__pycache__/" in f"/{e}"]
-    unexpected = [e for e in extra if e not in run_made]
+    not_packaged = [e for e in extra if e.rsplit("/", 1)[-1] in NOT_PACKAGED]
+    unexpected = [e for e in extra if e not in run_made and e not in not_packaged]
 
     print(f"submission.zip sha256 : {zip_hash}")
     print(f"files in submission   : {len(names)}")
