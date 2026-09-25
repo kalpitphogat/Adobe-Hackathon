@@ -26,7 +26,7 @@ in this order, each already scrolled to its line:
 | 7 | `tests/golden/site_b.audit-report.json` | line 109 |
 | 8 | `skills/ai-readiness-orchestrator/scripts/orchestrate.py` | line 242 |
 | 9 | `skills/ai-readiness-orchestrator/scripts/severity.py` | line 26 |
-| 10a | `DESIGN.md` | line 320 ("The shell detector had zero recall on real sites") |
+| 10a | `DESIGN.md` | **line 374** (365 findings, twelve false positives, 205 after) |
 | 10b | `skills/site-evidence-collector/scripts/dom.py` | line 53 (`NOSCRIPT_JS_NOTICE`) |
 | 10c | `tests/test_regressions.py` | line 2 (docstring); then scroll past the `# R1.` … `# R12.` headers (lines 50–504) |
 
@@ -34,7 +34,7 @@ Tip: highlight the line you are talking about (click the line number) so the vie
 
 ---
 
-## Beat 1 · How we discovered the signals (0:00 – 1:05)
+## Beat 1 · How we discovered the signals (0:00 – 0:58)
 
 **[Tab 0: chunking-model.md, lines 40–43 (the brief's own sentence)]**
 > "Ask an AI assistant about a brand: it either quotes the site or acts as if it doesn't exist.
@@ -51,18 +51,14 @@ Tip: highlight the line you are talking about (click the line number) so the vie
 > bot is info, line 318."
 
 **[Tab 3: geo-methods.md, lines 14–17]**
-> "Quote: the GEO study found pages that cite sources, statistics and quotations get used
-> more; keyword stuffing doesn't. That's a benchmark gain, not a defect, so a missing
-> evidence marker is only low."
+> "Quote: the GEO study found citing sources and statistics gets pages used more, and keyword
+> stuffing doesn't. A benchmark gain is not a defect, so a missing evidence marker is only low."
 
-**[Tab 0 again: chunking-model.md, line 5]**
-> "And Google says don't chop content up for AI, so no fix here tells you to split your page."
-
-*(151 words)*
+*(129 words)*
 
 ---
 
-## Beat 2 · How we assign severity (1:05 – 1:55)
+## Beat 2 · How we assign severity (0:58 – 1:48)
 
 **[Tab 5: severity-model.md, lines 5–11]**
 > "Severity answers *how bad if true*. Critical means the system can't see the page at all.
@@ -83,7 +79,7 @@ Tip: highlight the line you are talking about (click the line number) so the vie
 
 ---
 
-## Beat 3 · How we derive and prioritise fixes (1:55 – 2:30)
+## Beat 3 · How we derive and prioritise fixes (1:48 – 2:22)
 
 **[Tab 8: orchestrate.py, lines 242–253]**
 > "Every fix must carry a mechanism, *why* it works. `validate_finding` rejects any finding
@@ -99,17 +95,25 @@ Tip: highlight the line you are talking about (click the line number) so the vie
 
 ---
 
-## Beat 4 · Field-tested, and locked in (2:30 – 2:55) — cut first if over time
+## Beat 4 · What the field research actually cost us (2:22 – 2:47)
 
-**[Tab 10a: DESIGN.md, line 320 → Tab 10b: dom.py, line 53]**
-> "Field testing also found a miss: our empty-page detector never fired on live sites. The
-> fix keys on the noscript 'enable JavaScript' message, which any framework shows."
+This beat is the rubric's *"how you discovered the findings"* in numbers. **Do not cut it** —
+if Part 1 runs long, cut the GEO line in Beat 1 instead.
 
-**[Tab 10c: test_regressions.py, line 2, then scroll the R1–R12 headers]**
-> "And every false positive we fixed is pinned by a regression test, R1 to R12, so it can't
-> quietly come back. Now, live."
+**[Tab 10a: DESIGN.md, lines 374–380]**
+> "We audited five live sites picked for architectural variance. 365 findings — which was
+> itself the finding. We named twelve false positives before touching a single threshold;
+> tuning brought the same five sites to 205."
 
-*(50 words)*
+**[Tab 10b: dom.py, line 53]**
+> "It found a miss too: our empty-page detector never fired on a real site. It now keys on
+> the noscript 'enable JavaScript' notice."
+
+**[Tab 10c: test_regressions.py, scroll the R1–R12 headers]**
+> "Each of those twelve is a regression test now, R1 to R12, so none of them comes back
+> quietly. Now, live."
+
+*(93 words)*
 
 ---
 
