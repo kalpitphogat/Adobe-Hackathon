@@ -16,6 +16,15 @@ severity. It prints the exact command before running it, so a viewer can see
 the engine being driven rather than imitated. If this file disappeared, the
 findings would be identical -- they would just be less pleasant to look at.
 
+It drives whichever marketplace it is pointed at. From the root of the folder a
+judge unzipped from submission.zip (where marketplace.json is), the one file is
+all that is needed, with no clone of this repository:
+
+    python demo_cli.py doctor --zip ../submission.zip
+    python demo_cli.py audit https://example.com
+
+From this repository it finds brand-ai-readiness-audit/ and submission.zip itself:
+
     python3 round4/demo_cli.py doctor
     python3 round4/demo_cli.py audit https://example.com
     python3 round4/demo_cli.py audit --offline-root tests/fixtures/site_b
@@ -62,9 +71,88 @@ def _supports_unicode() -> bool:
 _UNICODE = _supports_unicode()
 
 ROOT = Path(__file__).resolve().parent.parent
+ENTRY_REL = Path("skills") / "ai-readiness-orchestrator" / "scripts" / "orchestrate.py"
+# Set by use_marketplace() once --marketplace (or the current directory) is known.
 MARKETPLACE = ROOT / "brand-ai-readiness-audit"
-ENTRYPOINT = MARKETPLACE / "skills" / "ai-readiness-orchestrator" / "scripts" / "orchestrate.py"
-FREEZE_CHECK = Path(__file__).resolve().parent / "check_engine_frozen.py"
+ENTRYPOINT = MARKETPLACE / ENTRY_REL
+
+# SHA-256 of the zip uploaded for Round 3, as declared in REPLAY_IT_Professionals.txt.
+SUBMITTED_SHA256 = "1c872c598dcac741c712cbf9e671f024881a9ba251e2b4da66995f81b6cf8dcf"
+# Written by an audit or by the REPLAY's setup, never part of the submitted package.
+RUN_OUTPUTS = {"audit-output", "audit-replay", ".claude", "__pycache__", ".pytest_cache"}
+# Never packed into the zip by package_submission.py, so never drift.
+NOT_PACKED = {".DS_Store", ".gitattributes", ".gitignore"}
+
+
+def use_marketplace(arg: str | None) -> None:
+    """--marketplace, else the current directory if it is a marketplace root, else this repo's copy."""
+    global MARKETPLACE, ENTRYPOINT
+    if arg:
+        MARKETPLACE = Path(arg).resolve()
+    elif (Path.cwd() / "marketplace.json").is_file():
+        MARKETPLACE = Path.cwd().resolve()
+    ENTRYPOINT = MARKETPLACE / ENTRY_REL
+
+
+def find_zip(arg: str | None) -> Path | None:
+    if arg:
+        return Path(arg).resolve()
+    for candidate in (MARKETPLACE.parent / "submission.zip", ROOT / "submission.zip"):
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def check_against_zip(zip_path: Path | None) -> tuple[bool, str]:
+    """Is the marketplace being driven byte-identical to the submitted zip?
+
+    Every file in the zip must exist in the folder with the same bytes. Files the
+    run itself writes (RUN_OUTPUTS, or any folder holding a report or evidence
+    bundle) are ignored; any other extra file fails.
+    """
+    import zipfile
+
+    if zip_path is None or not zip_path.is_file():
+        return False, "no submission.zip found - pass --zip PATH"
+    digest = hashlib.sha256(zip_path.read_bytes()).hexdigest()
+    problems = []
+    if digest != SUBMITTED_SHA256:
+        problems.append(f"zip SHA-256 {digest[:12]}... is not the submitted {SUBMITTED_SHA256[:12]}...")
+    with zipfile.ZipFile(zip_path) as zf:
+        names = [n for n in zf.namelist() if not n.endswith("/")]
+        differ = [n for n in names
+                  if not (MARKETPLACE / n).is_file() or (MARKETPLACE / n).read_bytes() != zf.read(n)]
+    # Any --out folder is the engine's output, not the engine: it holds a report or evidence.
+    outputs = set(RUN_OUTPUTS) | {d.name for d in MARKETPLACE.iterdir() if d.is_dir()
+                                  and ((d / "audit-report.json").is_file()
+                                       or (d / "evidence").is_dir())}
+    this_file = Path(__file__).resolve()
+    submitted = set(names)
+    extra = [p.relative_to(MARKETPLACE).as_posix() for p in MARKETPLACE.rglob("*")
+             if p.is_file() and p.resolve() != this_file
+             and p.name not in NOT_PACKED and p.suffix not in {".pyc", ".pyo"}
+             and p.relative_to(MARKETPLACE).as_posix() not in submitted
+             and not outputs & set(p.relative_to(MARKETPLACE).parts)]
+    if differ:
+        problems.append(f"{len(differ)} file(s) missing or modified, e.g. {differ[0]}")
+    if extra:
+        problems.append(f"{len(extra)} file(s) not in the zip, e.g. {extra[0]}")
+    if problems:
+        return False, "; ".join(problems)
+    return True, f"{len(names)}/{len(names)} files byte-identical, zip {digest[:12]}..."
+
+
+def shown_path(path: Path) -> str:
+    """Relative to where the viewer is standing, so it fits on one line at 720p."""
+    try:
+        return Path(os.path.relpath(path)).as_posix()
+    except ValueError:  # another drive on Windows
+        return str(path)
+
+
+def self_cmd() -> str:
+    """How to re-invoke this script, as the viewer would type it."""
+    return "python " + shown_path(Path(__file__).resolve())
 
 
 # ───────────────────────────────────────────────────────────── presentation ──
@@ -190,7 +278,7 @@ def cmd_doctor(args) -> int:
     v = sys.version_info
     row(v >= (3, 9), "Python >= 3.9", f"{v.major}.{v.minor}.{v.micro}")
     row(ENTRYPOINT.is_file(), "entrypoint present",
-        str(ENTRYPOINT.relative_to(ROOT)) if ENTRYPOINT.is_file() else "missing")
+        shown_path(ENTRYPOINT) if ENTRYPOINT.is_file() else f"missing: {ENTRYPOINT}")
 
     try:
         import playwright  # noqa: F401
@@ -199,11 +287,8 @@ def cmd_doctor(args) -> int:
         row(True, "Playwright (optional)",
             "absent - render checks report 'not assessed', audit still runs")
 
-    if FREEZE_CHECK.is_file():
-        proc = subprocess.run([sys.executable, str(FREEZE_CHECK)],
-                              capture_output=True, text=True, cwd=str(ROOT))
-        row(proc.returncode == 0, "engine frozen vs submission.zip",
-            "byte-identical" if proc.returncode == 0 else "DRIFTED - see check_engine_frozen.py")
+    frozen, detail = check_against_zip(find_zip(args.zip))
+    row(frozen, "engine identical to submission.zip", detail)
 
     print(f"\n  engine fingerprint  {ink.bold(engine_fingerprint())}")
     print(wrap(ink.grey("Say this number on camera and print it again after the run; "
@@ -300,7 +385,7 @@ def cmd_audit(args) -> int:
 
     # The shot that proves this is the submitted engine, not a demo harness.
     print(f"\n  {ink.grey('engine')}      {ink.bold(engine_fingerprint())}")
-    print(f"  {ink.grey('invoking')}    {ink.dim(str(ENTRYPOINT.relative_to(ROOT)))}")
+    print(f"  {ink.grey('invoking')}    {ink.dim(shown_path(ENTRYPOINT))}")
     shown = " ".join(["python3", str(ENTRYPOINT.relative_to(MARKETPLACE))] + cmd[2:])
     print(f"\n{wrap(ink.dim(shown), indent=2)}\n")
 
@@ -321,7 +406,7 @@ def cmd_audit(args) -> int:
     render_summary(report, out)
 
     if report["findings"]:
-        print(wrap(ink.grey(f"Drill in:  python3 round4/demo_cli.py show {args.out}"), indent=2))
+        print(wrap(ink.grey(f"Drill in:  {self_cmd()} show {args.out}"), indent=2))
     print()
     return 0
 
@@ -489,12 +574,8 @@ def cmd_prove(args) -> int:
 
     print(f"\n  {ink.bold('1.')} Engine identity")
     print(f"     fingerprint {ink.bold(engine_fingerprint())}")
-    if FREEZE_CHECK.is_file():
-        proc = subprocess.run([sys.executable, str(FREEZE_CHECK)],
-                              capture_output=True, text=True, cwd=str(ROOT))
-        mark = ink.green("byte-identical to submission.zip") if proc.returncode == 0 \
-            else ink.red("DRIFTED from submission.zip")
-        print(f"     {mark}")
+    frozen, detail = check_against_zip(find_zip(args.zip))
+    print(f"     {(ink.green if frozen else ink.red)(detail)}")
 
     print(f"\n  {ink.bold('2.')} Determinism on the shipped fixtures")
     print(f"     {ink.grey('six golden reports, compared byte-for-byte,')}")
@@ -571,12 +652,19 @@ def main(argv: list[str] | None = None) -> int:
                     "what that engine returns.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--marketplace", metavar="DIR",
+                    help="the unzipped marketplace root to drive "
+                         "(default: the current directory if it has marketplace.json)")
+    common.add_argument("--zip", metavar="PATH",
+                    help="the submitted zip to check the marketplace against "
+                         "(default: submission.zip next to the marketplace)")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
-    d = sub.add_parser("doctor", help="preflight before recording")
+    d = sub.add_parser("doctor", parents=[common], help="preflight before recording")
     d.set_defaults(fn=cmd_doctor)
 
-    a = sub.add_parser("audit", help="run the engine against a URL and summarise")
+    a = sub.add_parser("audit", parents=[common], help="run the engine against a URL and summarise")
     a.add_argument("url", nargs="?")
     a.add_argument("--offline-root", help="audit a shipped fixture instead of the network")
     a.add_argument("--out", default="./audit-output")
@@ -587,22 +675,24 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--time-budget", type=int, default=300)
     a.set_defaults(fn=cmd_audit)
 
-    s = sub.add_parser("show", help="drill into findings with full evidence")
+    s = sub.add_parser("show", parents=[common], help="drill into findings with full evidence")
     s.add_argument("out", nargs="?", default="./audit-output")
     s.add_argument("--id", help="one finding, e.g. F-001")
     s.add_argument("--top", type=int, default=3)
     s.set_defaults(fn=cmd_show)
 
-    p = sub.add_parser("prove", help="engine identity and determinism")
+    p = sub.add_parser("prove", parents=[common], help="engine identity and determinism")
     p.add_argument("out", nargs="?", default=None)
     p.add_argument("--offline-root", help="re-run against this fixture")
     p.set_defaults(fn=cmd_prove)
 
     args = ap.parse_args(argv)
+    use_marketplace(args.marketplace)
 
     if not ENTRYPOINT.is_file():
         return die(f"entrypoint not found at {ENTRYPOINT}\n"
-                   f"        run this from the repository root.")
+                   f"        run this from the unzipped marketplace root (where marketplace.json is),\n"
+                   f"        or pass --marketplace DIR.")
     try:
         return args.fn(args)
     except KeyboardInterrupt:
