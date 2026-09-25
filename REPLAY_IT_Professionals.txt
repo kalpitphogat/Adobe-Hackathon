@@ -131,17 +131,28 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # full data is in audit-output/audit-report.json, the same file the agent reads.
 # Tested 2026-09-24 with plain Python 3.13.15, no Playwright: exit 0, 45 s.
 #
-# ---- FALLBACK D: richer terminal output, no agent needed --------------------
-# For a formatted experience (progress bars, colour-coded finding tables,
-# drill-down by finding ID) without an LLM or agent harness:
-#   git clone https://github.com/kalpitphogat/Adobe-Hackathon.git
-#   cd Adobe-Hackathon && git checkout round4-demo-cli
-#   python round4/demo_cli.py doctor
-#   python round4/demo_cli.py audit <URL> --out ./audit-output
-#   python round4/demo_cli.py show ./audit-output --top 10
-#   python round4/demo_cli.py show ./audit-output --id F-001
-# demo_cli.py is a thin wrapper around orchestrate.py — it contains no checks
-# of its own. Findings are byte-identical to Fallback C.
+# ---- FALLBACK D: formatted terminal view of the same run, no agent ---------
+# One extra file, demo_cli.py, standard library only. It contains no checks: it
+# runs the orchestrate.py in YOUR unzipped marketplace and formats the report
+# (progress per skill, findings ranked by ICE, drill-down by ID). It is not
+# part of the engine and is not used in the video. From the folder holding
+# submission.zip and the unzipped brand-ai-readiness-audit/ (see TEST_STEPS 1):
+#   curl -L -o demo_cli.py https://raw.githubusercontent.com/kalpitphogat/Adobe-Hackathon/be4f1327c1897303abf1b584828883a5bd03a15d/round4/demo_cli.py
+#   sha256sum demo_cli.py   ->  517f64bf7baf278faaf9c5b94e025fd83c2e718bc7bc38f0212af85b246a2924
+#   (macOS: shasum -a 256 demo_cli.py. Windows PowerShell: the same curl line
+#    with curl.exe instead of curl, then certutil -hashfile demo_cli.py SHA256)
+#   cd brand-ai-readiness-audit
+#   python ../demo_cli.py doctor
+#   python ../demo_cli.py audit <URL> --out ./audit-output
+#   python ../demo_cli.py show ./audit-output --top 10
+#   python ../demo_cli.py show ./audit-output --id F-001
+#   python ../demo_cli.py prove ./audit-output
+# doctor checks every file of the marketplace against ../submission.zip and
+# its SHA-256 above (155/155 byte-identical, or it says which file differs),
+# so you can see it is driving the package you hold. Tested 2026-09-25 in an
+# empty folder with only submission.zip and this file: the report from
+# "audit --offline-root tests/fixtures/site_b" is identical to Fallback C's
+# except audited_at and evidence_bundle.path.
 #
 # ---- RE-ANALYSE WITHOUT RE-FETCHING (same evidence, same findings) ----------
 #   python skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle ./audit-output/evidence --out ./audit-replay
@@ -179,7 +190,11 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #  * read.render.nav_links_js_only can overstate: its rendered-side link count
 #    includes off-site links, the raw side does not. It is right when the gap
 #    is real (ikea.com/ae/ar/: 112 -> 204 same-host links) and wrong when it
-#    is not (docs.djangoproject.com: identical link sets).
+#    is not (docs.djangoproject.com: identical link sets). Over 23 sites on
+#    2026-09-25, browser-dependent findings with Playwright always on were 20
+#    true and 21 false, each re-counted against the live page
+#    (STRATEGY_COMPARISON.md in the team repo). This is why the agent's
+#    evidence check loads the rendered page before it agrees with one.
 #  * extract.sd.contradicts_visible_content can misread prices written as
 #    "132€": ikea.com product pages show the schema price but were reported
 #    as disagreeing.
