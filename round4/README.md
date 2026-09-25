@@ -5,12 +5,16 @@ Round 3 marketplace is reused exactly as submitted. Everything in this folder
 sits outside `brand-ai-readiness-audit/`, and `package_submission.py` packs only
 the marketplace directory, so nothing here can reach the submitted artifact.
 
+> **The manifest we submit is [`../REPLAY_IT_Professionals.txt`](../REPLAY_IT_Professionals.txt)**
+> (checked by `tools/check_replay.py`). The video's Part 2 runs Claude Code, not `demo_cli.py`;
+> `demo_cli.py` is the REPLAY's Fallback D only. The files below are the early scaffolding.
+
 | file | what it is for |
 |---|---|
-| [`demo_cli.py`](demo_cli.py) | the terminal front end used on camera |
+| [`demo_cli.py`](demo_cli.py) | REPLAY Fallback D: a formatted terminal view of an audit, driving the judge's own unzipped marketplace; not used on camera |
 | [`VIDEO_SCRIPT.md`](VIDEO_SCRIPT.md) | Part 1 beats with per-claim code anchors, Part 2 shot list |
 | [`RUNBOOK.md`](RUNBOOK.md) | harness wiring, demo-URL choice, dress rehearsal, recording |
-| [`REPLAY_TeamName.txt`](REPLAY_TeamName.txt) | the reproduction manifest — **rename and fill** |
+| [`REPLAY_TeamName.txt`](REPLAY_TeamName.txt) | the blank template the root REPLAY was filled from |
 | [`verify_replay.py`](verify_replay.py) | proves the manifest replays, before a judge finds out it doesn't |
 | [`check_engine_frozen.py`](check_engine_frozen.py) | proves the demoed engine is the submitted engine |
 
