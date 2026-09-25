@@ -1,7 +1,7 @@
 TEST_SITE_URLS: https://docs.pytest.org/, https://www.theguardian.com/
 LLM_MODEL: Claude Opus 5.5 (API model id: claude-opus-5-5), runs of 2026-09
-AGENT_HARNESS: Claude Code v2.1.281
-ENV_SETUP: uv python install 3.11.15 && uv venv --python 3.11.15 .venv && . .venv/bin/activate && uv pip install playwright==1.63.0 && python -m playwright install chromium
+AGENT_HARNESS: Claude Code v2.1.282
+ENV_SETUP: Engine: Python 3.9+, standard library only -- nothing to pip install, because pass 1 passes --no-render. OPTIONAL, and only for pass 2 on a site whose raw HTML has no links: pip install playwright==1.63.0 && python -m playwright install chromium (without it, pass 2 re-analyses the pass-1 evidence with --bundle and the report says so in limitations). Harness: Node.js 18+, then npm install -g @anthropic-ai/claude-code@2.1.282, then set DISABLE_AUTOUPDATER=1 in that shell so it stays on the disclosed version, then run claude once to sign in.
 TEST_STEPS:
  1. From the folder that holds submission.zip and the activated .venv, unpack the Round 3 submission, enter the marketplace root, make its skills discoverable to Claude Code (an unchanged copy in .claude/skills; the agent still runs the scripts in skills/), and start Claude Code. The first three commands are the same in bash, PowerShell and cmd:
       python -m zipfile -e submission.zip brand-ai-readiness-audit
@@ -26,7 +26,7 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # manifest.
 # ============================================================================
 #
-# QUICK START (no agent needed — just Python 3.9+ and the zip you already have)
+# QUICK START (no agent needed -- just Python 3.9+ and the zip you already have)
 # ------------------------------------------------------------------------------
 #   mkdir replay && cd replay
 #   python -m zipfile -e /path/to/submission.zip brand-ai-readiness-audit
@@ -40,7 +40,7 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # command with the browser run shown there.
 #
 # For the full agent-driven experience (as shown in the video), follow the
-# TEST_STEPS above with Claude Code. For more options see Fallbacks A–E below.
+# TEST_STEPS above with Claude Code. For more options see Fallbacks A-E below.
 #
 # ---- WHY THE AGENT RUNS TWO PASSES --------------------------------------------
 # Both passes use flags the Round 3 engine already has; no engine file changes.
@@ -276,7 +276,7 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #    (STRATEGY_COMPARISON.md in the team repo). This is why the agent's
 #    evidence check loads the rendered page before it agrees with one.
 #  * extract.sd.contradicts_visible_content can misread prices written as
-#    "132€": ikea.com product pages show the schema price but were reported
+#    "132EUR": ikea.com product pages show the schema price but were reported
 #    as disagreeing.
 #  * trust.integrity.prompt_injection fires on pages that discuss prompt
 #    injection (e.g. an acceptable-use policy), not only on pages that do it.
