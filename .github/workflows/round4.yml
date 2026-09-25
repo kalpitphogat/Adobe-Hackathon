@@ -10,7 +10,7 @@ name: Round 4 replay
 
 on:
   push:
-    branches: [sub_final]
+    branches: [final, final-2, round4-demo-cli]
   workflow_dispatch:
 
 permissions:
@@ -50,7 +50,9 @@ jobs:
           python-version: "3.11.15"
       - name: REPLAY_IT_Professionals.txt parses and its fallback path replays
         if: hashFiles('REPLAY_IT_Professionals.txt') != ''
-        run: python tools/verify_replay.py REPLAY_IT_Professionals.txt --twice --evidence 4
+        # The first TEST_SITE_URL is the video's live URL: it must not be audited before
+        # the recording ("a site the audit has never seen"), so only the second is replayed.
+        run: python tools/verify_replay.py REPLAY_IT_Professionals.txt --twice --evidence 4 --skip https://docs.pytest.org/
 
   url-list:
     runs-on: ubuntu-latest

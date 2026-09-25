@@ -150,6 +150,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-run", action="store_true", help="parse and cross-check only")
     ap.add_argument("--twice", action="store_true", help="also test run-to-run and bundle determinism")
     ap.add_argument("--evidence", type=int, default=2, help="print evidence for the top N findings")
+    ap.add_argument("--skip", action="append", default=[], metavar="URL",
+                    help="a TEST_SITE_URL not to audit (repeatable): the video's URL must stay "
+                         "unseen until it is recorded")
     args = ap.parse_args(argv)
 
     print(f"\nmanifest: {args.manifest}")
@@ -226,6 +229,9 @@ def main(argv: list[str] | None = None) -> int:
         engine = top / "brand-ai-readiness-audit"
         flags = shlex.split(cmd.group(2))
         for url in urls:
+            if url in args.skip:
+                print(f"\nskip {url}  (--skip: not audited, so it stays unseen until the recording)")
+                continue
             print(f"\nreplay {url}")
             print(f"  $ python {cmd.group(1)} {url} {' '.join(flags)}")
             out_dir = engine / "audit-output"

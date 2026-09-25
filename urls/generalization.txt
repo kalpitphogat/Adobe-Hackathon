@@ -1,6 +1,8 @@
 # Sites used to test how the frozen Round 3 engine generalises before recording.
 # Chosen for architectural and archetype variance, the way a judge's own pick
 # would vary: none is a fixture, and none was used to build or tune the engine.
+# NEVER add https://docs.pytest.org/ (the video's live URL) or https://www.sphinx-doc.org/
+# (the backup): the Round 4 brief needs "a site the audit has never seen" on camera.
 # One URL per line; run with: python3 round4/tools/live_matrix.py --urls round4/urls/generalization.txt
 
 # publisher / news
@@ -8,7 +10,6 @@ https://www.theguardian.com/
 https://www.bbc.com/
 https://www.nytimes.com/
 # documentation
-https://docs.pytest.org/
 https://docs.djangoproject.com/
 https://docs.python.org/3/
 # brand / SaaS marketing
