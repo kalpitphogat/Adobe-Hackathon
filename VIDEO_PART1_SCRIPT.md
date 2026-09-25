@@ -8,8 +8,11 @@ So **every sentence below has the file you show while you say it**. All paths ar
 the marketplace root: the unzipped `round3-frozen/submission.zip`, i.e. `demo/`. Every line
 number was checked against that exact copy (2026-09-23; new anchors 2026-09-24). If you cut a sentence, cut its anchor too.
 
-**Pace:** 380 spoken words: about 2:43 at ~140 words per minute, leaving ~15 s for switching tabs.
-Rehearse against a timer. Beat 4 is the one to cut if you run long.
+**Pace:** 390 spoken words: about 2:47 at ~140 words per minute, leaving ~13 s for switching tabs.
+That is tight. **Cut order if a timed rehearsal passes 2:50:** (1) the GEO sentence in Beat 1,
+(2) the dom.py sentence in Beat 4. Both cuts together bring it to 335 words (~2:24).
+Never cut the DESIGN.md sentence in Beat 4: it is the field-research evidence the rubric asks for.
+Rehearse against a timer, and cut only in the order given above.
 
 **Screen setup before recording:** VS Code with `demo/` open, font size 18+, these tabs pre-opened
 in this order, each already scrolled to its line:
@@ -97,8 +100,8 @@ Tip: highlight the line you are talking about (click the line number) so the vie
 
 ## Beat 4 · What the field research actually cost us (2:22 – 2:47)
 
-This beat is the rubric's *"how you discovered the findings"* in numbers. **Do not cut it** —
-if Part 1 runs long, cut the GEO line in Beat 1 instead.
+This beat is the rubric's *"how you discovered the findings"* in numbers. **Keep the DESIGN.md
+sentence** whatever happens; if Part 1 runs long, follow the cut order under **Pace** above.
 
 **[Tab 10a: DESIGN.md, lines 374–380]**
 > "We audited five live sites picked for architectural variance. 365 findings — which was
@@ -110,8 +113,8 @@ if Part 1 runs long, cut the GEO line in Beat 1 instead.
 > the noscript 'enable JavaScript' notice."
 
 **[Tab 10c: test_regressions.py, scroll the R1–R12 headers]**
-> "Each of those twelve is a regression test now, R1 to R12, so none of them comes back
-> quietly. Now, live."
+> "And every false positive we fixed has a regression test, R1 to R12, so none of them
+> comes back quietly. Now, live."
 
 *(93 words)*
 
@@ -122,8 +125,8 @@ if Part 1 runs long, cut the GEO line in Beat 1 instead.
 | tempting claim | why it's out |
 |---|---|
 | "13 findings are moot until F-001" (from DESIGN.md) | The checked-in golden has **11** `blocked_by: F-001` (and `summary.blocked_findings` = 11). A judge who opens the golden sees 11; say 11. |
-| "365 findings down to 205 on five live sites" (DESIGN.md) | Prose only; nothing in the submitted code reproduces it. Unanchored narration earns nothing. |
-| "We audited five live sites and each false positive became R1–R12" (Lakshya's draft) | `test_regressions.py` says the R-tests were found via the healthy **control fixture**. We say only what the docstring says: every fixed false positive has a test that fails if it returns. |
+| "365 findings down to 205" as something the code reproduces | It's the field-research record in `DESIGN.md:374`, which is in the submitted zip, so Beat 4 quotes it **as a record of what we did**, with the file on screen. No code re-derives those numbers, so never say "the engine shows" or "you can reproduce". |
+| "Each of those twelve (live-site) false positives became R1–R12" | `test_regressions.py` says the R-tests were found via the healthy **control fixture**. We say only what the docstring says: every fixed false positive has a test that fails if it returns. |
 | "Links only exist after JavaScript runs" as an example of a strong check | False positive in the frozen engine (see `SCOUTING.md`, `NOTES.md` §8). Do not feature it. |
 | "Every check is precise" / "no false positives" | Not true (see `SCOUTING.md`). Say what the code does, not how good it is. |
 
@@ -132,4 +135,4 @@ if Part 1 runs long, cut the GEO line in Beat 1 instead.
 - [ ] `.venv\Scripts\python.exe tools\verify_engine.py round3-frozen\submission.zip demo` ends `ENGINE UNCHANGED` (the engine on screen is the submitted one)
 - [ ] VS Code is showing `demo/` (the unzip), not any other copy
 - [ ] All 13 tabs open, in order, scrolled to the listed lines
-- [ ] Timer: Beats 1–3 done by 2:30 in rehearsal; if not, drop Beat 4
+- [ ] Timer: whole script under 2:50 in a timed rehearsal; if not, apply the cut order under **Pace** (GEO sentence, then the dom.py sentence), never the DESIGN.md sentence
