@@ -14,7 +14,7 @@ the command line against a site the audit has never seen.
 |---|---|
 | Engine | Round 3 `submission.zip`, unchanged (hash above) |
 | Entrypoint skill | `skills/ai-readiness-orchestrator` (`SKILL.md` → `scripts/orchestrate.py`) |
-| Agent harness | Claude Code v2.1.281, loading the entrypoint with its Skill tool |
+| Agent harness | Claude Code v2.1.282, loading the entrypoint with its Skill tool |
 | LLM | Claude Opus 5.5 (`claude-opus-5-5`) |
 | Live-run URL | https://docs.pytest.org/ (never audited before the recording) |
 | Second test URL | https://www.theguardian.com/ (stable: robots.txt critical + gate cascade) |

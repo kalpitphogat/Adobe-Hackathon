@@ -10,7 +10,7 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 |---|---|---|---|
 | 1.1 | Show the Round 3 engine works live, and prove it's reproducible | ✅ | Live run in the video + `REPLAY_IT_Professionals.txt`; rehearsed from empty folders (`rehearsal/`) |
 | 1.2 | No GUI needed; a CLI session where an agent runs the marketplace is what they want | ✅ | Claude Code in a terminal (`VIDEO_PART2_RUNSHEET.md`) |
-| 2.1 | Submit a recorded video, **≤ 5:00 hard cap** | 🎬 | Part 1 script ≈ 2:42 + tab switches, Part 2 ≤ 2:00 after trimming |
+| 2.1 | Submit a recorded video, **≤ 5:00 hard cap** | 🎬 | Part 1 script ≈ 2:47 + tab switches (cut order to 2:24 in the script), Part 2 ≤ 2:00 after trimming |
 | 2.2 | Submit a plain-text file named exactly `REPLAY_YourTeamName.txt` | ✅ | `REPLAY_IT_Professionals.txt` (team name IT_Professionals); name checked by `tools/check_replay.py` |
 | 2.3 | Don't resubmit Round 3; they reuse that exact package | ✅ | Nothing in this repo changes it; `round3-frozen/submission.zip` + `SHA256SUMS` |
 | 2.4 | **Live run must exercise the same submitted marketplace**, or it fails on integrity | ✅ 🎬 | Demo runs from a fresh unzip of the frozen zip; hash `1c872c59…8dcf` printed in REPLAY; `tools/verify_engine.py` proves the unzipped folder is byte-identical, file by file (155/155), and fails on any changed, missing or extra file (tested) |
@@ -20,7 +20,7 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 
 | # | rule | status | how we meet it · evidence |
 |---|---|---|---|
-| 3.1 | Part 1 methodology **≤ 3:00** | ✅ 🎬 | `VIDEO_PART1_SCRIPT.md`: 379 spoken words ≈ 2:42 at 140 wpm, ~15 s for tab switches |
+| 3.1 | Part 1 methodology **≤ 3:00** | ✅ 🎬 | `VIDEO_PART1_SCRIPT.md`: 390 spoken words ≈ 2:47 at 140 wpm, ~13 s for tab switches; a fixed cut order (GEO sentence, then dom.py sentence) brings it to 335 words ≈ 2:24 |
 | 3.2 | Part 2 trial run **≤ 2:00** | 🎬 | Run sheet timeline ends 1:50; agent output cut to top 5 and a stop-at-first-supported evidence check |
 | 3.3 | May crop idle waits; **may not splice** a run that didn't happen | 🎬 | One continuous take; raw file kept; "⏩ trimmed" captions; retake = new URL, never a splice |
 | 3.4 | Part 1: how we discovered the findings (field research, what separates cited vs ignored sites, distilled into repeatable checks) | ✅ | Beat 1 answers "what separates them" directly: the brief's reach/read/quote sentence (`chunking-model.md:40`), crawler roles (`ai-bots.json:71`, `check_robots.py:286/318`), the GEO finding (`geo-methods.md:14`); Beat 4: field-test miss + R1–R12 |
@@ -41,7 +41,7 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 | # | rule | status | how we meet it · evidence |
 |---|---|---|---|
 | 4.1 | Disclose LLM **name and version/date** | ✅ | `LLM_MODEL: Claude Opus 5.5 (API model id: claude-opus-5-5), runs of 2026-09` |
-| 4.2 | Disclose harness **name and version** | ✅ ⚠️ | `AGENT_HARNESS: Claude Code v2.1.281`. Claude Code auto-updated 2.1.280 → 2.1.281 on 2026-09-24; `tools/check_replay.py` now fails if the installed version differs from the REPLAY; judges pin with `claude install 2.1.281` |
+| 4.2 | Disclose harness **name and version** | ✅ ⚠️ | `AGENT_HARNESS: Claude Code v2.1.282`, and ENV_SETUP installs exactly that version. Claude Code auto-updated 2.1.280 → 2.1.281 on 2026-09-24 and to 2.1.282 on 2026-09-25; `tools/check_replay.py` now fails if the installed version differs from the REPLAY; judges pin with `claude install 2.1.281` |
 | 4.3 | **Exact invoke commands**, clean checkout → emitted report | ✅ | TEST_STEPS 1–3; rehearsed verbatim with `claude -p` |
 | 4.4 | Closed/paid harness → **document a fallback run path** | ✅ | REPLAY fallbacks: **A** no Playwright (identical to main when pass 1 finds no empty page; Django one-pass 21 vs 24, the 3 extra false); **B** other model or harness (Sonnet 5, Haiku 4.5: same findings; right pass-2 choice 10/10); **C** no agent, plain Python, the two passes by hand; **D** formatted terminal via one downloaded file, `demo_cli.py`, pinned to a commit with its SHA-256, driving the judge's own unzip (`doctor` 155/155 vs their zip). ⚠️ The repo is private: the download only works if it is made public; **E** always render (the previous main path) |
 | 4.5 | Judged on substance, not exact strings | ✅ | Deterministic engine; the agent only reads the report back |

@@ -59,7 +59,7 @@ engine's crawl are the parts you cut.
 
 | time | on screen | you say |
 |---|---|---|
-| 0:00 | Terminal in `demo-live\brand-ai-readiness-audit`. Run `python ..\..\tools\verify_engine.py ..\submission.zip .` → `ENGINE UNCHANGED`. Then `claude --version` → `2.1.281 (Claude Code)`. | "Part two, live. This folder is our Round 3 zip, unzipped: every file byte-identical to what we submitted. The harness is Claude Code 2.1.281…" |
+| 0:00 | Terminal in `demo-live\brand-ai-readiness-audit`. Run `python ..\..\tools\verify_engine.py ..\submission.zip .` → `ENGINE UNCHANGED`. Then `claude --version` → `2.1.282 (Claude Code)`. | "Part two, live. This folder is our Round 3 zip, unzipped: every file byte-identical to what we submitted. The harness is Claude Code 2.1.282…" |
 | 0:08 | Type `claude --model claude-opus-5-5 --allowedTools "Skill" "Bash(python:*)" "PowerShell(python:*)" "Read"`. Once it opens, type `/model` so the model is visible, then Esc. | "…driving Claude Opus 5.5." |
 | 0:15 | Paste the prompt, **type** `https://docs.pytest.org/` at the end, press Enter. | "I paste the prompt from our REPLAY file and type a site our audit has never seen." |
 | 0:22 | **`Skill(ai-readiness-orchestrator)`** appears, then pass 1: `python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://docs.pytest.org/ --no-render --out ./audit-precheck`. **Hold on each for 2 s.** Approve any permission prompt on camera. | "Wiring: the agent loads our entrypoint skill and runs its orchestrator. No demo code, no hardcoded results." |
@@ -138,7 +138,7 @@ python -c "import urllib.request as u;print(u.urlopen('https://docs.pytest.org/e
 
 ## F. After recording
 
-1. Watch the trimmed video once against the REPLAY file: harness `Claude Code v2.1.281`, model
+1. Watch the trimmed video once against the REPLAY file: harness `Claude Code v2.1.282`, model
    `Claude Opus 5.5`, URL `https://docs.pytest.org/` (or the backup, if you switched). All three must match.
 2. Copy `demo-live/brand-ai-readiness-audit/audit-output/` to `recorded-run/` in this repo and commit it.
 3. **Keep the proof the run was real and continuous.** Copy the session transcript Claude Code saved,
