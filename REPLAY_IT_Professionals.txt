@@ -141,6 +141,46 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # below reaches the same substance; each was tested on the date it gives.
 # ============================================================================
 #
+# ---- EXPECTED SUBSTANCE: https://www.theguardian.com/ -------------------------
+# The second TEST_SITE_URL, so a judge can corroborate this manifest WITHOUT
+# running anything. The video's URL is the first entry and is deliberately not
+# characterised here: the engine had never audited it before the recording.
+#
+# Recorded 2026-09-24, Claude Code + Opus 5.5, the TEST_STEPS above. Counts move
+# with the site's front page; the shape below is what should hold.
+#
+#   audit_status partial (no browser: the three render-stage checks report
+#   "not assessed" in limitations, which is the --no-render path working).
+#
+#   F-001  critical / confirmed  ICE 9.3
+#          reach.robots.ai_search_bot_blocked
+#          "robots.txt blocks 6 AI retrieval crawler(s) that cite sources at
+#           answer time"
+#     CHECK IT YOURSELF, no engine needed:
+#       curl -s https://www.theguardian.com/robots.txt | grep -nEi \
+#         "perplexitybot|claude-searchbot|claude-user|amazonbot|duckassistbot|google-cloudvertexbot|^disallow"
+#     You should see those retrieval crawlers named in one User-agent group that
+#     a "Disallow: /" closes. That single line is the finding. Checked twice,
+#     independently, on 2026-09-24 and 2026-09-25: robots.txt was 104 lines, the
+#     group began at line 81 (Claude-SearchBot 83, Claude-User 84, Amazonbot 95,
+#     DuckAssistBot 97, Google-CloudVertexBot 98) and "Disallow: /" was line 102.
+#     Line numbers move when the Guardian edits the file; the group does not.
+#
+#   THE CASCADE, which is the part worth watching: F-001 is the only critical or
+#   high finding. Roughly 45 of ~52 findings carry blocked_by pointing at it --
+#   real defects, capped at medium, because nothing reaches the page until the
+#   crawler is let in. The engagement findings (act.*) are NOT capped: a visitor
+#   arriving from a link does not care whether a crawler was refused.
+#
+#   Also expect, all medium/confirmed: content images with no alt text on
+#   several pages; no clear statement of who publishes the site; dated content
+#   carrying no date; a primary action labelled "Learn more".
+#
+#   A judge's own URL will differ. What should hold anywhere: every finding
+#   carries evidence naming a URL and a count you can verify by hand, findings
+#   are ordered severity then ICE, and anything the audit could not assess is
+#   listed in limitations rather than passed silently.
+#
 # ---- FALLBACK A: no Playwright (skip the two Playwright commands) ----------
 # The engine runs on the Python standard library alone. Pass 1 never needs a
 # browser, so on the usual site (pass-1 count 0) the result is identical to the
