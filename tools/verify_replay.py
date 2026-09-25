@@ -136,11 +136,30 @@ def two_pass(engine: Path, script: str, url: str, flags: list[str],
                 blank += 1
 
     if blank:
-        code, _, err = run_engine(engine, [script, url, "--out", "./audit-output"], timeout)
+        # Same flags as pass 1, minus --no-render and pass 1's own --out.
+        keep, skip = [], False
+        for flag in flags:
+            if skip:
+                skip = False
+            elif flag == "--out":
+                skip = True
+            elif flag != "--no-render":
+                keep.append(flag)
+        code, _, err = run_engine(engine, [script, url, *keep, "--out", "./audit-output"], timeout)
         return code, f"pass 2 rendered ({blank} page(s) with no internal links)", err
     code, _, err = run_engine(
         engine, [script, "--bundle", str(pre / "evidence"), "--out", "./audit-output"], timeout)
     return code, "pass 2 re-analysed pass 1's evidence (no blank pages)", err
+
+
+def evidence_of(engine: Path, out_dir: Path) -> Path:
+    """The evidence bundle behind the report in out_dir.
+
+    A rendering pass 2 writes its own bundle into out_dir; a --bundle pass 2 writes
+    none and reports on audit-precheck/evidence, so that is the bundle to use.
+    """
+    own = out_dir / "evidence"
+    return own if own.is_dir() else engine / "audit-precheck" / "evidence"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -246,7 +265,7 @@ def main(argv: list[str] | None = None) -> int:
                 continue
             rep = json.loads(target.read_text(encoding="utf-8"))
             check(not floor(rep), f"report meets the Round 3 schema floor for {url}", "; ".join(floor(rep)[:2]))
-            pages_file = out_dir / "evidence" / "pages.jsonl"
+            pages_file = evidence_of(engine, out_dir) / "pages.jsonl"
             titles = [json.loads(l).get("title") or "" for l in pages_file.read_text(encoding="utf-8").splitlines()
                       if l.strip()] if pages_file.is_file() else []
             bot_checks = [t for t in titles if CHALLENGE.search(t)]
@@ -267,6 +286,8 @@ def main(argv: list[str] | None = None) -> int:
                 first = signature(rep)
                 keep = work / f"first-{abs(hash(url))}"
                 shutil.copytree(out_dir, keep)
+                keep_evidence = work / f"first-evidence-{abs(hash(url))}"
+                shutil.copytree(evidence_of(engine, out_dir), keep_evidence)
                 shutil.rmtree(out_dir)
                 code2, _, err2 = two_pass(engine, cmd.group(1), url, flags)
                 if check(code2 == 0, f"second run exits 0 on {url}", err2.strip()[-200:]):
@@ -289,7 +310,7 @@ def main(argv: list[str] | None = None) -> int:
                           f"This machine could not reach the site.")
                     continue
                 bundle_out = work / f"bundle-{abs(hash(url))}"
-                code3, _, err3 = run_engine(engine, [cmd.group(1), "--bundle", str(keep / "evidence"),
+                code3, _, err3 = run_engine(engine, [cmd.group(1), "--bundle", str(keep_evidence),
                                                      "--out", str(bundle_out)], timeout=300)
                 if check(code3 == 0, f"re-analysis of the saved evidence bundle exits 0 on {url}", err3[-200:]):
                     a = json.loads((keep / "audit-report.json").read_text(encoding="utf-8"))
