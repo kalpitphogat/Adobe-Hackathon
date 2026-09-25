@@ -1,0 +1,31 @@
+# Sites used to test how the frozen Round 3 engine generalises before recording.
+# Chosen for architectural and archetype variance, the way a judge's own pick
+# would vary: none is a fixture, and none was used to build or tune the engine.
+# One URL per line; run with: python3 round4/tools/live_matrix.py --urls round4/urls/generalization.txt
+
+# publisher / news
+https://www.theguardian.com/
+https://www.bbc.com/
+https://www.nytimes.com/
+# documentation
+https://docs.pytest.org/
+https://docs.djangoproject.com/
+https://docs.python.org/3/
+# brand / SaaS marketing
+https://www.adobe.com/
+https://stripe.com/
+https://www.notion.com/
+https://www.hubspot.com/
+https://vercel.com/
+# e-commerce
+https://www.ikea.com/us/en/
+https://www.allbirds.com/
+# organisation / government / education / reference
+https://www.python.org/
+https://www.gov.uk/
+https://www.mit.edu/
+https://www.wikipedia.org/
+https://www.mozilla.org/
+# the handout's own example, and a tiny local business
+https://example.com/
+https://www.katzsdelicatessen.com/

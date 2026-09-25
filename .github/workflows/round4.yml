@@ -1,0 +1,109 @@
+name: Round 4 replay
+
+# Round 4 is a demonstration and reproducibility round. This workflow is the
+# clean machine a judge would use: it proves the engine is the frozen Round 3
+# artifact, replays REPLAY_IT_Professionals.txt's no-agent path, and runs the
+# unchanged engine against real sites to check that it generalises.
+#
+# It never modifies the marketplace. Every audit runs from a fresh unzip of
+# submission.zip, whose SHA-256 is pinned in round3-frozen/SHA256SUMS.
+
+on:
+  push:
+    branches: [sub_final]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frozen-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The checked-in golden reports record the interpreter version, so the
+      # byte-for-byte comparison is exact on 3.11.15 and nowhere else.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.15"
+
+      - name: The engine is the pinned Round 3 artifact, byte for byte
+        run: |
+          python -m zipfile -e round3-frozen/submission.zip /tmp/engine
+          python tools/verify_engine.py round3-frozen/submission.zip /tmp/engine
+
+      - name: The engine's own suites pass from a fresh unzip of submission.zip
+        run: |
+          mkdir -p "$RUNNER_TEMP/engine" && cd "$RUNNER_TEMP/engine"
+          python -m zipfile -e "$GITHUB_WORKSPACE/round3-frozen/submission.zip" .
+          python tests/validate_marketplace.py | tail -1
+          python tests/run_offline.py | tail -1
+          for t in tests/test_*.py; do python "$t" | tail -1; done
+
+  replay-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.15"
+      - name: REPLAY_IT_Professionals.txt parses and its fallback path replays
+        if: hashFiles('REPLAY_IT_Professionals.txt') != ''
+        run: python tools/verify_replay.py REPLAY_IT_Professionals.txt --twice --evidence 4
+
+  url-list:
+    runs-on: ubuntu-latest
+    outputs:
+      urls: ${{ steps.read.outputs.urls }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read
+        run: |
+          python - >> "$GITHUB_OUTPUT" <<'PY'
+          import json
+          lines = open("urls/generalization.txt", encoding="utf-8").read().splitlines()
+          urls = [l.split("#", 1)[0].strip() for l in lines if l.split("#", 1)[0].strip()]
+          print("urls=" + json.dumps(urls))
+          PY
+
+  generalization:
+    needs: url-list
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        url: ${{ fromJSON(needs.url-list.outputs.urls) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.15"
+      - id: slug
+        run: echo "slug=$(printf '%s' '${{ matrix.url }}' | sed -E 's#^https?://##; s#[^A-Za-z0-9]+#_#g; s#_+$##')" >> "$GITHUB_OUTPUT"
+      - name: Audit ${{ matrix.url }} with the unchanged engine
+        run: python tools/live_matrix.py "${{ matrix.url }}" --out runs --evidence 8 --verify 3 --json runs/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-${{ steps.slug.outputs.slug }}
+          path: runs/
+          if-no-files-found: warn
+          retention-days: 30
+
+  digest:
+    needs: generalization
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.15"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: live-*
+          path: all-runs
+      - name: One table for every site the engine was run against
+        run: python tools/digest.py all-runs --evidence 3
