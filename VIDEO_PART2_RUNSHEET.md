@@ -30,8 +30,13 @@ only pre-screened for robots.txt and homepage links with `tools/prescreen.py`.
    cd brand-ai-readiness-audit
    python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
    $env:DISABLE_AUTOUPDATER = "1"   # keep Claude Code on the disclosed version in this terminal
+   $env:PYTHONUTF8 = "1"            # UTF-8 for every python the agent runs (no cp1252 crashes)
    ```
    `demo-live/` is new, so there is no leftover `audit-output/`. It's git-ignored.
+1b. **Rehearse the two-pass prompt once on this machine, on a *seen* site** (e.g. the Guardian,
+   `tools\rehearse.ps1`). It was rehearsed 10 times on Linux (`rehearsal/2026-09-25_twopass_*`),
+   not yet on Windows. Check that the agent runs pass 1 with `--no-render --out ./audit-precheck`,
+   prints the count, and picks pass 2 by it.
 2. **Integrity:** `python ..\..\tools\verify_engine.py ..\submission.zip .` must end with
    `RESULT : ENGINE UNCHANGED` (155 files, plus the 73-file `.claude/skills` copy). You'll run
    this same command on camera.
@@ -57,9 +62,10 @@ engine's crawl are the parts you cut.
 | 0:00 | Terminal in `demo-live\brand-ai-readiness-audit`. Run `python ..\..\tools\verify_engine.py ..\submission.zip .` → `ENGINE UNCHANGED`. Then `claude --version` → `2.1.281 (Claude Code)`. | "Part two, live. This folder is our Round 3 zip, unzipped: every file byte-identical to what we submitted. The harness is Claude Code 2.1.281…" |
 | 0:08 | Type `claude --model claude-opus-5-5 --allowedTools "Skill" "Bash(python:*)" "PowerShell(python:*)" "Read"`. Once it opens, type `/model` so the model is visible, then Esc. | "…driving Claude Opus 5.5." |
 | 0:15 | Paste the prompt, **type** `https://docs.pytest.org/` at the end, press Enter. | "I paste the prompt from our REPLAY file and type a site our audit has never seen." |
-| 0:22 | **`Skill(ai-readiness-orchestrator)`** appears, then `python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://docs.pytest.org/ --out ./audit-output`. **Hold on each for 2 s.** Approve any permission prompt on camera. | "Wiring: the agent loads our entrypoint skill and runs its orchestrator. No demo code, no hardcoded results." |
+| 0:22 | **`Skill(ai-readiness-orchestrator)`** appears, then pass 1: `python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://docs.pytest.org/ --no-render --out ./audit-precheck`. **Hold on each for 2 s.** Approve any permission prompt on camera. | "Wiring: the agent loads our entrypoint skill and runs its orchestrator. No demo code, no hardcoded results." |
 | — | *(trim the crawl wait; put a small on-screen caption "⏩ crawl, ~40 s trimmed")* | |
-| 0:35 | Orchestrator finishes, agent reads `audit-output/audit-report.json`, prints status + counts. | "One crawl, six audit skills over it. The findings come from our engine; the model only runs it and double-checks it." |
+| 0:30 | The agent's count of pages with no same-site links, then pass 2 (`--bundle ./audit-precheck/evidence`, or the browser run if the count is above 0), and its one line saying which and why. **Hold 2 s on that line.** | "First pass without a browser. A browser only helps when a crawler sees an empty page, so the agent checks for that. Here it [did / didn't] find one, so it [renders / re-analyses the same evidence]." Say what's on screen. |
+| 0:38 | Agent reads `audit-output/audit-report.json`, prints status + counts. | "Six audit skills over one crawl. The findings come from our engine; the model only runs it and double-checks it." If the status is `partial`: "Partial means the report lists what it didn't measure, here the browser checks." |
 | 0:45 | Agent's **priority table** (top 5 in report order, ICE column). | "The fixes in priority order: severity first, then ICE, meaning impact, confidence and ease. This is the order to work in." |
 | 1:00 | Agent's **evidence check**: confirmed high findings in order, until one holds up. | "Before trusting them, the agent re-fetches each page itself, raw and rendered, until one finding holds up. The report stays exactly as the engine wrote it." |
 | 1:15 | Agent's **drill-down** on that finding. Optionally flip to VS Code (section D). | Name the finding; walk evidence, severity, fix and patch (section D wording). |
@@ -123,6 +129,8 @@ python -c "import urllib.request as u;print(u.urlopen('https://docs.pytest.org/e
 | Claude Code asks permission for a command | Approve it on camera ("yes"). It's part of the real run; trim the pause. On Windows the agent sometimes tries the orchestrator first as a chained command (`...; echo $LASTEXITCODE`), which is blocked; it then retries the plain command. Only one crawl runs (checked in `rehearsal/*_skill.md`). |
 | Run exits with `no evidence bundle was produced` | You aren't in the marketplace root. Stop, `cd` into `demo-live\brand-ai-readiness-audit`, and **start a new take on the backup URL** (below). |
 | Run takes past 5 min / crashes on a crawl delay | New take on the backup URL; REPLAY troubleshooting mentions `--time-budget 600`. |
+| The agent chains a command (`...; echo $LASTEXITCODE`) or pipes it | It's blocked, then it retries plain. The prompt now asks for no pipes or chaining; Opus followed it in the final rehearsals. Trim the retry. |
+| The agent uses `python3` and gets blocked | Approve it on camera, or restart with `"PowerShell(python3:*)"` added (Sonnet did this once on Linux). |
 | Any retake | pytest is now "seen". Use **https://www.sphinx-doc.org/** (pre-screened, never audited), and **change the first `TEST_SITE_URLS` entry, step 2's example and this run sheet to match**, then re-run `tools\check_replay.py`. Never splice two takes. |
 | Output is too long for 2:00 | Scroll faster in the edit; trim the agent's thinking. Don't cut the URL entry, the command, the priority table, the evidence check or the drill-down. |
 

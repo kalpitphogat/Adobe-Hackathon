@@ -9,9 +9,16 @@ TEST_STEPS:
       python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
       claude --model claude-opus-5-5 --allowedTools "Skill" "Bash(python:*)" "PowerShell(python:*)" "Read"
  2. Paste this prompt verbatim, replacing <URL> at the very end with one of the TEST_SITE_URLS (the video uses https://docs.pytest.org/) or any URL of your choice:
-      Use the ai-readiness-orchestrator skill, the entrypoint of this marketplace (skills/ai-readiness-orchestrator/SKILL.md), and follow its Procedure to audit the URL given at the end of this message. Run the orchestrator from this directory with --out ./audit-output. Do not create, change or delete any file yourself, and do not add findings that are not in the report. When the report is written, read audit-output/audit-report.json and give, briefly: (1) audit_status, the counts by severity, and the checks listed as not assessed; (2) the top 5 findings in report order, which is the engine's priority order (severity, then ICE), as a table of rank, id, severity, confidence, ICE (from suggested_action.ice) and title; (3) an evidence check: go through the critical or high findings whose confidence is confirmed, in report order (if there are none, the first findings in report order), and stop at the first one your check supports or after 5 checks; for each, fetch one affected URL yourself with an inline python -c command and say in one line whether what you see supports the evidence (supported, partly supported, or not supported), quoting the numbers you saw. Use urllib for the raw HTML. For any check_id starting with read.render, and whenever the evidence compares the raw HTML with the rendered page or quotes values shown only after JavaScript runs, you must also load the page with Playwright if it is installed and count the same thing on both sides, same-host links only for links. (4) A drill-down on the finding your check supported (if none was, say so): its evidence, severity and confidence, mechanism, paste-ready patch, ICE components, how many findings have blocked_by pointing at it, and its verification step. Report the engine's findings exactly as written; your evidence check is commentary and must not change the report. URL: <URL>
- 3. The agent loads the entrypoint with the Skill tool (Skill: ai-readiness-orchestrator), then runs: python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output
-    The report is written to ./audit-output/ as audit-report.json (fixed schema), report.md (plain-English version) and fix_patches/ (one paste-ready patch per finding). The agent then prints, in the terminal: the status and counts, the top 5 fixes in priority order with their ICE scores, its evidence check on the confirmed high findings (stopping at the first one it supports), and a drill-down (evidence, severity, fix, patch) on that finding.
+      Use the ai-readiness-orchestrator skill, the entrypoint of this marketplace (skills/ai-readiness-orchestrator/SKILL.md), and follow its Procedure to audit the URL given at the end of this message, running the orchestrator from this directory in two passes. Pass 1, without a browser: the URL with --no-render --out ./audit-precheck. Then, with one python -c command, count the pages in audit-precheck/evidence/pages.jsonl that have status 200 and an empty links.internal list. If there are any, the crawler may be missing content that JavaScript builds, so pass 2 is a full run with the browser: the URL with --out ./audit-output. If there are none, pass 2 re-analyses the same evidence without crawling again: --bundle ./audit-precheck/evidence --out ./audit-output. Say in one line which pass 2 you ran and why. Run each command on its own, with no pipes, redirects or chained commands. Do not create, change or delete any file yourself, and do not add findings that are not in the report. When the report is written, read audit-output/audit-report.json and give, briefly: (1) audit_status, the counts by severity, and the checks listed as not assessed; (2) the top 5 findings in report order, which is the engine's priority order (severity, then ICE), as a table of rank, id, severity, confidence, ICE (from suggested_action.ice) and title; (3) an evidence check: go through the critical or high findings whose confidence is confirmed, in report order (if there are none, the first findings in report order), and stop at the first one your check supports or after 5 checks; for each, fetch one affected URL yourself with an inline python -c command and say in one line whether what you see supports the evidence (supported, partly supported, or not supported), quoting the numbers you saw. Use urllib for the raw HTML. For any check_id starting with read.render, and whenever the evidence compares the raw HTML with the rendered page or quotes values shown only after JavaScript runs, you must also load the page with Playwright if it is installed and count the same thing on both sides, same-host links only for links. (4) A drill-down on the finding your check supported (if none was, say so): its evidence, severity and confidence, mechanism, paste-ready patch, ICE components, how many findings have blocked_by pointing at it, and its verification step. Report the engine's findings exactly as written; your evidence check is commentary and must not change the report. URL: <URL>
+ 3. The agent loads the entrypoint with the Skill tool (Skill: ai-readiness-orchestrator) and runs the orchestrator in two passes from the marketplace root. Pass 1, no browser:
+      python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --no-render --out ./audit-precheck
+    It then counts the pages that came back with status 200 and no same-site links in their raw HTML (the same count as this command):
+      python -c "import json;print(sum(1 for l in open('audit-precheck/evidence/pages.jsonl',encoding='utf-8') if l.strip() and json.loads(l).get('status')==200 and not (json.loads(l).get('links') or {}).get('internal')))"
+    If the count is above 0, pass 2 is a full run with the browser:
+      python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output
+    If it is 0, pass 2 re-analyses the same evidence without crawling again:
+      python skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle ./audit-precheck/evidence --out ./audit-output
+    The report is written to ./audit-output/ as audit-report.json (fixed schema), report.md (plain-English version) and fix_patches/ (one paste-ready patch per finding). The agent then prints, in the terminal: which pass 2 it ran and why, the status and counts, the top 5 fixes in priority order with their ICE scores, its evidence check on the confirmed high findings (stopping at the first one it supports), and a drill-down (evidence, severity, fix, patch) on that finding.
 EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 
 # ============================================================================
@@ -24,13 +31,45 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #   mkdir replay && cd replay
 #   python -m zipfile -e /path/to/submission.zip brand-ai-readiness-audit
 #   cd brand-ai-readiness-audit
-#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py \
-#       https://www.adobe.com/ --out ./audit-output
+#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --no-render --out ./audit-precheck
+#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle ./audit-precheck/evidence --out ./audit-output
 #   # -> audit-output/audit-report.json  (machine-readable)
 #   #    audit-output/report.md           (human-readable summary)
+# These are the agent's two passes for the usual case. Run the count in
+# TEST_STEPS 3 between them: if it prints more than 0, replace the second
+# command with the browser run shown there.
 #
 # For the full agent-driven experience (as shown in the video), follow the
-# TEST_STEPS above with Claude Code. For more options see Fallbacks A–D below.
+# TEST_STEPS above with Claude Code. For more options see Fallbacks A–E below.
+#
+# ---- WHY THE AGENT RUNS TWO PASSES --------------------------------------------
+# Both passes use flags the Round 3 engine already has; no engine file changes.
+# The browser (Playwright) only helps when the crawler's raw HTML is missing
+# content that JavaScript builds. On an ordinary site it adds nothing true and
+# can add false read.render.nav_links_js_only findings, because the engine
+# counts every link on the rendered page but only same-site links in the raw
+# HTML (collect.py line 739 vs links.internal): a page with 2 internal links
+# and 4 social links reads as a 4-link "JavaScript gap".
+# So pass 1 runs without the browser, and its own evidence decides: a page that
+# came back with status 200 but no same-site links is the sign a crawler may be
+# seeing an empty shell, and only then does pass 2 render. Otherwise pass 2
+# re-analyses pass 1's evidence (--bundle: no second crawl, same findings), and
+# the report lists the three browser checks as not assessed, so audit_status is
+# "partial": the report says what it did not measure rather than guessing.
+# Measured on real runs, every browser finding re-counted by hand-built tools
+# (same-site links on both sides), all on 2026-09-25:
+#   * 23 public sites: Playwright always on gave 20 true and 21 false browser
+#     findings; two passes gave 11 true and 1 false.
+#   * 6 more public sites (ubuntu.com, anthropic.com, code.claude.com, jsr.io,
+#     nodejs.org, pkg.go.dev): identical findings with and without the browser;
+#     the pass-1 count was 0 on all six.
+#   * 5 test sites we built: a tiny page with 2 internal and 4 social links got
+#     3 false high findings with the browser and none in two passes; a
+#     JavaScript-only app fired the count, rendered, and got its 2 true browser
+#     findings; a normal site was identical either way.
+# What two passes give up: sites only partly built by JavaScript, where the
+# crawler already sees some links (Spotify, IKEA, and one of our test sites):
+# their true browser findings are not measured. Fallback E measures them.
 #
 # TEAM: IT_Professionals (Lakshya, Tanmay, Kalpit)
 #
@@ -80,8 +119,11 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # Use "python", not "python3": on Windows "python3" is often the Microsoft
 # Store placeholder, not a real interpreter.
 # Recorded on: Windows 11 Home 10.0.26200, Python 3.11.15, Playwright 1.63.0
-# with Chromium. These Windows steps, the unzip, and TEST_STEPS 1-3 (with
-# claude -p) were rehearsed end to end in an empty folder on that machine.
+# with Chromium. These Windows steps, the unzip, and the one-pass TEST_STEPS
+# 1-3 (with claude -p) were rehearsed end to end in an empty folder on that
+# machine on 2026-09-24. The two-pass TEST_STEPS were rehearsed on 2026-09-25
+# with claude -p (Claude Code 2.1.282) on Linux, 10 runs, every one followed
+# by the file-by-file engine check (ENGINE UNCHANGED).
 # The one-line ENV_SETUP above is the macOS/Linux form of the same commands.
 # It was run exactly as written (read from this file) on GitHub-hosted
 # ubuntu-latest and macos-latest runners on 2026-09-24, followed by the unzip,
@@ -93,18 +135,19 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #
 # ============================================================================
 # FALLBACKS. The findings come from the engine, not the model. Each path
-# below reaches the same substance; each was tested on this machine.
+# below reaches the same substance; each was tested on the date it gives.
 # ============================================================================
 #
 # ---- FALLBACK A: no Playwright (skip the two Playwright commands) ----------
-# The engine runs on the Python standard library alone. Without a browser it
-# reports the render-dependent checks (read.render.raw_text_gap,
-# read.render.nav_links_js_only, act.perf.above_fold_weight) as "not assessed"
-# in limitations[] and sets audit_status to "partial"; every other check runs.
-# To make that explicit, add --no-render to the orchestrate.py command.
+# The engine runs on the Python standard library alone. Pass 1 never needs a
+# browser, so on the usual site (pass-1 count 0) the result is identical to the
+# main path. When the count fires, pass 2 cannot render: the engine reports
+# read.render.raw_text_gap, read.render.nav_links_js_only and
+# act.perf.above_fold_weight as "not assessed" in limitations[], sets
+# audit_status to "partial", and every other check still runs.
 # Tested 2026-09-24 on docs.djangoproject.com: without Playwright, 21 findings
 # (1 high); with Playwright, 24 findings (4 high). The 3 extra highs are all
-# read.render.nav_links_js_only. Everything else is identical.
+# read.render.nav_links_js_only and all 3 were false. Everything else is identical.
 #
 # ---- FALLBACK B: a different model, or a different agent harness -----------
 # The step-2 prompt is harness-neutral: it needs only an agent that can read
@@ -122,14 +165,28 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # and correctly flagged the engine's three read.render.nav_links_js_only
 # findings as not supported; Haiku 4.5 did not load the rendered page and
 # called them supported. For the evidence check, use Sonnet 5 or stronger.
+# The two-pass prompt, 2026-09-25 (claude -p, rehearsal/2026-09-25_twopass_*):
+# Opus 5.5, Sonnet 5 and Haiku 4.5 each chose the right pass 2 on a
+# JavaScript-only test app (browser run) and on a tiny test page (re-analysis),
+# 10 of 10 runs; Opus also on a normal test site and on jsr.io. Sonnet 5 once
+# ran its evidence check with "python3", which "Bash(python:*)" does not cover,
+# so it was blocked: add "Bash(python3:*)" to --allowedTools, or approve it.
+# Haiku 4.5 reached the right report but wandered (background runs, extra
+# checks); use Sonnet 5 or stronger.
 #
 # ---- FALLBACK C: no agent, no model, no special setup -----------------------
-# Any Python 3.9+ (no uv, no venv, no pip install), from the marketplace root:
-#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output
+# Any Python 3.9+ (no uv, no venv, no pip install), from the marketplace root,
+# the agent's own two passes by hand:
+#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --no-render --out ./audit-precheck
+#   <the count command from TEST_STEPS 3>        -> prints a number
+#   if 0: python skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle ./audit-precheck/evidence --out ./audit-output
+#   else: python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output
 # Then open audit-output/report.md: its "What to do first" section lists the
 # fixes in priority order, each with ICE, mechanism and a verify command. The
 # full data is in audit-output/audit-report.json, the same file the agent reads.
 # Tested 2026-09-24 with plain Python 3.13.15, no Playwright: exit 0, 45 s.
+# Tested 2026-09-25 (Python 3.11): the --bundle pass gives the same findings,
+# limitations and audit_status as pass 1; only evidence_bundle.path differs.
 #
 # ---- FALLBACK D: formatted terminal view of the same run, no agent ---------
 # One extra file, demo_cli.py, standard library only. It contains no checks: it
@@ -143,16 +200,27 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #    with curl.exe instead of curl, then certutil -hashfile demo_cli.py SHA256)
 #   cd brand-ai-readiness-audit
 #   python ../demo_cli.py doctor
-#   python ../demo_cli.py audit <URL> --out ./audit-output
-#   python ../demo_cli.py show ./audit-output --top 10
-#   python ../demo_cli.py show ./audit-output --id F-001
+#   python ../demo_cli.py show ./audit-output --top 10     (the report from
+#   python ../demo_cli.py show ./audit-output --id F-001    the main path or C)
 #   python ../demo_cli.py prove ./audit-output
+# To have it run the engine too: "python ../demo_cli.py audit <URL> --no-render
+# --out ./audit-precheck" is pass 1; drop --no-render for Fallback E.
 # doctor checks every file of the marketplace against ../submission.zip and
 # its SHA-256 above (155/155 byte-identical, or it says which file differs),
 # so you can see it is driving the package you hold. Tested 2026-09-25 in an
 # empty folder with only submission.zip and this file: the report from
 # "audit --offline-root tests/fixtures/site_b" is identical to Fallback C's
 # except audited_at and evidence_bundle.path.
+#
+# ---- FALLBACK E: always render (the main path until 2026-09-25) ------------
+# With Playwright installed, one run with the browser on every site:
+#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output
+# It measures the three browser checks everywhere (audit_status "complete"),
+# so it also catches partly-JavaScript sites that two passes skip, at the cost
+# of the false nav_links findings counted above. The agent's evidence check
+# (prompt part 3) loads the rendered page for any read.render finding and says
+# "not supported" when the gap is not real; it never edits the report. The 12
+# transcripts in the team's rehearsal/ folder dated 2026-09-23/24 used this path.
 #
 # ---- RE-ANALYSE WITHOUT RE-FETCHING (same evidence, same findings) ----------
 #   python skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle ./audit-output/evidence --out ./audit-replay
@@ -167,7 +235,7 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #     Google-CloudVertexBot, PerplexityBot). Anyone can check it at
 #     https://www.theguardian.com/robots.txt
 #   The gate cascade: most downstream discoverability findings are capped at
-#     medium with blocked_by: F-001 (45 of 52 on that run). Engagement (act.*)
+#     medium with blocked_by: F-001 (45 of 52 on that run, which rendered). Engagement (act.*)
 #     findings are never capped. Training-only crawlers are reported
 #     separately and are not treated as a defect.
 #   Page-level findings change as the site publishes; F-001 and the cascade
@@ -190,7 +258,8 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #  * read.render.nav_links_js_only can overstate: its rendered-side link count
 #    includes off-site links, the raw side does not. It is right when the gap
 #    is real (ikea.com/ae/ar/: 112 -> 204 same-host links) and wrong when it
-#    is not (docs.djangoproject.com: identical link sets). Over 23 sites on
+#    is not (docs.djangoproject.com: identical link sets). The two passes
+#    exist to avoid it (see WHY THE AGENT RUNS TWO PASSES). Over 23 sites on
 #    2026-09-25, browser-dependent findings with Playwright always on were 20
 #    true and 21 false, each re-counted against the live page
 #    (STRATEGY_COMPARISON.md in the team repo). This is why the agent's

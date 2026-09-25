@@ -19,6 +19,7 @@ the command line against a site the audit has never seen.
 | Live-run URL | https://docs.pytest.org/ (never audited before the recording) |
 | Second test URL | https://www.theguardian.com/ (stable: robots.txt critical + gate cascade) |
 | Setup | Python 3.11.15 + Playwright 1.63.0 (Chromium); fallbacks need neither |
+| How it runs | Two passes: without a browser first; the agent renders only if a page came back with no same-site links (`SITE_MATRIX.md`) |
 | Report | `audit-output/audit-report.json`, plus `report.md` and `fix_patches/` |
 
 ## Replaying it
@@ -28,10 +29,12 @@ below was actually run: on our Windows machine (`rehearsal/` has the transcripts
 
 | path | who it's for | tested |
 |---|---|---|
-| **Main**: Claude Code + Opus 5.5 + Playwright, REPLAY steps 1–3 | reproduces the video | Django, IKEA, Guardian |
-| **A**: no Playwright (`--no-render`) | no browser install | Django: 21 vs 24 findings; the only difference is 3 × `nav_links_js_only` |
-| **B**: another model or agent harness, same prompt | no Opus, or no Claude Code | Sonnet 5 and Haiku 4.5: same 24 findings, same order |
-| **C**: no agent at all, any Python 3.9+ | no model, no special setup | Python 3.13 (Windows), 3.12 (Ubuntu), 3.14 (macOS), no venv: exit 0; `report.md` lists "What to do first" |
+| **Main**: Claude Code + Opus 5.5 + Playwright, REPLAY steps 1–3 (two passes) | reproduces the video | 10 `claude -p` rehearsals on Linux (`rehearsal/2026-09-25_twopass_*`); the one-pass version on Windows: Django, IKEA, Guardian |
+| **A**: no Playwright | no browser install | identical to the main path when pass 1 finds no empty page; Django one-pass: 21 vs 24 findings, the 3 extra all false `nav_links_js_only` |
+| **B**: another model or agent harness, same prompt | no Opus, or no Claude Code | Sonnet 5 and Haiku 4.5: same 24 findings as Opus (one-pass); right pass-2 choice 10/10 (two-pass) |
+| **C**: no agent at all, any Python 3.9+ | no model, no special setup | the same two passes by hand; Python 3.13 (Windows), 3.12 (Ubuntu), 3.14 (macOS), no venv: exit 0 |
+| **D**: formatted terminal (`demo_cli.py`, one pinned file) | a readable view without an agent | drives the judge's own unzip; `doctor` checks it 155/155 against their zip |
+| **E**: always render | partly-JavaScript sites | the previous main path; all browser checks measured, with the false positives in `SITE_MATRIX.md` |
 | **Linux / macOS** | judges not on Windows | CI runs ENV_SETUP as written + steps 1 and 3 + A and C on Ubuntu and macOS: all pass |
 
 `tools/check_replay.py` checks the REPLAY file (fields, URLs, steps) and that it matches the run
@@ -53,6 +56,11 @@ All paths are inside the unzipped submission; line numbers were checked against 
 | fixed false positives can't come back | `tests/test_regressions.py` R1–R12 |
 
 The Part 1 narration with the same anchors is `VIDEO_PART1_SCRIPT.md`.
+
+**When to use the browser** is decided by the agent, not the engine, from pass 1's own evidence:
+`SITE_MATRIX.md` (11 sites, including 5 test sites that isolate each case), `STRATEGY_COMPARISON.md`
+(23 sites) and `JS_DETECTION_STUDY.md` (18 sites). Always rendering gave 24 true and 24 false browser
+findings across them; two passes gave 13 true and 1 false.
 
 ## What we verified, including where the engine is wrong
 

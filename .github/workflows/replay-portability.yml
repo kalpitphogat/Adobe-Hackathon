@@ -44,18 +44,52 @@ jobs:
           python ../tools/verify_engine.py submission.zip brand-ai-readiness-audit
           cd brand-ai-readiness-audit
           python tests/run_offline.py
-          # TEST_STEPS 3: the command the agent runs
-          python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://www.theguardian.com/ --out ./audit-output
+          # TEST_STEPS 3: the agent's two passes. Pass 1 without a browser, then its count,
+          # then pass 2 (browser run if the count is above 0, else --bundle re-analysis)
+          URL=https://www.theguardian.com/
+          python skills/ai-readiness-orchestrator/scripts/orchestrate.py "$URL" --no-render --out ./audit-precheck
+          # the count command, read from TEST_STEPS 3 itself
+          COUNT_CMD="$(grep -m1 "^      python -c \"import json;print(sum(1 for l in open('audit-precheck" ../../REPLAY_IT_Professionals.txt | sed 's/^ *//')"
+          test -n "$COUNT_CMD"
+          COUNT="$(eval "$COUNT_CMD")"
+          echo "pages with status 200 and no same-site links: $COUNT"
+          if [ "$COUNT" -gt 0 ]; then
+            python skills/ai-readiness-orchestrator/scripts/orchestrate.py "$URL" --out ./audit-output
+          else
+            python skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle ./audit-precheck/evidence --out ./audit-output
+          fi
           python ../../tools/summarize.py audit-output/audit-report.json --top 3
           python - <<'EOF'
           import json
           r = json.load(open("audit-output/audit-report.json", encoding="utf-8"))
+          f = r["findings"][0]
+          print("status:", r["audit_status"], "| F-001:", f["check_id"], f["severity"], f["confidence"])
+          assert f["check_id"] == "reach.robots.ai_search_bot_blocked" and f["severity"] == "critical"
+          EOF
+          python ../../tools/verify_engine.py ../submission.zip .
+
+      - name: Fallback E - always render (proves the Playwright install works)
+        run: |
+          set -euxo pipefail
+          cd work && source .venv/bin/activate && cd brand-ai-readiness-audit
+          python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://www.theguardian.com/ --out ./audit-output-rendered
+          python - <<'EOF'
+          import json
+          r = json.load(open("audit-output-rendered/audit-report.json", encoding="utf-8"))
           f = r["findings"][0]
           renderer = r["generator"]["tool_versions"].get("renderer")
           print("renderer:", renderer, "| F-001:", f["check_id"], f["severity"], f["confidence"])
           assert renderer == "playwright", f"Playwright did not run (renderer={renderer})"
           assert f["check_id"] == "reach.robots.ai_search_bot_blocked" and f["severity"] == "critical"
           EOF
+
+      - name: Fallback D - demo_cli.py against the unzipped marketplace and its zip
+        run: |
+          set -euxo pipefail
+          cd work && cp ../round4/demo_cli.py . && cd brand-ai-readiness-audit
+          python3 ../demo_cli.py doctor
+          python3 ../demo_cli.py show ./audit-output --top 3
+          python3 ../demo_cli.py prove
 
       - name: Fallback A - no rendering (--no-render)
         run: |

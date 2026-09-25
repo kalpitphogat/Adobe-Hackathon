@@ -2,7 +2,7 @@
 
 Compares every file inside submission.zip with the same path in the folder, by SHA-256.
 Fails (exit 1) if any submitted file is missing or differs. Files the run itself creates
-(audit-output/, .claude/, __pycache__/) are listed as "added by the run", never compared,
+(audit-output/, audit-precheck/, .claude/, __pycache__/) are listed as "added by the run", never compared,
 because the engine's own outputs are expected; anything else extra is reported too.
 Standard library only, so it runs anywhere the engine runs.
 
@@ -13,7 +13,7 @@ import sys
 import zipfile
 from pathlib import Path
 
-RUN_OUTPUTS = ("audit-output", "audit-replay", ".claude", "__pycache__")
+RUN_OUTPUTS = ("audit-output", "audit-precheck", "audit-replay", ".claude", "__pycache__")
 
 
 def sha256_bytes(data: bytes) -> str:

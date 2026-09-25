@@ -92,3 +92,13 @@ for `Accept-Encoding: gzip, deflate` (`fetch.py:260`). `_decompress` (`fetch.py:
 only gzip and deflate, so the saved "HTML" is compressed bytes: the page reads as 0 links and 0 words
 and the audit sees nothing. A browser decodes it fine. Found by `JS_DETECTION_STUDY.md` on
 2026-09-25. Frozen engine: recorded, not fixed.
+
+## 12. The browser pass is chosen per site (two passes)
+
+§8's off-site counting hits hardest on small pages: a test page with 2 internal and 4 social links
+got three high, confirmed `nav_links_js_only` findings (`raw 2, rendered 6`; same-site 2 and 2).
+On six public sites the browser changed no finding at all. So the agent now runs pass 1 with
+`--no-render`, and renders only if a page came back with status 200 and no same-site links;
+otherwise it re-analyses pass 1's evidence with `--bundle`. Across 34 sites: always rendering gave
+24 true and 24 false browser findings, two passes 13 true and 1 false (`SITE_MATRIX.md`).
+Rehearsed 10× with `claude -p` (`rehearsal/2026-09-25_twopass_*`).
