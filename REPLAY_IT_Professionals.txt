@@ -1,7 +1,7 @@
 TEST_SITE_URLS: https://docs.pytest.org/, https://www.theguardian.com/
 LLM_MODEL: Claude Opus 5.5 (API model id: claude-opus-5-5), runs of 2026-09
 AGENT_HARNESS: Claude Code v2.1.282
-ENV_SETUP: Engine: Python 3.9+, standard library only -- nothing to pip install, because pass 1 passes --no-render. OPTIONAL, and only for pass 2 on a site whose raw HTML has no links: pip install playwright==1.63.0 && python -m playwright install chromium (without it, pass 2 re-analyses the pass-1 evidence with --bundle and the report says so in limitations). Harness: Node.js 18+, then npm install -g @anthropic-ai/claude-code@2.1.282, then set DISABLE_AUTOUPDATER=1 in that shell so it stays on the disclosed version, then run claude once to sign in.
+ENV_SETUP: uv python install 3.11.15 && uv venv --python 3.11.15 .venv && . .venv/bin/activate && uv pip install playwright==1.63.0 && python -m playwright install chromium && npm install -g @anthropic-ai/claude-code@2.1.282 && export DISABLE_AUTOUPDATER=1
 TEST_STEPS:
  1. From the folder that holds submission.zip and the activated .venv, unpack the Round 3 submission, enter the marketplace root, make its skills discoverable to Claude Code (an unchanged copy in .claude/skills; the agent still runs the scripts in skills/), and start Claude Code. The first three commands are the same in bash, PowerShell and cmd:
       python -m zipfile -e submission.zip brand-ai-readiness-audit
@@ -79,10 +79,19 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # Check:  sha256sum submission.zip        (macOS: shasum -a 256 submission.zip)
 #         Windows: certutil -hashfile submission.zip SHA256
 #
+# ---- WHAT ENV_SETUP INSTALLS, AND WHAT IS OPTIONAL ---------------------------
+# The engine itself needs only Python 3.9+ and its standard library. Python
+# 3.11.15 is pinned because the checked-in golden reports record it.
+# Playwright is used only in pass 2, and only when pass 1's count is above 0.
+# Skipping the two Playwright commands is Fallback A: pass 2 still runs, and
+# the report lists the three browser checks as "not assessed". Claude Code
+# needs Node.js 18+; ENV_SETUP installs exactly the disclosed version, and
+# DISABLE_AUTOUPDATER=1 keeps that shell on it. Run claude once to sign in.
+#
 # ---- GETTING THE SAME HARNESS VERSION ---------------------------------------
 # Claude Code updates itself. To run exactly the disclosed version:
-#   claude install 2.1.281
-# then check with: claude --version   ->  2.1.281 (Claude Code)
+#   claude install 2.1.282
+# then check with: claude --version   ->  2.1.282 (Claude Code)
 #
 # ---- INSTALLING uv (only needed if you do not have it) ----------------------
 #   macOS / Linux:  curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -99,6 +108,8 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #   .venv\Scripts\Activate.ps1
 #   uv pip install playwright==1.63.0
 #   python -m playwright install chromium
+#   npm install -g @anthropic-ai/claude-code@2.1.282
+#   $env:DISABLE_AUTOUPDATER = "1"
 #   python -m zipfile -e submission.zip brand-ai-readiness-audit
 #   cd brand-ai-readiness-audit
 #   python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
@@ -143,43 +154,47 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #
 # ---- EXPECTED SUBSTANCE: https://www.theguardian.com/ -------------------------
 # The second TEST_SITE_URL, so a judge can corroborate this manifest WITHOUT
-# running anything. The video's URL is the first entry and is deliberately not
-# characterised here: the engine had never audited it before the recording.
+# running anything. The video's URL (https://docs.pytest.org/) is deliberately
+# not characterised here: the engine had never audited it before the recording.
 #
-# Recorded 2026-09-24, Claude Code + Opus 5.5, the TEST_STEPS above. Counts move
-# with the site's front page; the shape below is what should hold.
+# F-001  critical / confirmed  ICE 9.3  reach.robots.ai_search_bot_blocked
+#        "robots.txt blocks 6 AI retrieval crawler(s) that cite sources at
+#         answer time": Amazonbot, Claude-SearchBot, Claude-User, DuckAssistBot,
+#         Google-CloudVertexBot, PerplexityBot, all refused by one "Disallow: /".
+#   CHECK IT YOURSELF, no engine needed (macOS / Linux):
+#     curl -s https://www.theguardian.com/robots.txt | grep -n -i -E "PerplexityBot|Claude-SearchBot|Claude-User|Amazonbot|DuckAssistBot|Google-CloudVertexBot|^Disallow: /\s*$"
+#   Windows PowerShell:
+#     curl.exe -s https://www.theguardian.com/robots.txt | Select-String -Pattern "PerplexityBot","Claude-SearchBot","Claude-User","Amazonbot","DuckAssistBot","Google-CloudVertexBot","^Disallow: /\s*$"
+#   On 2026-09-24 (two rehearsals) robots.txt was 104 lines: PerplexityBot at
+#   line 79, the User-agent group from line 81 (Claude-SearchBot 83, Claude-User
+#   84, Amazonbot 95, DuckAssistBot 97, Google-CloudVertexBot 98), and
+#   "Disallow: /" at line 102. Line numbers move when the Guardian edits the
+#   file; the finding holds while the rule does.
 #
-#   audit_status partial (no browser: the three render-stage checks report
-#   "not assessed" in limitations, which is the --no-render path working).
+# THE CASCADE, the part worth watching: most discoverability findings are real
+#   but capped at medium with blocked_by: F-001, because nothing on a page
+#   matters to a crawler that is refused. Engagement findings (act.*) are never
+#   capped: a visitor arriving from a link does not care whether a crawler was.
+#   Training-only crawlers are reported separately and are not a defect.
 #
-#   F-001  critical / confirmed  ICE 9.3
-#          reach.robots.ai_search_bot_blocked
-#          "robots.txt blocks 6 AI retrieval crawler(s) that cite sources at
-#           answer time"
-#     CHECK IT YOURSELF, no engine needed:
-#       curl -s https://www.theguardian.com/robots.txt | grep -nEi \
-#         "perplexitybot|claude-searchbot|claude-user|amazonbot|duckassistbot|google-cloudvertexbot|^disallow"
-#     You should see those retrieval crawlers named in one User-agent group that
-#     a "Disallow: /" closes. That single line is the finding. Checked twice,
-#     independently, on 2026-09-24 and 2026-09-25: robots.txt was 104 lines, the
-#     group began at line 81 (Claude-SearchBot 83, Claude-User 84, Amazonbot 95,
-#     DuckAssistBot 97, Google-CloudVertexBot 98) and "Disallow: /" was line 102.
-#     Line numbers move when the Guardian edits the file; the group does not.
+# THE RUNS BEHIND THIS (counts move with the front page; the shape holds):
+#   2026-09-24, Claude Code + Opus 5.5, one pass with Playwright: complete,
+#     52 findings (1 critical, 0 high), 45 blocked_by F-001. Also medium and
+#     confirmed: content images without alt text on several pages; no clear
+#     statement of who publishes the site; dated content with no date; a main
+#     action labelled "Learn more".
+#   2026-09-25, CI (Ubuntu and macOS), the two passes as TEST_STEPS 3 states:
+#     pass-1 count 0, so pass 2 was the --bundle re-analysis; partial (the
+#     three browser checks "not assessed"), 47 findings (1 critical, 1 high),
+#     38 blocked_by F-001. The high is act.orient.no_value_proposition, an
+#     engagement finding with confidence "likely", so it is not capped.
+#     Fallback E on the same runners, with the browser: the same 47 findings,
+#     status complete. The browser changed no finding on this site.
 #
-#   THE CASCADE, which is the part worth watching: F-001 is the only critical or
-#   high finding. Roughly 45 of ~52 findings carry blocked_by pointing at it --
-#   real defects, capped at medium, because nothing reaches the page until the
-#   crawler is let in. The engagement findings (act.*) are NOT capped: a visitor
-#   arriving from a link does not care whether a crawler was refused.
-#
-#   Also expect, all medium/confirmed: content images with no alt text on
-#   several pages; no clear statement of who publishes the site; dated content
-#   carrying no date; a primary action labelled "Learn more".
-#
-#   A judge's own URL will differ. What should hold anywhere: every finding
-#   carries evidence naming a URL and a count you can verify by hand, findings
-#   are ordered severity then ICE, and anything the audit could not assess is
-#   listed in limitations rather than passed silently.
+# WHAT SHOULD HOLD ON A JUDGE'S OWN URL: every finding carries evidence naming
+#   a URL and a count you can check by hand; findings are ordered severity,
+#   then ICE; anything the audit could not assess is listed in limitations
+#   rather than passed silently.
 #
 # ---- FALLBACK A: no Playwright (skip the two Playwright commands) ----------
 # The engine runs on the Python standard library alone. Pass 1 never needs a
@@ -272,35 +287,6 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #   python skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle ./audit-output/evidence --out ./audit-replay
 # Tested 2026-09-24: identical findings; the only field that differs is
 # evidence_bundle.path.
-#
-# ---- WHAT TO EXPECT ON THE SECOND TEST URL (stable while its robots.txt is) --
-# https://www.theguardian.com/ (rehearsed 2026-09-24, Opus 5.5 and Playwright):
-#   F-001 critical, confirmed, ICE 9.3, reach.robots.ai_search_bot_blocked:
-#     robots.txt line 102 "Disallow: /" blocks six AI retrieval crawlers
-#     (Amazonbot, Claude-SearchBot, Claude-User, DuckAssistBot,
-#     Google-CloudVertexBot, PerplexityBot). Anyone can check it at
-#     https://www.theguardian.com/robots.txt
-#   The gate cascade: most downstream discoverability findings are capped at
-#     medium with blocked_by: F-001 (45 of 52 on that run, which rendered;
-#     38 of 47 in CI on 2026-09-25, both passes and always-render alike).
-#     Engagement (act.*) findings are never capped. Training-only crawlers are reported
-#     separately and are not treated as a defect.
-#   Page-level findings change as the site publishes; F-001 and the cascade
-#   stay the same while robots.txt is unchanged.
-#   Two passes on 2026-09-25 (CI, Ubuntu and macOS): pass-1 count 0, so pass 2
-#   was the --bundle re-analysis; 47 findings, 1 critical, 1 high, status
-#   "partial". Fallback E on the same runners: the same 47 findings, status
-#   "complete". The browser changed no finding on this site.
-#   Check F-001 without running the audit (macOS / Linux):
-#     curl -s https://www.theguardian.com/robots.txt | grep -n -i -E "PerplexityBot|Claude-SearchBot|Claude-User|Amazonbot|DuckAssistBot|Google-CloudVertexBot|^Disallow: /\s*$"
-#   Windows PowerShell:
-#     curl.exe -s https://www.theguardian.com/robots.txt | Select-String -Pattern "PerplexityBot","Claude-SearchBot","Claude-User","Amazonbot","DuckAssistBot","Google-CloudVertexBot","^Disallow: /\s*$"
-#   On 2026-09-24 the output showed the six User-agent lines (79 to 98, one
-#   group) and, after them, "102:Disallow: /", the line F-001 cites.
-#
-# The first test URL (https://docs.pytest.org/) is the video's live run. The
-# audit had never seen it before that run, so there is no expected result
-# listed here.
 #
 # ---- KNOWN LIMITS OF THE FROZEN ENGINE (so you can judge a replay fairly) ---
 # The engine is unchanged from Round 3, so these are recorded, not fixed. Each
