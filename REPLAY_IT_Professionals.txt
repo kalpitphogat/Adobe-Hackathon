@@ -54,6 +54,7 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # version. The engine itself runs on any Python 3.9+.
 #
 # ---- WINDOWS (PowerShell), which is what the video was recorded on ----------
+#   $env:PYTHONUTF8 = "1"
 #   uv python install 3.11.15
 #   uv venv --python 3.11.15 .venv
 #   .venv\Scripts\Activate.ps1
@@ -63,6 +64,16 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #   cd brand-ai-readiness-audit
 #   python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
 #   claude --model claude-opus-5-5 --allowedTools "Skill" "Bash(python:*)" "PowerShell(python:*)" "Read"
+# PYTHONUTF8=1 makes Python use UTF-8 for files and console output instead of
+# the Windows code page, so a page title or quote with non-Latin characters
+# cannot crash a print. Set it before starting claude so every python command
+# the agent runs inherits it (cmd: set PYTHONUTF8=1). Harmless elsewhere.
+# Why "Skill" is in --allowedTools: the prompt asks the agent to use the
+# ai-readiness-orchestrator skill, and Claude Code loads a skill through its
+# Skill tool. Allowing it means the entrypoint loads without a permission
+# prompt, so Skill(ai-readiness-orchestrator) is the agent's first tool call,
+# as brief item 3.10 asks the video to show. Bash(python:*) and Read then let
+# it run orchestrate.py and read the report, and nothing else.
 # On Windows, Claude Code also has a PowerShell tool; allowing PowerShell(python:*)
 # avoids a permission prompt for each python command. Any command the agent
 # chains (a; b) still asks for approval: approve it, it is the same python call.
@@ -150,6 +161,12 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #     separately and are not treated as a defect.
 #   Page-level findings change as the site publishes; F-001 and the cascade
 #   stay the same while robots.txt is unchanged.
+#   Check F-001 without running the audit (macOS / Linux):
+#     curl -s https://www.theguardian.com/robots.txt | grep -n -i -E "PerplexityBot|Claude-SearchBot|Claude-User|Amazonbot|DuckAssistBot|Google-CloudVertexBot|^Disallow: /\s*$"
+#   Windows PowerShell:
+#     curl.exe -s https://www.theguardian.com/robots.txt | Select-String -Pattern "PerplexityBot","Claude-SearchBot","Claude-User","Amazonbot","DuckAssistBot","Google-CloudVertexBot","^Disallow: /\s*$"
+#   On 2026-09-24 the output showed the six User-agent lines (79 to 98, one
+#   group) and, after them, "102:Disallow: /", the line F-001 cites.
 #
 # The first test URL (https://docs.pytest.org/) is the video's live run. The
 # audit had never seen it before that run, so there is no expected result
