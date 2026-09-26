@@ -33,8 +33,7 @@ below was actually run: on our Windows machine (`rehearsal/` has the transcripts
 | **A**: no Playwright | no browser install | identical to the main path when pass 1 finds no empty page; Django one-pass: 21 vs 24 findings, the 3 extra all false `nav_links_js_only` |
 | **B**: another model or agent harness, same prompt | no Opus, or no Claude Code | Sonnet 5 and Haiku 4.5: same 24 findings as Opus (one-pass); right pass-2 choice 10/10 (two-pass) |
 | **C**: no agent at all, any Python 3.9+ | no model, no special setup | the same two passes by hand; Python 3.13 (Windows), 3.12 (Ubuntu), 3.14 (macOS), no venv: exit 0 |
-| **D**: formatted terminal (`demo_cli.py`, one pinned file) | a readable view without an agent | drives the judge's own unzip; `doctor` checks it 155/155 against their zip |
-| **E**: always render | partly-JavaScript sites | the previous main path; all browser checks measured, with the false positives in `SITE_MATRIX.md` |
+| **D**: always render | partly-JavaScript sites | the previous main path; all browser checks measured, with the false positives in `SITE_MATRIX.md` |
 | **Linux / macOS** | judges not on Windows | CI runs ENV_SETUP as written + steps 1 and 3 + A and C on Ubuntu and macOS: all pass |
 
 `tools/check_replay.py` checks the REPLAY file (fields, URLs, steps) and that it matches the run

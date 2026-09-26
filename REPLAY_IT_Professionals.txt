@@ -40,7 +40,7 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # command with the browser run shown there.
 #
 # For the full agent-driven experience (as shown in the video), follow the
-# TEST_STEPS above with Claude Code. For more options see Fallbacks A-E below.
+# TEST_STEPS above with Claude Code. For more options see Fallbacks A-D below.
 #
 # ---- WHY THE AGENT RUNS TWO PASSES --------------------------------------------
 # Both passes use flags the Round 3 engine already has; no engine file changes.
@@ -69,7 +69,7 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #     findings; a normal site was identical either way.
 # What two passes give up: sites only partly built by JavaScript, where the
 # crawler already sees some links (Spotify, IKEA, and one of our test sites):
-# their true browser findings are not measured. Fallback E measures them.
+# their true browser findings are not measured. Fallback D measures them.
 #
 # ---- WHY THE TABLE SHOWS CONFIRMED FINDINGS, EACH ONE RE-CHECKED ------------
 # Every finding carries the engine's own confidence: "confirmed" means a
@@ -165,8 +165,8 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # (runner Python 3.12.3 on Ubuntu, 3.14.7 on macOS) passed on both. Only the
 # agent step (it needs a Claude login) was not run there.
 # On 2026-09-25 the same CI ran the two passes exactly as TEST_STEPS 3 states
-# (the count command read from this file), Fallback E with Playwright, and
-# Fallback D's doctor (155/155 against the zip): all passed on both.
+# (the count command read from this file) and Fallback D with Playwright:
+# all passed on both.
 #
 # ============================================================================
 # FALLBACKS. The findings come from the engine, not the model. Each path
@@ -209,7 +209,7 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #     three browser checks "not assessed"), 47 findings (1 critical, 1 high),
 #     38 blocked_by F-001. The high is act.orient.no_value_proposition, an
 #     engagement finding with confidence "likely", so it is not capped.
-#     Fallback E on the same runners, with the browser: the same 47 findings,
+#     Fallback D on the same runners, with the browser: the same 47 findings,
 #     status complete. The browser changed no finding on this site.
 #
 # WHAT SHOULD HOLD ON A JUDGE'S OWN URL: every finding carries evidence naming
@@ -244,7 +244,7 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # and correctly flagged the engine's three read.render.nav_links_js_only
 # findings as not supported; Haiku 4.5 did not load the rendered page and
 # called them supported. For the evidence check, use Sonnet 5 or stronger.
-# The two-pass prompt, 2026-09-25 (claude -p, rehearsal/2026-09-25_twopass_*):
+# The two-pass prompt, 2026-09-25 (claude -p, 10 recorded rehearsals):
 # Opus 5.5, Sonnet 5 and Haiku 4.5 each chose the right pass 2 on a
 # JavaScript-only test app (browser run) and on a tiny test page (re-analysis),
 # 10 of 10 runs; Opus also on a normal test site and on jsr.io. Sonnet 5 once
@@ -267,42 +267,15 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # Tested 2026-09-25 (Python 3.11): the --bundle pass gives the same findings,
 # limitations and audit_status as pass 1; only evidence_bundle.path differs.
 #
-# ---- FALLBACK D: formatted terminal view of the same run, no agent ---------
-# One extra file, demo_cli.py, standard library only. It contains no checks: it
-# runs the orchestrate.py in YOUR unzipped marketplace and formats the report
-# (progress per skill, findings ranked by ICE, drill-down by ID). It is not
-# part of the engine and is not used in the video. From the folder holding
-# submission.zip and the unzipped brand-ai-readiness-audit/ (see TEST_STEPS 1):
-#   curl -L -o demo_cli.py https://raw.githubusercontent.com/kalpitphogat/Adobe-Hackathon/be4f1327c1897303abf1b584828883a5bd03a15d/round4/demo_cli.py
-#   sha256sum demo_cli.py   ->  517f64bf7baf278faaf9c5b94e025fd83c2e718bc7bc38f0212af85b246a2924
-#   (macOS: shasum -a 256 demo_cli.py. Windows PowerShell: the same curl line
-#    with curl.exe instead of curl, then certutil -hashfile demo_cli.py SHA256)
-#   cd brand-ai-readiness-audit
-#   python ../demo_cli.py doctor
-#   python ../demo_cli.py show ./audit-output --top 10     (the report from
-#   python ../demo_cli.py show ./audit-output --id F-001    the main path or C)
-#   python ../demo_cli.py prove ./audit-output
-# To have it run the engine too: "python ../demo_cli.py audit <URL> --no-render
-# --out ./audit-precheck" is pass 1; drop --no-render for Fallback E.
-# prove's golden comparison needs Python 3.11.15, like tests/run_offline.py:
-# on other versions it reports site_f as drifted because the golden records
-# the Python version; the findings are the same.
-# doctor checks every file of the marketplace against ../submission.zip and
-# its SHA-256 above (155/155 byte-identical, or it says which file differs),
-# so you can see it is driving the package you hold. Tested 2026-09-25 in an
-# empty folder with only submission.zip and this file: the report from
-# "audit --offline-root tests/fixtures/site_b" is identical to Fallback C's
-# except audited_at and evidence_bundle.path.
-#
-# ---- FALLBACK E: always render (the main path until 2026-09-25) ------------
+# ---- FALLBACK D: always render (the main path until 2026-09-25) ------------
 # With Playwright installed, one run with the browser on every site:
 #   python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output
 # It measures the three browser checks everywhere (audit_status "complete"),
 # so it also catches partly-JavaScript sites that two passes skip, at the cost
 # of the false nav_links findings counted above. The agent's evidence check
 # (prompt part 3) loads the rendered page for any read.render finding and says
-# "not supported" when the gap is not real; it never edits the report. The 12
-# transcripts in the team's rehearsal/ folder dated 2026-09-23/24 used this path.
+# "not supported" when the gap is not real; it never edits the report. Our 12
+# recorded rehearsals of 2026-09-23 and 2026-09-24 used this path.
 #
 # ---- RE-ANALYSE WITHOUT RE-FETCHING (same evidence, same findings) ----------
 #   python skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle ./audit-output/evidence --out ./audit-replay
@@ -319,9 +292,9 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #    is not (docs.djangoproject.com: identical link sets). The two passes
 #    exist to avoid it (see WHY THE AGENT RUNS TWO PASSES). Over 23 sites on
 #    2026-09-25, browser-dependent findings with Playwright always on were 20
-#    true and 21 false, each re-counted against the live page
-#    (STRATEGY_COMPARISON.md in the team repo). This is why the agent's
-#    evidence check loads the rendered page before it agrees with one.
+#    true and 21 false, each re-counted against the live page. This is why
+#    the agent's evidence check loads the rendered page before it agrees
+#    with one.
 #  * extract.sd.contradicts_visible_content can misread prices written as
 #    "132EUR": ikea.com product pages show the schema price but were reported
 #    as disagreeing.

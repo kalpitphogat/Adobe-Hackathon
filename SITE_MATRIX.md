@@ -61,7 +61,7 @@ host and is left out.
 
 The agent runs pass 1 with `--no-render`, counts those pages, and then either renders (count > 0)
 or re-analyses pass 1's evidence with `--bundle` (same findings, no second crawl). The REPLAY's step 2
-prompt does this, and Fallback E keeps the always-render path for partly-JavaScript sites.
+prompt does this, and Fallback D keeps the always-render path for partly-JavaScript sites.
 
 **Rehearsed** with `claude -p` (Claude Code 2.1.282, Linux), 10 runs, `rehearsal/2026-09-25_twopass_*`:
 Opus 5.5, Sonnet 5 and Haiku 4.5 all chose the right pass 2 on the JavaScript-only app and on

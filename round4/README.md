@@ -4,7 +4,7 @@ One file, and it is **not** part of the Round 3 engine.
 
 | file | what it is |
 |---|---|
-| [`demo_cli.py`](demo_cli.py) | Fallback D in `REPLAY_IT_Professionals.txt`: a standard-library terminal view of a report the engine already wrote |
+| [`demo_cli.py`](demo_cli.py) | An internal tool: a standard-library terminal view of a report the engine already wrote. It is **not** in `REPLAY_IT_Professionals.txt` (it was Fallback D until 2026-09-26): judges receive only the REPLAY file and the `submission.zip` they already hold, and this repo is private |
 
 `demo_cli.py` **contains no checks.** It shells out to `orchestrate.py` in your
 own unzipped marketplace and formats what that engine returns — progress per

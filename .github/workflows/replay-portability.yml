@@ -68,7 +68,7 @@ jobs:
           EOF
           python ../../tools/verify_engine.py ../submission.zip .
 
-      - name: Fallback E - always render (proves the Playwright install works)
+      - name: Fallback D - always render (proves the Playwright install works)
         run: |
           set -euxo pipefail
           cd work && source .venv/bin/activate && cd brand-ai-readiness-audit
@@ -83,7 +83,7 @@ jobs:
           assert f["check_id"] == "reach.robots.ai_search_bot_blocked" and f["severity"] == "critical"
           EOF
 
-      - name: Fallback D - demo_cli.py against the unzipped marketplace and its zip
+      - name: Internal viewer demo_cli.py (not in the REPLAY) against the unzipped marketplace and its zip
         run: |
           set -euxo pipefail
           cd work && cp ../round4/demo_cli.py . && cd brand-ai-readiness-audit
