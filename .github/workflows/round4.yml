@@ -33,6 +33,10 @@ jobs:
           python -m zipfile -e round3-frozen/submission.zip /tmp/engine
           python tools/verify_engine.py round3-frozen/submission.zip /tmp/engine
 
+      # Part 1 earns credit only for claims traceable to the submitted code.
+      - name: Every file:line the video script cites says what the script claims
+        run: python tools/check_script_anchors.py VIDEO_SCRIPT.md round3-frozen/submission.zip
+
       - name: The engine's own suites pass from a fresh unzip of submission.zip
         run: |
           mkdir -p "$RUNNER_TEMP/engine" && cd "$RUNNER_TEMP/engine"
