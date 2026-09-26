@@ -12,7 +12,7 @@ click next to the line you say with it.
 
 | | hard cap | target | spoken words | at 145 wpm |
 |---|---|---|---|---|
-| **Part 1**: thought process | 3:00 | **2:49** | 389 (cut ladder → 349) | 2:49 incl. title card and pauses (→ 2:32) |
+| **Part 1**: thought process | 3:00 | **2:49** | 389 (cut ladder → 345) | 2:49 incl. title card and pauses (→ 2:31) |
 | **Part 2**: live trial run | 2:00 | **1:55** after trimming idle waits | ~230, incl. one drill-down card | ~1:35 of talk, over the screen action |
 | **Total** | 5:00 | **4:44** | | 16 s of headroom |
 
@@ -25,9 +25,11 @@ before you record.**
 ## The story in one breath
 
 A brand is either quoted by AI assistants or treated as if it doesn't exist. **Act I** shows
-where our signals came from: the handout's *reach, read, quote* and the non-obvious lesson that
-AI crawlers are not all equal. **Act II** shows how bad each problem is and why the *order* of
-failures matters more than the count. **Act III** shows how every fix earns its place.
+where our signals came from: the handout's *reach, read, quote*, and two things a flat list gets
+wrong. The steps come *in order* (so a flat checklist reports fifteen criticals where one matters),
+and AI crawlers are not all equal. **Act II** shows how bad each problem is and pays off the
+first one: *"Remember those fifteen criticals?"* The cascade caps fourteen of them behind the one
+blocker. **Act III** shows how every fix earns its place.
 **Act IV** is the twist: the real web proved our own tool wrong, and we show how we fixed it.
 The last line of Part 1 is a quote from our own code, *"a citation that can't be checked is worse
 than none"*, and it hands straight to **Part 2**, where you don't have to take our word for anything.
@@ -74,7 +76,7 @@ so `Ctrl+PgDn` walks the script. Each is already scrolled to its first line:
 | tab | file (relative to the marketplace root) | first line | then |
 |---|---|---|---|
 | 1 | `skills/answerability-audit/references/chunking-model.md` | 40 | |
-| 2 | `skills/ai-readiness-orchestrator/references/gate-rules.md` | 10 | |
+| 2 | `skills/ai-readiness-orchestrator/references/gate-rules.md` | 10 | → 16 |
 | 3 | `skills/crawl-access-audit/references/ai-bots.json` | 12 | → 71 |
 | 4 | `skills/crawl-access-audit/scripts/check_robots.py` | 286 | → 318 |
 | 5 | `skills/answerability-audit/references/geo-methods.md` | 14 | → 24 |
@@ -114,52 +116,60 @@ Everything else is direction, not speech.*
 
 *Deliver it like a question you're dying to answer: slower on "doesn't exist", a smile on the last line.*
 
-### Act I · What separates the cited from the ignored (0:21–0:58)
+### Act I · What separates the cited from the ignored (0:21–1:03)
 
 **SCREEN:** Tab 2 `gate-rules.md`, lines **10–14** ("three things have to succeed in order").
 **CAPTION:** `gate-rules.md:10 · 66 checks: DESIGN.md:108 (count generated from the code)`
 
-> And the steps come **in order**, so each of our 66 checks has a stage: reach, read, extract, trust · and act, for visitors.
+> Those steps come **in order** · each of our 66 checks has a stage: reach, read, extract, trust · and act, for visitors.
 
-**SCREEN:** Tab 3 `ai-bots.json`, lines **12–14** ("we need to know what blocking each one COSTS"),
-then scroll to line **71** (`"GPTBot" … "category": "training"`).
+**SCREEN:** same tab, highlight lines **16–19**, right under it ("A flat checklist ignores it … fifteen criticals … Fourteen of them").
+**CAPTION:** `gate-rules.md:16–19 · a flat checklist: fifteen criticals, fourteen change nothing`
+
+> A flat checklist ignores that: block retrieval crawlers and get **fifteen criticals** · fourteen of them moot.
+
+*This is the setup. Act II pays it off ("Remember those fifteen criticals?"), so never cut one without the other.*
+
+**SCREEN:** Tab 3 `ai-bots.json`, lines **12–14** ("Upstream lists bots to block; we need to know what blocking each one COSTS
+… the reason a flat list produces bad findings"), then scroll to line **71** (`"GPTBot" … "category": "training"`).
 **CAPTION:** `ai-bots.json:12–14 · 29 crawlers: 14 retrieval, 10 training, 5 contested`
 
-> Reach taught us rule one: lists say which AI bots to **block**; we asked what blocking each **costs**, and sorted 29 by role.
+> Bot lists are just as flat: they say what to **block**, not what blocking **costs**. We sorted 29 by role.
 > Block GPTBot: you've opted out of **training**. Block a retrieval bot: you **vanish from its answers**.
 
 **SCREEN:** Tab 4 `check_robots.py`, line **286** (`severity="critical"`), then line **318** (`severity="info"`).
 **CAPTION:** `check_robots.py:286 critical · :318 info`
 
-> Same rule · **critical** for one, line 286 · **info** for the other, line 318.
+> Same block · **critical** for retrieval, line 286 · **info** for training, line 318.
 
 **SCREEN:** Tab 5 `geo-methods.md`, lines **14–19**, then line **24** ("fires at **low** severity").
 **CAPTION:** `geo-methods.md:14–24 · GEO (KDD 2024): a benchmark gain, not a defect`
 
-> Quote: GEO research says statistics help · **in a benchmark** · so their absence scores **low**.
+> And to be **quoted**? GEO research says statistics help · **in a benchmark** · so their absence scores **low**.
 
-### Act II · How bad, how sure (0:58–1:35)
+### Act II · How bad, how sure (1:03–1:35)
 
 **SCREEN:** Tab 6 `severity-model.md`, line **43** ("Severity answers 'how bad if true'. Confidence answers 'how sure'"),
 then line **56** ("A clean report and a report that could not look are different things").
 **CAPTION:** `severity-model.md:43 · :56`
 
-> Severity asks: **how bad, if true?** Confidence is a separate field: **how sure?**
+> Severity: **how bad, if true?** Confidence, separately: **how sure?**
 > A check that couldn't run says so: a clean report and one that couldn't look are **different things**.
 
 **SCREEN:** Tab 7 `gate_model.py`, line **117** (`def apply_cascade`), then line **128–129**
 (`# Rule 0: gates never touch engagement`).
 **CAPTION:** `gate_model.py:117 apply_cascade · :42 ceiling "medium" · :129 Rule 0`
 
-> A flat checklist gives a site blocking AI crawlers **fifteen criticals**, fourteen of them moot.
-> `apply_cascade` caps those at medium and tags the **one** blocker. **Capped · never deleted.**
-> Line 128: engagement is **never** gated. A visitor from an ad doesn't care if a crawler got in.
+> **Remember** those fifteen criticals? `apply_cascade` caps fourteen at medium and tags the **one** blocker. **Capped · never deleted.**
+> But line 128: engagement is **never** gated. A visitor from an ad doesn't care if a crawler got in.
+
+*Lean on "Remember": it's the callback that ties Act I to Act II.*
 
 **SCREEN:** Tab 8 `tests/golden/site_b.report.md`, lines **58–60**
 ("11 finding(s) are recorded but capped at medium because F-001 … blocks them").
 **CAPTION:** `tests/golden/site_b.report.md:60 · same in site_b.audit-report.json:109 ("blocked_by": "F-001")`
 
-> Our golden: **one** critical, **eleven** findings waiting on F-001, engagement untouched.
+> Our golden test: **one** critical, **eleven** findings waiting on F-001, engagement untouched.
 
 ### Act III · Every fix earns its place (1:35–2:01)
 
@@ -213,25 +223,33 @@ and only in this order.** Cut the shot with the words.
 | step | cut | words | total after | ≈ at 145 wpm |
 |---|---|---|---|---|
 | — | full script | | 389 | 2:49 |
-| 1 | the GEO line (skip tab 5's first shot; the closing `Ctrl+P` still works) | −14 | 375 | 2:43 |
-| 2 | "Our golden: one critical…" (tab 8) | −11 | 364 | 2:39 |
-| 3 | "File sizes read as phone numbers… show a price." | −15 | 349 | 2:32 |
+| 1 | "And to be quoted? GEO research…" (skip tab 5's first shot; the closing `Ctrl+P` still works) | −17 | 372 | 2:42 |
+| 2 | "Our golden test: one critical…" (tab 8) | −12 | 360 | 2:37 |
+| 3 | "File sizes read as phone numbers… show a price." | −15 | 345 | 2:31 |
 
 *(Times at 145 wpm plus ~8 s for the title card and beat pauses. `tools/check_script_anchors.py`
 recounts the full cut every run and fails if it would pass 3:00 even at a slow 140 wpm.)*
 
-**Never cut:** the cold open, the crawler-roles lines, `apply_cascade`, "never gated",
-`validate_finding`, ICE, the zero-recall story, the closing quote. Together they are the rubric's
-*discovery, severity, fixes*.
+**Never cut:** the cold open, the flat-checklist line (the `apply_cascade` line calls back to it),
+the crawler-roles lines, `apply_cascade`, "never gated", `validate_finding`, ICE, the zero-recall
+story, the closing quote. Together they are the rubric's *discovery, severity, fixes*.
+
+Each cut leaves the story joined up: without the GEO line, Act I ends on "info for training,
+line 318" and Act II's "Severity:" follows straight on; without the golden line, Act II ends on
+"…if a crawler got in".
 
 ### If the timed run is short (under 2:35): bonus lines
 
 Add in this order, each with its shot:
 
-1. **After "never gated…"**, Tab 2 `gate-rules.md` `Ctrl+G 54`. CAPTION `gate-rules.md:54–57 · Rule 0b`
+1. **After "…if a crawler got in."**: `Ctrl+P` → `gate-rules.md:54` → `Enter` (jumps back to tab 2). CAPTION `gate-rules.md:54–57 · Rule 0b`
    > And if we never saw the page a visitor sees, those findings aren't softened, they're **suppressed**. Capping asserts a weaker claim. Suppression asserts **none**.
-2. **After "…the right thing."**, the caption's `tests/test_regressions.py` open at line 2, scroll the `# R1.` … `# R12.` headers.
+
+   Then `Ctrl+P` → `site_b.report.md:58` → `Enter` to carry on at tab 8. (`Ctrl+PgDn` from tab 2 would land on tab 3.)
+2. **After "…the right thing."**: `Ctrl+P` → `test_regressions.py:2` → `Enter`, and scroll the `# R1.` … `# R12.` headers. CAPTION `tests/test_regressions.py:2 · R1–R12`
    > Tests R1 to R12 keep fixed bugs fixed.
+
+   The closing shot's `Ctrl+P` → `geo-methods.md:56` works from any tab.
 
 ---
 
@@ -263,8 +281,8 @@ the evidence check or the drill-down.
 | **0:38–0:50** | The agent's `python -c` count on `pages.jsonl`, then its one line naming pass 2 and why, then the pass-2 command. **Hold 2 s on the "why" line.** | **If the count is 0:** > Pass one: no browser. The agent checks that crawl for any page only JavaScript could build. **None** · so pass two re-reads the **same evidence**, no second crawl. <br><br> **If the count is above 0:** > Pass one: no browser. The agent checks that crawl for pages only JavaScript could build. It found **[N]** · so pass two **renders** the site in Chromium. |
 | — | *Trim the second pass and the agent's reading.* Badge: **⏩ ~Ns trimmed** | |
 | **0:50–1:00** | Final answer, section (1): `audit_status`, counts by severity, "not assessed". | **If `partial`:** > **[N] findings** from six audit skills. Status **partial**, and it says why: **[the browser checks weren't run]**, so they're listed as **not assessed.** <br><br> **If `complete`:** > **[N] findings** from six audit skills. Status **complete**. The one blind spot it names is the edge probe, which stays off unless you own the site. |
-| **1:00–1:10** | Section (2): the **table of the top 5 confirmed findings**, with the ICE column, and the line under it counting the likely ones. Scroll slowly. | > Here are the fixes, **sorted by impact**: severity first, then ICE. These are the ones a deterministic check **confirmed**; the **[N] likely** ones are counted right under the table, not hidden. *(opt:)* That's the **engine's** order, not the model's. |
-| **1:10–1:22** | Section (3): the **verdict column**. The agent re-fetched **every row**. Hold on a line that says *supported*, with its numbers. | > Now the agent **audits the auditor.** It re-fetches **every row** itself: **[what it counted, e.g. "zero JSON-LD blocks"]**. **Supported.** That's commentary; the report stays exactly as the engine wrote it. <br><br> *If any row came back* **not supported**, *add Card F first (below).* |
+| **1:00–1:10** | Section (2): the **table of the top 5 confirmed findings**, with the ICE column, and the line under it counting the likely ones. Scroll slowly. | > Here are the fixes, **sorted by impact**: severity first, then ICE. *(opt:)* That's the **engine's** order, not the model's. These are the ones a deterministic check **confirmed**; the **[N] likely** ones are counted right under the table, not hidden. |
+| **1:10–1:22** | Section (3): the **verdict column**. The agent re-fetched **every row**. Show the column, then hold on the highest-ranked row that says *supported*, with its numbers. | > Now the agent **audits the auditor**: it re-fetches **every row** itself. <br><br> *Only if a row came back* **not supported**, *read Card F here (below).* <br><br> > **[F-00x]**: **[what it counted, e.g. "zero JSON-LD blocks"]** · **supported**. That's commentary; the report stays exactly as the engine wrote it. |
 | **1:22–1:48** | Section (4): the **drill-down**. Scroll it top to bottom: evidence, severity/confidence, mechanism, patch, ICE, `blocked_by` count, verification. Optionally flip to VS Code on `audit-output/audit-report.json`, `Ctrl+F` the `check_id` (run sheet §D). | **Read the card below that matches the finding on screen.** |
 | **1:48–1:55** | Stay on the verification command, or the `fix_patches/` folder in VS Code. | > Evidence, severity, mechanism, patch, and a **command to verify it**, on every finding. It's all in **REPLAY_IT_Professionals.txt.** Pick your own URL · and **check us.** |
 
@@ -298,8 +316,8 @@ Anchors: `diff_raw_rendered.py:163–164` (high/confirmed), `:179` (mechanism).
 Anchors: `date_consistency.py:143–144` (medium/confirmed), `:158` (mechanism), `:168–169` (`__FILL_IN__` dates).
 > Drill-down: **[N]** pages of dated content carry **no date at all.** Freshness is weighed when sources disagree, and an undated page **can't compete** on it. Medium, confirmed. The patch adds datePublished and dateModified as **FILL_IN**, because we will **not invent a date.** ICE **7.7**.
 
-**Card F · a row's verdict is *not supported*** (most likely on `read.render.nav_links_js_only`, or on `trust.integrity.prompt_injection` when the page only *discusses* AI). Read it **before** the card for the finding that *was* supported:
-> Look, the agent says **this one doesn't hold** on the live page. So we'd verify before acting, and the report stays exactly as the engine wrote it. The drill-down is on **[F-00x]**, which **does.**
+**Card F · a row's verdict is *not supported*** (most likely on `read.render.nav_links_js_only`, or on `trust.integrity.prompt_injection` when the page only *discusses* AI). Read it in section (3), **between** "…every row itself." and the supported row:
+> Look, the agent says **this one doesn't hold** on the live page, so we'd verify before acting.
 
 *This is a strength, not a stumble: it's the "check us" promise happening on camera. Don't trim it out.*
 
@@ -358,8 +376,8 @@ the voice should be **the person at the keyboard**, since it's their live run.
 
 | brief requirement (Round 4, §3) | where in the video |
 |---|---|
-| Part 1: how you discovered the findings (field research, what separates cited from ignored, distilled into repeatable checks) | Cold open + Act I (handout's reach/read/quote, crawler roles, GEO) and Act IV (five-site field test, zero-recall miss) |
-| Part 1: how you assigned severities | Act I (critical vs info by crawler role, GEO → low) + Act II (severity vs confidence, cascade, Rule 0, golden) |
+| Part 1: how you discovered the findings (field research, what separates cited from ignored, distilled into repeatable checks) | Cold open + Act I (handout's reach/read/quote, the steps in order and what a flat checklist gets wrong, crawler roles, GEO) and Act IV (five-site field test, zero-recall miss) |
+| Part 1: how you assigned severities | Act I (critical vs info by crawler role, GEO → low) + Act II (severity vs confidence, the cascade paying off Act I's fifteen criticals, Rule 0, golden) |
 | Part 1: how you derived the suggested actions (mechanism-sound, prioritised) | Act III (`validate_finding`, patches never invented, ICE, total order) |
 | Part 1: anchor every claim to code | every shot: tab + highlighted line + `file:line` caption; §5 ledger, machine-checked |
 | Part 2: unseen URL, typed on camera, real and continuous | 0:18–0:28, one take, trims badged |
@@ -382,25 +400,27 @@ row against the zip itself.
 | id | claim as spoken | file:line | text on that line |
 |---|---|---|---|
 | A01 | the handout: reach, read, quote, or it won't make the answer | `skills/answerability-audit/references/chunking-model.md:42` | `about a brand is easy to reach, read, and quote` |
-| A02 | three things succeed in order | `skills/ai-readiness-orchestrator/references/gate-rules.md:10` | `three things have to succeed in order` |
+| A02 | those steps come in order | `skills/ai-readiness-orchestrator/references/gate-rules.md:10` | `three things have to succeed in order` |
 | A03 | 66 checks, each at a stage | `DESIGN.md:108` | `**66 checks** across six audit skills` |
-| A04 | we asked what blocking each bot costs | `skills/crawl-access-audit/references/ai-bots.json:13` | `we need to know what blocking each one COSTS` |
+| A04 | bot lists say what to block, not what blocking costs | `skills/crawl-access-audit/references/ai-bots.json:13` | `we need to know what blocking each one COSTS` |
+| A58 | bot lists are just as flat | `skills/crawl-access-audit/references/ai-bots.json:14` | `the reason a flat list produces bad findings` |
 | A05 | GPTBot is a training crawler | `skills/crawl-access-audit/references/ai-bots.json:71` | `"token": "GPTBot", "vendor": "OpenAI", "category": "training"` |
 | A06 | blocking a retrieval bot removes you from its answers | `skills/crawl-access-audit/references/ai-bots.json:26` | `Blocking one of these removes the brand from that assistant's answers.` |
 | A07 | blocking training bots doesn't affect citation | `skills/crawl-access-audit/references/ai-bots.json:31` | `Blocking has no effect on whether the brand is retrieved or cited at answer time.` |
-| A08 | critical for a retrieval bot, line 286 | `skills/crawl-access-audit/scripts/check_robots.py:286` | `severity="critical", confidence="confirmed", stage="reach",` |
-| A09 | info for a training bot, line 318 | `skills/crawl-access-audit/scripts/check_robots.py:318` | `severity="info", confidence="confirmed", stage="reach",` |
-| A10 | GEO: citations and statistics help | `skills/answerability-audit/references/geo-methods.md:15` | `citing sources, adding statistics, and adding` |
+| A08 | same block: critical for retrieval, line 286 | `skills/crawl-access-audit/scripts/check_robots.py:286` | `severity="critical", confidence="confirmed", stage="reach",` |
+| A09 | …info for training, line 318 | `skills/crawl-access-audit/scripts/check_robots.py:318` | `severity="info", confidence="confirmed", stage="reach",` |
+| A10 | and to be quoted? GEO: statistics help | `skills/answerability-audit/references/geo-methods.md:15` | `citing sources, adding statistics, and adding` |
 | A11 | …so their absence scores low | `skills/answerability-audit/references/geo-methods.md:24` | `three markers, and it fires at **low** severity.` |
 | A12 | how bad if true / how sure | `skills/ai-readiness-orchestrator/references/severity-model.md:43` | `Severity answers "how bad if true". Confidence answers "how sure".` |
 | A13 | a clean report vs one that couldn't look | `skills/ai-readiness-orchestrator/references/severity-model.md:56` | `A clean report and a report that could not look are` |
-| A14 | a flat checklist: fifteen criticals, fourteen moot | `skills/ai-readiness-orchestrator/references/gate-rules.md:18` | `fifteen criticals and no indication which one to fix first. Fourteen of them are` |
-| A15 | apply_cascade | `skills/ai-readiness-orchestrator/scripts/gate_model.py:117` | `def apply_cascade(findings: list[dict], id_of)` |
+| A14 | a flat checklist ignores the order: fifteen criticals, fourteen moot (Act I, on screen at gate-rules.md:16–19) | `skills/ai-readiness-orchestrator/references/gate-rules.md:18` | `fifteen criticals and no indication which one to fix first. Fourteen of them are` |
+| A15 | remember those fifteen criticals? apply_cascade… | `skills/ai-readiness-orchestrator/scripts/gate_model.py:117` | `def apply_cascade(findings: list[dict], id_of)` |
 | A16 | caps at medium | `skills/ai-readiness-orchestrator/scripts/gate_model.py:42` | `BLOCKED_SEVERITY_CEILING = "medium"` |
 | A17 | capped, never deleted | `skills/ai-readiness-orchestrator/scripts/gate_model.py:120` | `Rule 3: cap, never delete.` |
-| A18 | line 128: engagement is never gated | `skills/ai-readiness-orchestrator/scripts/gate_model.py:128` | `if finding.get("category") != "discoverability":` |
+| A18 | but line 128: engagement is never gated | `skills/ai-readiness-orchestrator/scripts/gate_model.py:128` | `if finding.get("category") != "discoverability":` |
 | A19 | (same) | `skills/ai-readiness-orchestrator/scripts/gate_model.py:129` | `# Rule 0: gates never touch engagement` |
-| A20 | golden: eleven findings waiting on F-001 | `tests/golden/site_b.report.md:60` | `11 finding(s) are recorded but capped at medium because F-001` |
+| A59 | a visitor from an ad doesn't care if a crawler got in | `skills/ai-readiness-orchestrator/scripts/gate_model.py:12` | `visitor arriving from an ad does not care` |
+| A20 | golden test: eleven findings waiting on F-001 | `tests/golden/site_b.report.md:60` | `11 finding(s) are recorded but capped at medium because F-001` |
 | A21 | golden JSON: blocked_by F-001 | `tests/golden/site_b.audit-report.json:109` | `"blocked_by": "F-001",` |
 | A22 | validate_finding | `skills/ai-readiness-orchestrator/scripts/orchestrate.py:242` | `def validate_finding(finding: dict)` |
 | A23 | …rejects a finding without a mechanism | `skills/ai-readiness-orchestrator/scripts/orchestrate.py:253` | `return "suggested_action has no mechanism"` |

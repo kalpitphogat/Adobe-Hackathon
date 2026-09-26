@@ -15,8 +15,10 @@ Nothing below names a user, a drive or a folder outside this repo:
   run sheet or the REPLAY.
 
 How to read this file:
+- Every step is listed **in the order you do it**, from a fresh clone to the saved take.
 - **RUN** is typed in PowerShell.
 - **DO** is a click or key in VS Code or the terminal.
+- **CAPTION** is the lower-third text, added in the editor.
 - **SAY** is spoken. **Bold** words get stress, `·` is a half-beat pause.
 - In Part 2, a `[bracket]` means you read the value off the screen. Never say a number the
   terminal isn't showing.
@@ -117,10 +119,6 @@ Paste the output to Claude for checking. What it should show:
 - The table holds only confirmed findings, with a verdict on every row.
 - The `prompt_injection` row is marked **not supported**.
 
-### 0.5 Time Part 1
-Read Part 1 (Stage 2 below) aloud once with a stopwatch, tab switches included.
-**Over 2:50** → apply the cut ladder (end of Stage 2), in order.
-
 > **Do not** open or audit `https://docs.pytest.org/` with the engine at any point before the take.
 > A browser visit is fine; a run of the audit is not.
 
@@ -189,28 +187,9 @@ claude
 - Leave this window open: Part 2 starts here, and the venv and both `$env:` settings belong to this window.
   If you close it, run this whole block again.
 
-### 1.3 Clipboard, screen and recorder
-Do this last, just before recording, in the Stage 1.1 PowerShell window (at the repo root). Keep
-the Stage 1.2 window clean: it's the one on camera.
-
-**Clipboard: the step-2 prompt without its `<URL>`.** On camera you paste the prompt and type the
-URL by hand, because the brief wants the URL entered on camera and the prompt pasted word for word
-from the REPLAY. The prompt is one 2,940-character line, so let PowerShell copy it rather than
-selecting it by hand. It uses the same match as `tools\rehearse.ps1`:
-```powershell
-$prompt = (Get-Content REPLAY_IT_Professionals.txt -Encoding UTF8 | Where-Object { $_ -match "SKILL\.md" -and $_.TrimEnd().EndsWith("URL: <URL>") } | Select-Object -First 1).Trim()
-Set-Clipboard -Value $prompt.Substring(0, $prompt.Length - 5)
-(Get-Clipboard -Raw).EndsWith("URL: ")
-```
-- The last line must print `True`: the clipboard ends in `URL: ` with the space, and without `<URL>`.
-- Copy nothing else before the take, or you'll overwrite it. If you do, run the three lines again.
-- Claude Code may show a long paste as a short `[Pasted text #1]` label. That's normal: the whole
-  prompt is still sent, and the saved transcript has it. Type the URL straight after the label.
-
-**Browser: check the site is up.** Open https://docs.pytest.org/ once in Chrome or Edge.
-- If it doesn't load, don't start the take. Use the backup URL (see "If it goes sideways").
-- The rule is that **our engine** has never run on the site. Looking at it in a browser is fine;
-  running `orchestrate.py` or `rehearse.ps1` on it is not.
+### 1.3 Screen and recorder
+Both parts are recorded with this setup. The Part 2 clipboard and the site check come later, in
+Stage 3.0, right before that take, so nothing overwrites them while you record Part 1.
 
 **Screen: what the camera sees.**
 - **Windows Terminal (the Stage 1.2 window):**
@@ -222,14 +201,6 @@ Set-Clipboard -Value $prompt.Substring(0, $prompt.Length - 5)
   - Windows 11: Settings → System → Notifications → **Do not disturb**, on.
   - Windows 10: Action Center → **Focus assist** → Alarms only.
   - Close chat apps and email.
-- **Optional, for the drill-down's JSON flip:** a second VS Code window on the **parent** folder `demo-live`:
-  ```powershell
-  code -n demo-live
-  ```
-  - At 1:22, open `brand-ai-readiness-audit\audit-output\audit-report.json` and `Ctrl+F` the finding's `check_id`.
-  - Open `demo-live`, never `demo-live\brand-ai-readiness-audit`. A settings change or an extension
-    can create a `.vscode` folder in the folder VS Code has open. Inside the engine folder, that
-    makes the on-camera engine check print `ENGINE DIFFERS FROM THE SUBMISSION`.
 
 **Recorder: OBS Studio (free, obsproject.com).**
 - **Setup:**
@@ -237,12 +208,8 @@ Set-Clipboard -Value $prompt.Substring(0, $prompt.Length - 5)
   - Source: **Display Capture** of the whole screen, so switching from Terminal to VS Code is captured.
   - Audio: your mic on. Its meter should move in the green and yellow when you talk, not the red.
 - **Test first:** record 10 seconds, play it back, and check the text is readable and the voice is clear.
-- **For the take:**
-  - Start recording, then **stay silent for 5 seconds**. The editor uses that silence to learn the
-    room's background noise and remove it.
-  - Record Part 2 in **one continuous take**.
-- **Keep the raw, untrimmed file.** Edit a copy. The raw file proves the run was continuous if
-  anyone asks; Stage 4 records its hash, and video files are git-ignored.
+- **For every take, Part 1 or Part 2:** start recording, then **stay silent for 5 seconds**. The
+  editor uses that silence to learn the room's background noise and remove it.
 
 ---
 
@@ -252,6 +219,19 @@ Part 1 may be recorded in several takes.
 - Every shot needs its file on screen, the line highlighted (click its line number), and a
   lower-third caption.
 - Captions are added in the editor.
+
+### 2.0 Time it once, before the first take
+Read Part 1 aloud with a stopwatch, clicking through the tabs as you go (VS Code from Stage 1.1).
+- **Over 2:50** → apply the cut ladder (end of this stage), in order.
+- **Under 2:35** → you may add the bonus lines (after the cut ladder).
+
+**How the lines hand off.** Each line sets up the next, so say them in this order and keep the shots in this order:
+- "…which step fails." → "**Those steps** come in order…"
+- "A **flat** checklist…" → "Bot lists are just as **flat**…" → "**Block** GPTBot…" → "Same **block**…"
+- Act I's "…fifteen criticals · fourteen of them moot" is the setup. Act II pays it off: "**Remember** those fifteen criticals?"
+- "Capped · never deleted." → "**But** line 128…" → the golden test proves both.
+- "…same evidence, same ranking." → "**Then** the real web humbled us."
+- "…So don't trust us. · **Watch.**" → Part 2: "Part two: **live, one take.**"
 
 ### 0:00–0:02 · Title card
 | | |
@@ -268,22 +248,23 @@ Part 1 may be recorded in several takes.
 
 *Slow down on "doesn't exist", and smile on the last line.*
 
-### 0:21–0:58 · Act I · What separates the cited from the ignored
+### 0:21–1:03 · Act I · What separates the cited from the ignored
 | DO | CAPTION | SAY |
 |---|---|---|
-| `Ctrl+PgDn` → Tab 2 `gate-rules.md`, lines **10–14** | `gate-rules.md:10 · 66 checks: DESIGN.md:108 (count generated from the code)` | "And the steps come **in order**, so each of our 66 checks has a stage: reach, read, extract, trust · and act, for visitors." |
-| `Ctrl+PgDn` → Tab 3 `ai-bots.json`, lines **12–14** | `ai-bots.json:12–14 · 29 crawlers: 14 retrieval, 10 training, 5 contested` | "Reach taught us rule one: lists say which AI bots to **block**; we asked what blocking each **costs**, and sorted 29 by role." |
+| `Ctrl+PgDn` → Tab 2 `gate-rules.md`, lines **10–14** | `gate-rules.md:10 · 66 checks: DESIGN.md:108 (count generated from the code)` | "Those steps come **in order** · each of our 66 checks has a stage: reach, read, extract, trust · and act, for visitors." |
+| Highlight lines **16–19**, just below | `gate-rules.md:16–19 · a flat checklist: fifteen criticals, fourteen change nothing` | "A flat checklist ignores that: block retrieval crawlers and get **fifteen criticals** · fourteen of them moot." *(the setup Act II pays off)* |
+| `Ctrl+PgDn` → Tab 3 `ai-bots.json`, lines **12–14** | `ai-bots.json:12–14 · 29 crawlers: 14 retrieval, 10 training, 5 contested` | "Bot lists are just as flat: they say what to **block**, not what blocking **costs**. We sorted 29 by role." |
 | `Ctrl+G 71` (GPTBot, `"category": "training"`) | *(same)* | "Block GPTBot: you've opted out of **training**. Block a retrieval bot: you **vanish from its answers**." |
-| `Ctrl+PgDn` → Tab 4 `check_robots.py` line **286**, then `Ctrl+G 318` | `check_robots.py:286 critical · :318 info` | "Same rule · **critical** for one, line 286 · **info** for the other, line 318." |
-| `Ctrl+PgDn` → Tab 5 `geo-methods.md` lines **14–19**, then `Ctrl+G 24` | `geo-methods.md:14–24 · GEO (KDD 2024): a benchmark gain, not a defect` | "Quote: GEO research says statistics help · **in a benchmark** · so their absence scores **low**." *(cut-ladder step 1)* |
+| `Ctrl+PgDn` → Tab 4 `check_robots.py` line **286**, then `Ctrl+G 318` | `check_robots.py:286 critical · :318 info` | "Same block · **critical** for retrieval, line 286 · **info** for training, line 318." |
+| `Ctrl+PgDn` → Tab 5 `geo-methods.md` lines **14–19**, then `Ctrl+G 24` | `geo-methods.md:14–24 · GEO (KDD 2024): a benchmark gain, not a defect` | "And to be **quoted**? GEO research says statistics help · **in a benchmark** · so their absence scores **low**." *(cut-ladder step 1)* |
 
-### 0:58–1:35 · Act II · How bad, how sure
+### 1:03–1:35 · Act II · How bad, how sure
 | DO | CAPTION | SAY |
 |---|---|---|
-| `Ctrl+PgDn` → Tab 6 `severity-model.md` line **43**, then `Ctrl+G 56` | `severity-model.md:43 · :56` | "Severity asks: **how bad, if true?** Confidence is a separate field: **how sure?** A check that couldn't run says so: a clean report and one that couldn't look are **different things**." |
-| `Ctrl+PgDn` → Tab 7 `gate_model.py` line **117** | `gate_model.py:117 apply_cascade · :42 ceiling "medium" · :129 Rule 0` | "A flat checklist gives a site blocking AI crawlers **fifteen criticals**, fourteen of them moot. `apply_cascade` caps those at medium and tags the **one** blocker. **Capped · never deleted.**" |
-| `Ctrl+G 128`, highlight **128–129** | *(same)* | "Line 128: engagement is **never** gated. A visitor from an ad doesn't care if a crawler got in." |
-| `Ctrl+PgDn` → Tab 8 `site_b.report.md` lines **58–60** | `tests/golden/site_b.report.md:60 · same in site_b.audit-report.json:109 ("blocked_by": "F-001")` | "Our golden: **one** critical, **eleven** findings waiting on F-001, engagement untouched." *(cut-ladder step 2)* |
+| `Ctrl+PgDn` → Tab 6 `severity-model.md` line **43**, then `Ctrl+G 56` | `severity-model.md:43 · :56` | "Severity: **how bad, if true?** Confidence, separately: **how sure?** A check that couldn't run says so: a clean report and one that couldn't look are **different things**." |
+| `Ctrl+PgDn` → Tab 7 `gate_model.py` line **117** | `gate_model.py:117 apply_cascade · :42 ceiling "medium" · :129 Rule 0` | "**Remember** those fifteen criticals? `apply_cascade` caps fourteen at medium and tags the **one** blocker. **Capped · never deleted.**" |
+| `Ctrl+G 128`, highlight **128–129** | *(same)* | "But line 128: engagement is **never** gated. A visitor from an ad doesn't care if a crawler got in." |
+| `Ctrl+PgDn` → Tab 8 `site_b.report.md` lines **58–60** | `tests/golden/site_b.report.md:60 · same in site_b.audit-report.json:109 ("blocked_by": "F-001")` | "Our golden test: **one** critical, **eleven** findings waiting on F-001, engagement untouched." *(cut-ladder step 2)* |
 
 ### 1:35–2:01 · Act III · Every fix earns its place
 | DO | CAPTION | SAY |
@@ -302,12 +283,16 @@ Part 1 may be recorded in several takes.
 *Hard cut to Part 2 on "Watch."*
 
 ### Cut ladder: only if the timed read is over 2:50, and only in this order
-1. Cut the GEO line and tab 5's first shot (−14 words → about 2:43).
-2. Cut "Our golden: one critical…" and tab 8 (−11 words → about 2:39).
-3. Cut "File sizes read as phone numbers… show a price." (−15 words → about 2:32).
+1. Cut "And to be quoted? GEO research…" and tab 5's first shot (−17 words → about 2:42).
+2. Cut "Our golden test: one critical…" and tab 8 (−12 words → about 2:37).
+3. Cut "File sizes read as phone numbers… show a price." (−15 words → about 2:31).
+
+Each cut leaves the story joined up: without the GEO line, "…info for training, line 318." runs
+straight into "Severity: how bad, if true?"; without the golden line, Act II ends on "…if a crawler got in."
 
 **Never cut:**
 - the cold open
+- the flat-checklist line (Act II's "Remember those fifteen criticals?" depends on it)
 - the crawler-roles lines
 - `apply_cascade`
 - "never gated"
@@ -317,10 +302,12 @@ Part 1 may be recorded in several takes.
 - the closing quote
 
 ### Bonus lines: only if the read is under 2:35
-1. After "…got in.": `Ctrl+PgUp` back to Tab 2 `gate-rules.md`, `Ctrl+G 54`. Caption `gate-rules.md:54–57 · Rule 0b`.
+1. After "…if a crawler got in.": `Ctrl+P` → type `gate-rules.md:54` → `Enter` (back to tab 2). Caption `gate-rules.md:54–57 · Rule 0b`.
    SAY: "And if we never saw the page a visitor sees, those findings aren't softened, they're **suppressed**. Capping asserts a weaker claim. Suppression asserts **none**."
-2. After "…the right thing.": open `tests\test_regressions.py` at line 2 and scroll the `# R1.` … `# R12.` headers.
+   Then `Ctrl+P` → `site_b.report.md:58` → `Enter` to carry on at tab 8. (`Ctrl+PgDn` from tab 2 would land on tab 3.)
+2. After "…the right thing.": `Ctrl+P` → `test_regressions.py:2` → `Enter`, and scroll the `# R1.` … `# R12.` headers. Caption `tests/test_regressions.py:2 · R1–R12`.
    SAY: "Tests R1 to R12 keep fixed bugs fixed."
+   The closing shot's `Ctrl+P` → `geo-methods.md:56` works from any tab.
 
 ---
 
@@ -331,9 +318,49 @@ Part 1 may be recorded in several takes.
 - On-camera URL: `https://docs.pytest.org/`.
 - Harness: Claude Code 2.1.282. Model: Claude Opus 5.5.
 
-Start in the terminal window from Stage 1.2:
+### 3.0 Right before the take (off camera, in this order)
+
+**Step 1 · Know the escape routes.** Read "If it goes sideways" at the end of this stage now, so you
+know the moves before you need them.
+
+**Step 2 · Clipboard: the step-2 prompt without its `<URL>`.** Do this in the Stage 1.1 PowerShell
+window (at the repo root). Keep the Stage 1.2 window clean: it's the one on camera.
+On camera you paste the prompt and type the URL by hand, because the brief wants the URL entered
+on camera and the prompt pasted word for word from the REPLAY. The prompt is one 2,940-character
+line, so let PowerShell copy it rather than selecting it by hand. It uses the same match as
+`tools\rehearse.ps1`:
+```powershell
+$prompt = (Get-Content REPLAY_IT_Professionals.txt -Encoding UTF8 | Where-Object { $_ -match "SKILL\.md" -and $_.TrimEnd().EndsWith("URL: <URL>") } | Select-Object -First 1).Trim()
+Set-Clipboard -Value $prompt.Substring(0, $prompt.Length - 5)
+(Get-Clipboard -Raw).EndsWith("URL: ")
+```
+- The last line must print `True`: the clipboard ends in `URL: ` with the space, and without `<URL>`.
+- Copy nothing else before the take, or you'll overwrite it. If you do, run the three lines again.
+- Claude Code may show a long paste as a short `[Pasted text #1]` label. That's normal: the whole
+  prompt is still sent, and the saved transcript has it. Type the URL straight after the label.
+
+**Step 3 · Browser: check the site is up.** Open https://docs.pytest.org/ once in Chrome or Edge.
+- If it doesn't load, don't start the take. Use the backup URL (see "If it goes sideways").
+- The rule is that **our engine** has never run on the site. Looking at it in a browser is fine;
+  running `orchestrate.py` or `rehearse.ps1` on it is not.
+
+**Step 4 · Optional, for the drill-down's JSON flip:** a second VS Code window on the **parent** folder `demo-live`:
+```powershell
+code -n demo-live
+```
+- At 1:22, open `brand-ai-readiness-audit\audit-output\audit-report.json` and `Ctrl+F` the finding's `check_id`.
+- Open `demo-live`, never `demo-live\brand-ai-readiness-audit`. A settings change or an extension
+  can create a `.vscode` folder in the folder VS Code has open. Inside the engine folder, that
+  makes the on-camera engine check print `ENGINE DIFFERS FROM THE SUBMISSION`.
+
+**Step 5 · Go to the camera window.** Switch to the terminal window from Stage 1.2:
 - folder `demo-live\brand-ai-readiness-audit` inside the repo;
-- venv active, and the screen cleared.
+- venv active, and the screen cleared (`Clear-Host`).
+
+**Step 6 · Roll.** Start recording, stay silent for 5 seconds, then begin at 0:00 below. Record
+Part 2 in **one continuous take**.
+- **Keep the raw, untrimmed file.** Edit a copy. The raw file proves the run was continuous if
+  anyone asks; Stage 4 records its hash, and video files are git-ignored.
 
 ### 0:00–0:02 · Title strip
 | | |
@@ -389,22 +416,24 @@ Start in the terminal window from Stage 1.2:
 | | |
 |---|---|
 | DO | Scroll slowly over the table of the **top 5 confirmed** findings (ICE column), and the line under it with the likely count |
-| SAY | "Here are the fixes, **sorted by impact**: severity first, then ICE. These are the ones a deterministic check **confirmed**; the **[N] likely** ones are counted right under the table, not hidden." *(optional, drop first if long:)* "That's the **engine's** order, not the model's." |
+| SAY | "Here are the fixes, **sorted by impact**: severity first, then ICE." *(optional, drop first if long:)* "That's the **engine's** order, not the model's." "These are the ones a deterministic check **confirmed**; the **[N] likely** ones are counted right under the table, not hidden." |
 
 ### 1:10–1:22 · Section (3): the verdict column
 | | |
 |---|---|
-| DO | Hold on a row whose verdict is *supported*, with its numbers |
-| SAY | "Now the agent **audits the auditor.** It re-fetches **every row** itself: **[what it counted, e.g. "zero JSON-LD blocks"]**. **Supported.** That's commentary; the report stays exactly as the engine wrote it." |
-| SAY, **first**, if any row says **not supported** (Card F) | "Look, the agent says **this one doesn't hold** on the live page. So we'd verify before acting, and the report stays exactly as the engine wrote it. The drill-down is on **[F-00x]**, which **does.**" |
+| DO | Show the verdict column, then hold on the highest-ranked row whose verdict is *supported*, with its numbers |
+| SAY | "Now the agent **audits the auditor**: it re-fetches **every row** itself." |
+| SAY, only if a row says **not supported** (Card F) | "Look, the agent says **this one doesn't hold** on the live page, so we'd verify before acting." |
+| SAY | "**[F-00x]**: **[what it counted, e.g. "zero JSON-LD blocks"]** · **supported**. That's commentary; the report stays exactly as the engine wrote it." |
 
-*Card F is a strength, not a stumble: don't trim it out.*
+*Card F is a strength, not a stumble: it's the "check us" promise happening on camera. Don't trim it out.*
 
 ### 1:22–1:48 · Section (4): the drill-down
 **DO:** scroll the agent's drill-down top to bottom: evidence, severity and confidence, mechanism,
 patch, ICE, the `blocked_by` count, then verification.
-- The agent picks the finding itself: the highest-ranked row its evidence check supported.
-- Optional: flip to the VS Code window from Stage 1.3, open `brand-ai-readiness-audit\audit-output\audit-report.json`, and `Ctrl+F` the `check_id`.
+- The agent picks the finding itself: the highest-ranked row its evidence check supported,
+  normally the same row you just named in section (3).
+- Optional: flip to the VS Code window from Stage 3.0, open `brand-ai-readiness-audit\audit-output\audit-report.json`, and `Ctrl+F` the `check_id`.
 
 **SAY:** the card below whose `check_id` matches the finding on screen. Swap in the numbers from the screen.
 
