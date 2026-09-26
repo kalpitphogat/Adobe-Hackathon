@@ -22,10 +22,9 @@ only pre-screened for robots.txt and homepage links with `tools/prescreen.py`.
    REPLAY (it did once already, 2.1.280 → 2.1.281). If it fails on the version, update
    `AGENT_HARNESS` and this run sheet to the installed version and re-run a rehearsal
    (`tools\rehearse.ps1` on a *seen* site), or pin with `claude install <version>`.
-1. **Fresh folder, exactly as REPLAY step 1** (Windows PowerShell). Stop before `claude`;
-   that part happens on camera:
+1. **Fresh folder, exactly as REPLAY step 1** (Windows PowerShell, at the repo root of any
+   machine's clone). Stop before `claude`; that part happens on camera:
    ```powershell
-   cd C:\Users\kalpi\Kalpit_round_4
    Remove-Item -Recurse -Force demo-live -ErrorAction SilentlyContinue
    mkdir demo-live; Copy-Item round3-frozen\submission.zip demo-live\; cd demo-live
    ..\.venv\Scripts\Activate.ps1
@@ -152,8 +151,9 @@ python -c "import urllib.request as u;print(u.urlopen('https://docs.pytest.org/e
 1. Watch the trimmed video once against the REPLAY file: harness `Claude Code v2.1.282`, model
    `Claude Opus 5.5`, URL `https://docs.pytest.org/` (or the backup, if you switched). All three must match.
 2. Copy `demo-live/brand-ai-readiness-audit/audit-output/` to `recorded-run/` in this repo and commit it.
-3. **Keep the proof the run was real and continuous.** Copy the session transcript Claude Code saved,
-   `C:\Users\kalpi\.claude\projects\C--Users-kalpi-Kalpit-round-4-demo-live-brand-ai-readiness-audit\<newest>.jsonl`,
+3. **Keep the proof the run was real and continuous.** Copy the session transcript Claude Code saved
+   (the newest `.jsonl` in the folder under `%USERPROFILE%\.claude\projects\` whose name ends in
+   `demo-live-brand-ai-readiness-audit`; `RECORDING_FLOW.md` Stage 4 has the command)
    to `recorded-run/session.jsonl`, and write the raw (untrimmed) video's filename, length and
    `(Get-FileHash <raw-video>).Hash` into `recorded-run/README.md`. The video file itself stays out of git.
    Run `python tools\tool_calls.py recorded-run\session.jsonl` once to confirm it shows the Skill call.

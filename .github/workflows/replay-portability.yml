@@ -1,6 +1,8 @@
-# Runs REPLAY_IT_Professionals.txt's setup and engine steps on Linux and macOS, so the
-# manifest is proven on the platforms judges are most likely to use (we record on Windows).
-# The agent step needs a Claude login, so it is not run here; everything the agent drives is.
+# Runs REPLAY_IT_Professionals.txt's setup and engine steps on clean Linux, macOS and Windows
+# machines, so the manifest is proven wherever a judge replays it. On Windows the REPLAY's own
+# WINDOWS (PowerShell) block is read from the file and run line by line in Windows PowerShell 5.1,
+# the default shell on Windows 10 and 11. The agent step needs a Claude login, so it is not run
+# here; everything the agent drives is, and the disclosed Claude Code version is installed.
 name: replay-portability
 
 on:
@@ -9,6 +11,7 @@ on:
       - "REPLAY_IT_Professionals.txt"
       - "round3-frozen/**"
       - "tools/verify_engine.py"
+      - "tools/check_replay.py"
       - ".github/workflows/replay-portability.yml"
   workflow_dispatch:
 
@@ -114,3 +117,103 @@ jobs:
           print("status:", r["audit_status"], "| F-001:", f["check_id"], f["severity"])
           assert f["check_id"] == "reach.robots.ai_search_bot_blocked" and f["severity"] == "critical"
           EOF
+
+  replay-windows:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: powershell   # Windows PowerShell 5.1: no &&, and scripts blocked unless allowed
+    steps:
+      - uses: actions/checkout@v4
+
+      # Any Python, only to install uv; the REPLAY's own lines then fetch Python 3.11.15.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv (REPLAY commentary, "INSTALLING uv", any platform)
+        run: python -m pip install uv
+
+      - name: Main path - the REPLAY's WINDOWS block as written, engine check, offline tests, two passes
+        run: |
+          $ErrorActionPreference = "Continue"
+          $replay = Get-Content REPLAY_IT_Professionals.txt -Encoding UTF8
+          $start = -1
+          for ($i = 0; $i -lt $replay.Count; $i++) { if ($replay[$i] -like "# ---- WINDOWS (PowerShell)*") { $start = $i; break } }
+          if ($start -lt 0) { throw "WINDOWS block not found in the REPLAY" }
+          $block = @()
+          for ($i = $start + 1; $i -lt $replay.Count -and $replay[$i].StartsWith("#   "); $i++) { $block += $replay[$i].Substring(4) }
+          if ($block.Count -lt 10 -or $block[-1] -notlike "claude --model *") { throw "WINDOWS block is not the expected setup + claude command" }
+          New-Item -ItemType Directory work | Out-Null
+          Copy-Item round3-frozen\submission.zip work\
+          Set-Location work
+          Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+          # Every line exactly as written, in order, except the last: the interactive agent needs a login.
+          foreach ($line in $block[0..($block.Count - 2)]) {
+            Write-Host "REPLAY> $line"
+            $global:LASTEXITCODE = 0
+            Invoke-Expression $line
+            if ($LASTEXITCODE -ne 0) { throw "REPLAY line failed with exit code ${LASTEXITCODE}: $line" }
+          }
+          Write-Host "--- now in $(Get-Location)"
+          $py = (python --version | Out-String).Trim()
+          Write-Host "python: $py"
+          if ($py -ne "Python 3.11.15") { throw "the venv's Python is $py, not 3.11.15" }
+          $harness = (claude --version | Out-String).Trim()
+          Write-Host "claude --version: $harness"
+          if ($harness -notmatch '^2\.1\.282 ') { throw "Claude Code is $harness, not the disclosed 2.1.282" }
+          python ..\..\tools\verify_engine.py ..\submission.zip .
+          if ($LASTEXITCODE -ne 0) { throw "engine check failed" }
+          python tests\run_offline.py
+          if ($LASTEXITCODE -ne 0) { throw "run_offline did not pass on Python 3.11.15" }
+          # TEST_STEPS 3: pass 1 without a browser, the count command read from the REPLAY, then pass 2
+          $url = "https://www.theguardian.com/"
+          python skills/ai-readiness-orchestrator/scripts/orchestrate.py $url --no-render --out ./audit-precheck
+          if ($LASTEXITCODE -ne 0) { throw "pass 1 failed" }
+          $countCmd = $replay | Where-Object { $_.TrimStart().StartsWith("python -c") -and $_.Contains("open('audit-precheck/evidence/pages.jsonl'") } | Select-Object -First 1
+          if (-not $countCmd) { throw "count command not found in TEST_STEPS 3" }
+          $countCmd = $countCmd.Trim()
+          Write-Host "REPLAY> $countCmd"
+          $count = [int](Invoke-Expression $countCmd)
+          Write-Host "pages with status 200 and no same-site links: $count"
+          if ($count -gt 0) {
+            python skills/ai-readiness-orchestrator/scripts/orchestrate.py $url --out ./audit-output
+          } else {
+            python skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle ./audit-precheck/evidence --out ./audit-output
+          }
+          if ($LASTEXITCODE -ne 0) { throw "pass 2 failed" }
+          python ..\..\tools\summarize.py audit-output/audit-report.json --top 3
+          python -c "import json; r=json.load(open('audit-output/audit-report.json',encoding='utf-8')); f=r['findings'][0]; print('status:', r['audit_status'], '| F-001:', f['check_id'], f['severity'], f['confidence']); assert f['check_id']=='reach.robots.ai_search_bot_blocked' and f['severity']=='critical'"
+          if ($LASTEXITCODE -ne 0) { throw "F-001 is not the critical robots.txt finding" }
+          python ..\..\tools\verify_engine.py ..\submission.zip .
+          if ($LASTEXITCODE -ne 0) { throw "the run changed an engine file" }
+
+      - name: Fallback D - always render, with the venv the WINDOWS block built
+        run: |
+          $ErrorActionPreference = "Continue"
+          Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+          $env:PYTHONUTF8 = "1"
+          work\.venv\Scripts\Activate.ps1
+          Set-Location work\brand-ai-readiness-audit
+          python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://www.theguardian.com/ --out ./audit-output-rendered
+          if ($LASTEXITCODE -ne 0) { throw "rendered run failed" }
+          python -c "import json; r=json.load(open('audit-output-rendered/audit-report.json',encoding='utf-8')); f=r['findings'][0]; rr=r['generator']['tool_versions'].get('renderer'); print('renderer:', rr, '| F-001:', f['check_id'], f['severity']); assert rr=='playwright' and f['check_id']=='reach.robots.ai_search_bot_blocked' and f['severity']=='critical'"
+          if ($LASTEXITCODE -ne 0) { throw "Playwright did not render, or F-001 changed" }
+
+      - name: Fallback C / QUICK START - no agent, no venv, no PYTHONUTF8, the runner's own Python
+        run: |
+          $ErrorActionPreference = "Continue"
+          New-Item -ItemType Directory plain | Out-Null
+          Copy-Item round3-frozen\submission.zip plain\
+          Set-Location plain
+          python --version
+          python -m zipfile -e submission.zip brand-ai-readiness-audit
+          Set-Location brand-ai-readiness-audit
+          python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://www.theguardian.com/ --no-render --out ./audit-precheck
+          if ($LASTEXITCODE -ne 0) { throw "pass 1 failed" }
+          python skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle ./audit-precheck/evidence --out ./audit-output
+          if ($LASTEXITCODE -ne 0) { throw "pass 2 failed" }
+          Select-String -Path audit-output\report.md -Pattern "What to do first" | Select-Object -First 1
+          python -c "import json; r=json.load(open('audit-output/audit-report.json',encoding='utf-8')); f=r['findings'][0]; print('status:', r['audit_status'], '| F-001:', f['check_id'], f['severity']); assert f['check_id']=='reach.robots.ai_search_bot_blocked' and f['severity']=='critical'"
+          if ($LASTEXITCODE -ne 0) { throw "F-001 is not the critical robots.txt finding" }

@@ -3,6 +3,9 @@
 Fails (exit 1) on anything that would make judges treat the run as unverified:
 wrong file name, a missing or blank field, a URL that is not a full URL, TEST_STEPS
 without steps 1-3, or a run sheet that names a different harness, model or URL.
+Also fails if the REPLAY, the run sheet or RECORDING_FLOW.md contains a path that only
+exists on one computer (a drive letter or a home folder): every command must run
+unchanged on any machine.
 
 Usage: python tools/check_replay.py [REPLAY_IT_Professionals.txt] [VIDEO_PART2_RUNSHEET.md]
 """
@@ -14,6 +17,10 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 FIELDS = ["TEST_SITE_URLS", "LLM_MODEL", "AGENT_HARNESS", "ENV_SETUP", "TEST_STEPS", "EXPECTED_OUTPUT"]
+
+# A path that exists on one computer only: C:\..., /home/<name>, /Users/<name>, ...\Users\<name>.
+# ~, $HOME, %USERPROFILE% and $env:USERPROFILE are portable and do not match.
+MACHINE_PATH = re.compile(r"(?i)(?<![\w$%])[a-z]:\\|(?<![\w.~$])/(?:home|Users)/\w|\\Users\\\w")
 
 
 def parse(text: str) -> dict[str, str]:
@@ -95,6 +102,17 @@ def main() -> int:
                 problems.append(f"run sheet does not mention {label} {value!r}")
     else:
         problems.append(f"run sheet {runsheet} not found; cannot check consistency with the video")
+
+    # every command must run unchanged on any machine: no drive-letter or home-folder paths
+    docs = [d for d in (replay, runsheet, runsheet.with_name("RECORDING_FLOW.md")) if d.exists()]
+    hits = [f"{d.name}:{n}: {line.strip()[:80]}"
+            for d in docs
+            for n, line in enumerate(d.read_text(encoding="utf-8", errors="replace").splitlines(), 1)
+            if MACHINE_PATH.search(line)]
+    if hits:
+        problems.extend(f"machine-specific path (runs on one computer only): {h}" for h in hits)
+    else:
+        ok.append(f"no machine-specific paths in {', '.join(d.name for d in docs)}")
 
     # the harness actually installed on this machine must match what the REPLAY discloses
     # (Claude Code auto-updates; a silent bump before recording would contradict the video)

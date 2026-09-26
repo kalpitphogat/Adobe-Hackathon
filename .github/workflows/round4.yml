@@ -52,6 +52,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11.15"
+      # Fields, run-sheet consistency, and no path that exists on one computer only (the
+      # installed-harness check is skipped here: there is no Claude Code on the runner).
+      - name: REPLAY fields match the run sheet, and nothing names one machine's paths
+        run: python tools/check_replay.py
       - name: REPLAY_IT_Professionals.txt parses and its fallback path replays
         if: hashFiles('REPLAY_IT_Professionals.txt') != ''
         # The first TEST_SITE_URL is the video's live URL: it must not be audited before

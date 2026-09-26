@@ -48,9 +48,10 @@ $code = $LASTEXITCODE
 $secs = [int]((Get-Date) - $started).TotalSeconds
 $report = Test-Path "audit-output\audit-report.json"
 # tool-call trace (proves the Skill call and the single orchestrator run) + final answer
-$answer = & "$repo\.venv\Scripts\python.exe" "$repo\tools\tool_calls.py" $log --answer | Out-String
+# `python` is the venv activated above (-Venv); both tools are standard library only
+$answer = python "$repo\tools\tool_calls.py" $log --answer | Out-String
 Set-Location $base
-$engine = (& "$repo\.venv\Scripts\python.exe" "$repo\tools\verify_engine.py" submission.zip brand-ai-readiness-audit | Select-Object -Last 2) -join "`n"
+$engine = (python "$repo\tools\verify_engine.py" submission.zip brand-ai-readiness-audit | Select-Object -Last 2) -join "`n"
 Set-Location brand-ai-readiness-audit
 
 $header = @"

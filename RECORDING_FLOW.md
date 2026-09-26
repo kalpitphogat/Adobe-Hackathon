@@ -5,10 +5,14 @@ with it. The spoken lines are copied word for word from [`VIDEO_SCRIPT.md`](VIDE
 (branch `final-3`). If the two ever differ, `VIDEO_SCRIPT.md` wins for what you say and
 [`VIDEO_PART2_RUNSHEET.md`](VIDEO_PART2_RUNSHEET.md) wins for what you type.
 
-Machine: **Kalpit's Windows PC**, PowerShell.
-- Repo clone: `C:\Users\kalpi\Kalpit_round_4`.
-- Venv: `.venv` (Python 3.11.15 with Playwright). Every Windows rehearsal in `rehearsal/` ran on it.
-- On another machine, replace that path, and `.venv` with that machine's venv.
+This file works unchanged on **any Windows PC** with PowerShell, whoever's machine records.
+Nothing below names a user, a drive or a folder outside this repo:
+- **Every command runs at the repo root:** the folder of your clone that holds `REPLAY_IT_Professionals.txt`.
+  To open PowerShell there, open that folder in File Explorer, click the address bar, type `powershell`, and press Enter.
+- **The venv is `.venv` in the repo root,** the name the REPLAY uses. Stage 0.2 checks it, and
+  builds it only if it's missing or wrong.
+- `python tools\check_replay.py` fails if a machine-specific path ever gets into this file, the
+  run sheet or the REPLAY.
 
 How to read this file:
 - **RUN** is typed in PowerShell.
@@ -22,8 +26,9 @@ How to read this file:
 ## Stage 0 · One-time setup, off camera (~15 min)
 
 ### 0.1 Put the clone on `final-3`
+No clone yet? Run `git clone --branch final-3 https://github.com/kalpitphogat/Adobe-Hackathon`, then
+open PowerShell in the new folder and skip to 0.2. Otherwise, at the repo root:
 ```powershell
-cd C:\Users\kalpi\Kalpit_round_4
 git status --short
 git fetch origin
 git checkout final-3
@@ -34,14 +39,16 @@ git log -1 --oneline
   - Lines starting with `??` are untracked files, which are fine.
   - Any other line is a local change to a tracked file. **Stop and paste it to Claude.**
 - If `git checkout` refuses because untracked files "would be overwritten", paste that message to Claude too.
-- `git log` must show the newest `final-3` commit (the one that switched this file to Kalpit's machine).
+- `git log` must show the newest `final-3` commit.
 
 ### 0.2 Check what's installed; install only what's missing
-Kalpit's machine should already have everything. These commands check it:
+Run this at the repo root. On a machine that is already set up, every line prints what's expected
+and nothing needs installing.
 ```powershell
 [Environment]::SetEnvironmentVariable("DISABLE_AUTOUPDATER", "1", "User")
 $env:DISABLE_AUTOUPDATER = "1"
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+Test-Path .venv\Scripts\python.exe
 .venv\Scripts\Activate.ps1
 python --version
 python -c "from importlib.metadata import version; print('playwright', version('playwright'))"
@@ -55,6 +62,7 @@ matters: 2.1.283 came out on 2026-09-25, and the REPLAY says 2.1.282. When the v
 
 Expected output:
 ```
+True
 Python 3.11.15
 playwright 1.63.0
 chromium <any version number>
@@ -62,28 +70,44 @@ chromium <any version number>
 <the path claude runs from>
 ```
 
-Fix only the lines that differ:
+Fix only the lines that differ, then run the block again:
 
 | line differs | fix |
 |---|---|
-| Python isn't 3.11.15 | Stop and tell Claude. Every Windows rehearsal recorded 3.11.15 in this venv. |
-| `playwright` is missing or isn't 1.63.0 | `uv pip install playwright==1.63.0`. If `uv` isn't found, `python -m pip install playwright==1.63.0`. |
+| `False`, or Python isn't 3.11.15 | Build `.venv` the REPLAY's way (next block). |
+| `playwright` is missing or isn't 1.63.0 | `uv pip install playwright==1.63.0` |
 | The chromium line prints an error | `python -m playwright install chromium` |
-| claude isn't **2.1.282**. After 2026-09-25 it has probably updated itself to 2.1.283. | If the path on the last line contains `npm`, run `npm install -g @anthropic-ai/claude-code@2.1.282`. Otherwise run `claude install 2.1.282`. Then open a **new** PowerShell window, `cd` back, and check `claude --version` again. |
+| `claude` isn't recognised | 1. `node --version` must print v18 or newer. If it doesn't, run `winget install OpenJS.NodeJS.LTS` and open a new PowerShell at the repo root.<br>2. Run `npm install -g @anthropic-ai/claude-code@2.1.282`.<br>3. Open a new PowerShell at the repo root, run `claude` once to sign in, then type `/exit`. |
+| claude isn't **2.1.282**. An install that updated itself after 2026-09-25 shows 2.1.283. | If the path on the last line contains `npm`, run `npm install -g @anthropic-ai/claude-code@2.1.282`. Otherwise run `claude install 2.1.282`. Then open a new PowerShell at the repo root and check again. |
+
+**Building `.venv`.** These are the REPLAY's own Windows lines. An existing wrong `.venv` is
+renamed, not deleted; `.venv-*` folders are git-ignored. If `uv --version` isn't recognised, run
+`winget install --id astral-sh.uv -e` (or `pip install uv`) first, then open a new PowerShell at
+the repo root.
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+if (Test-Path .venv) { Rename-Item .venv (".venv-old-" + (Get-Date -Format "yyyyMMdd-HHmmss")) }
+uv python install 3.11.15
+uv venv --python 3.11.15 .venv
+.venv\Scripts\Activate.ps1
+uv pip install playwright==1.63.0
+python -m playwright install chromium
+```
 
 ### 0.3 Pre-flight checks (both must print `0 problem(s)`)
+At the repo root:
 ```powershell
-cd C:\Users\kalpi\Kalpit_round_4
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .venv\Scripts\Activate.ps1
 python tools\check_script_anchors.py
 python tools\check_replay.py
 ```
 `check_replay.py` also compares the installed Claude Code with the REPLAY, so a harness that has
-auto-updated fails here, before it can reach the video.
+auto-updated fails here, before it can reach the video. It also fails if this file, the run sheet
+or the REPLAY names a machine-specific path.
 
 ### 0.4 Rehearse the new prompt once, on a site that has already been audited
-This uses Claude usage from Kalpit's account and takes about 3 minutes.
+This uses Claude usage from the signed-in account and takes about 3 minutes. Run it at the repo root.
 ```powershell
 powershell -ExecutionPolicy Bypass -File tools\rehearse.ps1 -Url https://www.docker.com/ -Label docker_confirmed
 Get-ChildItem rehearsal\*_docker_confirmed.md | Get-Content
@@ -107,12 +131,12 @@ Read Part 1 (Stage 2 below) aloud once with a stopwatch, tab switches included.
 ### 1.1 VS Code for Part 1
 Open a **fresh unzip of the submission**, proven byte-identical, with the 12 tabs in script order,
 each at its first line.
-- An older `demo` folder is renamed, not deleted, so nothing Kalpit kept in it is lost.
+- An older `demo` folder is renamed, not deleted, so nothing kept in it is lost.
   `demo-*` folders are git-ignored.
 - Any older `demo-old-*` folders from earlier recording days are safe to delete once you've checked them.
 
+At the repo root:
 ```powershell
-cd C:\Users\kalpi\Kalpit_round_4
 if (Test-Path demo) { Rename-Item demo ("demo-old-" + (Get-Date -Format "yyyyMMdd-HHmmss")) }
 python -m zipfile -e round3-frozen\submission.zip demo
 python tools\verify_engine.py round3-frozen\submission.zip demo
@@ -140,8 +164,8 @@ code -g demo\DESIGN.md:369
 This is a fresh folder, exactly as in REPLAY step 1 and run sheet §A.1.
 - `demo-live` holds the last take or rehearsal. If a take in it isn't saved yet (Stage 4), save it first.
 
+At the repo root:
 ```powershell
-cd C:\Users\kalpi\Kalpit_round_4
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 Remove-Item -Recurse -Force demo-live -ErrorAction SilentlyContinue
 mkdir demo-live
@@ -264,7 +288,7 @@ Part 1 may be recorded in several takes.
 - Harness: Claude Code 2.1.282. Model: Claude Opus 5.5.
 
 Start in the terminal window from Stage 1.2:
-- folder `C:\Users\kalpi\Kalpit_round_4\demo-live\brand-ai-readiness-audit`;
+- folder `demo-live\brand-ai-readiness-audit` inside the repo;
 - venv active, and the screen cleared.
 
 ### 0:00–0:02 · Title strip
@@ -375,12 +399,14 @@ Type `/exit` in Claude Code and stop recording.
 
 ## Stage 4 · After recording
 
-Right after the take, before any other Claude Code session, check that nothing is saved yet:
+Right after the take, before any other Claude Code session, go back from the recording window to
+the repo root and check that nothing is saved yet:
 ```powershell
-cd C:\Users\kalpi\Kalpit_round_4
+cd ..\..
+Test-Path REPLAY_IT_Professionals.txt
 Test-Path recorded-run
 ```
-This must print `False`. If it prints `True`, an earlier run is saved there: stop and ask before
+The first line must print `True` (you're at the repo root) and the second `False`. If it prints `True`, an earlier run is saved there: stop and ask before
 overwriting it. Then save the run, its session transcript and the video's hash:
 ```powershell
 Copy-Item -Recurse demo-live\brand-ai-readiness-audit\audit-output recorded-run
