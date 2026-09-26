@@ -190,15 +190,59 @@ claude
   If you close it, run this whole block again.
 
 ### 1.3 Clipboard, screen and recorder
-- **Clipboard:** copy the REPLAY step-2 prompt, from `Use the ai-readiness-orchestrator skill` to `URL: `.
-  Include the trailing space and leave out `<URL>`: you type the URL by hand on camera.
-- **Browser:** open https://docs.pytest.org/ once to confirm it's up. A visit is not an audit.
-- **Screen:**
-  - Windows Terminal maximised, font 16+, dark theme.
-  - Focus Assist on, so no notifications.
-  - VS Code open on `demo-live\brand-ai-readiness-audit` in a second window, for the optional JSON flip.
-- **Recorder:** OBS, full screen, mic on. Record 5 s of silence first, for noise reduction.
-  **Keep the raw file.**
+Do this last, just before recording, in the Stage 1.1 PowerShell window (at the repo root). Keep
+the Stage 1.2 window clean: it's the one on camera.
+
+**Clipboard: the step-2 prompt without its `<URL>`.** On camera you paste the prompt and type the
+URL by hand, because the brief wants the URL entered on camera and the prompt pasted word for word
+from the REPLAY. The prompt is one 2,940-character line, so let PowerShell copy it rather than
+selecting it by hand. It uses the same match as `tools\rehearse.ps1`:
+```powershell
+$prompt = (Get-Content REPLAY_IT_Professionals.txt -Encoding UTF8 | Where-Object { $_ -match "SKILL\.md" -and $_.TrimEnd().EndsWith("URL: <URL>") } | Select-Object -First 1).Trim()
+Set-Clipboard -Value $prompt.Substring(0, $prompt.Length - 5)
+(Get-Clipboard -Raw).EndsWith("URL: ")
+```
+- The last line must print `True`: the clipboard ends in `URL: ` with the space, and without `<URL>`.
+- Copy nothing else before the take, or you'll overwrite it. If you do, run the three lines again.
+- Claude Code may show a long paste as a short `[Pasted text #1]` label. That's normal: the whole
+  prompt is still sent, and the saved transcript has it. Type the URL straight after the label.
+
+**Browser: check the site is up.** Open https://docs.pytest.org/ once in Chrome or Edge.
+- If it doesn't load, don't start the take. Use the backup URL (see "If it goes sideways").
+- The rule is that **our engine** has never run on the site. Looking at it in a browser is fine;
+  running `orchestrate.py` or `rehearse.ps1` on it is not.
+
+**Screen: what the camera sees.**
+- **Windows Terminal (the Stage 1.2 window):**
+  - Maximised (`Win+Up`).
+  - Font size 16 or more, so judges can read it at 1080p: `Ctrl+,` → Profiles → Defaults →
+    Appearance → Font size.
+  - A dark colour scheme. The default, Campbell, is dark.
+- **No pop-ups:** these could interrupt the take or show private messages.
+  - Windows 11: Settings → System → Notifications → **Do not disturb**, on.
+  - Windows 10: Action Center → **Focus assist** → Alarms only.
+  - Close chat apps and email.
+- **Optional, for the drill-down's JSON flip:** a second VS Code window on the **parent** folder `demo-live`:
+  ```powershell
+  code -n demo-live
+  ```
+  - At 1:22, open `brand-ai-readiness-audit\audit-output\audit-report.json` and `Ctrl+F` the finding's `check_id`.
+  - Open `demo-live`, never `demo-live\brand-ai-readiness-audit`. A settings change or an extension
+    can create a `.vscode` folder in the folder VS Code has open. Inside the engine folder, that
+    makes the on-camera engine check print `ENGINE DIFFERS FROM THE SUBMISSION`.
+
+**Recorder: OBS Studio (free, obsproject.com).**
+- **Setup:**
+  - Settings → Video: 1920×1080, 30 fps.
+  - Source: **Display Capture** of the whole screen, so switching from Terminal to VS Code is captured.
+  - Audio: your mic on. Its meter should move in the green and yellow when you talk, not the red.
+- **Test first:** record 10 seconds, play it back, and check the text is readable and the voice is clear.
+- **For the take:**
+  - Start recording, then **stay silent for 5 seconds**. The editor uses that silence to learn the
+    room's background noise and remove it.
+  - Record Part 2 in **one continuous take**.
+- **Keep the raw, untrimmed file.** Edit a copy. The raw file proves the run was continuous if
+  anyone asks; Stage 4 records its hash, and video files are git-ignored.
 
 ---
 
@@ -360,7 +404,7 @@ Start in the terminal window from Stage 1.2:
 **DO:** scroll the agent's drill-down top to bottom: evidence, severity and confidence, mechanism,
 patch, ICE, the `blocked_by` count, then verification.
 - The agent picks the finding itself: the highest-ranked row its evidence check supported.
-- Optional: flip to VS Code, open `audit-output\audit-report.json`, and `Ctrl+F` the `check_id`.
+- Optional: flip to the VS Code window from Stage 1.3, open `brand-ai-readiness-audit\audit-output\audit-report.json`, and `Ctrl+F` the `check_id`.
 
 **SAY:** the card below whose `check_id` matches the finding on screen. Swap in the numbers from the screen.
 
