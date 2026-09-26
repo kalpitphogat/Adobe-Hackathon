@@ -7,6 +7,8 @@ It **replaces the narration** in `VIDEO_PART1_SCRIPT.md` and the "you say" colum
 `VIDEO_PART2_RUNSHEET.md`. The run sheet is still the **operations manual** for the live run
 (fresh folder, recorder, what to do if something breaks). Where the two differ, this file wins
 for *what you say*; the run sheet wins for *what you type*.
+[`RECORDING_FLOW.md`](RECORDING_FLOW.md) puts the two side by side, step by step: each command or
+click next to the line you say with it.
 
 | | hard cap | target | spoken words | at 145 wpm |
 |---|---|---|---|---|
