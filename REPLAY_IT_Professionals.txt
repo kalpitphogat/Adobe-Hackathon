@@ -376,8 +376,12 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # the --bundle re-analysis above). Verify offline with:
 #   python tests/run_offline.py
 #   -> PASS: offline, deterministic, goldens current, control clean.
-# (That byte-for-byte golden comparison needs Python 3.11.15, the version the
-# goldens record; on other versions only generator.tool_versions.python differs.)
+# That last comparison is byte for byte against goldens made with Python
+# 3.11.15, and each golden records that version. On any other Python it
+# prints "DRIFTED from golden" for all six sites and ends "FAILED (6)",
+# while every other section still passes: the only field that differs is
+# generator.tool_versions.python (checked 2026-09-26 on Windows with Python
+# 3.12.5 and on Linux with 3.12.3).
 # On a live URL, differences between runs come only from the site changing or
 # the crawl sampling different pages; audited_at always changes. Example:
 # docs.djangoproject.com gave the same 24 findings on 2026-09-23 and 2026-09-24.
