@@ -5,7 +5,10 @@ with it. The spoken lines are copied word for word from [`VIDEO_SCRIPT.md`](VIDE
 (branch `final-3`). If the two ever differ, `VIDEO_SCRIPT.md` wins for what you say and
 [`VIDEO_PART2_RUNSHEET.md`](VIDEO_PART2_RUNSHEET.md) wins for what you type.
 
-Machine: **Tanmay's Windows PC**, PowerShell, repo clone at `C:\verify-final3`.
+Machine: **Kalpit's Windows PC**, PowerShell.
+- Repo clone: `C:\Users\kalpi\Kalpit_round_4`.
+- Venv: `.venv` (Python 3.11.15 with Playwright). Every Windows rehearsal in `rehearsal/` ran on it.
+- On another machine, replace that path, and `.venv` with that machine's venv.
 
 How to read this file:
 - **RUN** is typed in PowerShell.
@@ -16,47 +19,79 @@ How to read this file:
 
 ---
 
-## Stage 0 · One-time setup, off camera (~20 min)
+## Stage 0 · One-time setup, off camera (~15 min)
 
-### 0.1 Update the clone
+### 0.1 Put the clone on `final-3`
 ```powershell
-cd C:\verify-final3
-git pull
+cd C:\Users\kalpi\Kalpit_round_4
+git status --short
+git fetch origin
+git checkout final-3
+git pull origin final-3
 git log -1 --oneline
 ```
+- Check `git status --short` before switching branches:
+  - Lines starting with `??` are untracked files, which are fine.
+  - Any other line is a local change to a tracked file. **Stop and paste it to Claude.**
+- If `git checkout` refuses because untracked files "would be overwritten", paste that message to Claude too.
+- `git log` must show the newest `final-3` commit (the one that switched this file to Kalpit's machine).
 
-### 0.2 The disclosed environment
-This is REPLAY ENV_SETUP, Windows block. Skip any line that is already done.
+### 0.2 Check what's installed; install only what's missing
+Kalpit's machine should already have everything. These commands check it:
 ```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-winget install --id astral-sh.uv -e
-uv python install 3.11.15
-uv venv --python 3.11.15 .venv-rec
-.venv-rec\Scripts\Activate.ps1
-uv pip install playwright==1.63.0
-python -m playwright install chromium
-npm install -g @anthropic-ai/claude-code@2.1.282
 [Environment]::SetEnvironmentVariable("DISABLE_AUTOUPDATER", "1", "User")
+$env:DISABLE_AUTOUPDATER = "1"
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.venv\Scripts\Activate.ps1
+python --version
+python -c "from importlib.metadata import version; print('playwright', version('playwright'))"
+python -c "from playwright.sync_api import sync_playwright as s; p = s().start(); b = p.chromium.launch(); print('chromium', b.version); b.close(); p.stop()"
+claude --version
+(Get-Command claude).Source
 ```
-- If `winget install` installs uv, open a new PowerShell window, `cd C:\verify-final3`, and carry on from `uv python install`.
-- `.venv-rec` is the recording venv: Python 3.11.15 with Playwright. It is separate from the test venvs.
+The first line stops Claude Code from updating itself, in every new window from now on. That
+matters: 2.1.283 came out on 2026-09-25, and the REPLAY says 2.1.282. When the video is done,
+`[Environment]::SetEnvironmentVariable("DISABLE_AUTOUPDATER", $null, "User")` turns updates back on.
+
+Expected output:
+```
+Python 3.11.15
+playwright 1.63.0
+chromium <any version number>
+2.1.282 (Claude Code)
+<the path claude runs from>
+```
+
+Fix only the lines that differ:
+
+| line differs | fix |
+|---|---|
+| Python isn't 3.11.15 | Stop and tell Claude. Every Windows rehearsal recorded 3.11.15 in this venv. |
+| `playwright` is missing or isn't 1.63.0 | `uv pip install playwright==1.63.0`. If `uv` isn't found, `python -m pip install playwright==1.63.0`. |
+| The chromium line prints an error | `python -m playwright install chromium` |
+| claude isn't **2.1.282**. After 2026-09-25 it has probably updated itself to 2.1.283. | If the path on the last line contains `npm`, run `npm install -g @anthropic-ai/claude-code@2.1.282`. Otherwise run `claude install 2.1.282`. Then open a **new** PowerShell window, `cd` back, and check `claude --version` again. |
 
 ### 0.3 Pre-flight checks (both must print `0 problem(s)`)
 ```powershell
-cd C:\verify-final3
-.venv-rec\Scripts\Activate.ps1
-python --version                     # Python 3.11.15
-claude --version                     # 2.1.282 (Claude Code)
+cd C:\Users\kalpi\Kalpit_round_4
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.venv\Scripts\Activate.ps1
 python tools\check_script_anchors.py
 python tools\check_replay.py
 ```
+`check_replay.py` also compares the installed Claude Code with the REPLAY, so a harness that has
+auto-updated fails here, before it can reach the video.
 
 ### 0.4 Rehearse the new prompt once, on a site that has already been audited
+This uses Claude usage from Kalpit's account and takes about 3 minutes.
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools\rehearse.ps1 -Url https://www.docker.com/ -Label docker_confirmed -Venv .venv-rec
+powershell -ExecutionPolicy Bypass -File tools\rehearse.ps1 -Url https://www.docker.com/ -Label docker_confirmed
+Get-ChildItem rehearsal\*_docker_confirmed.md | Get-Content
 ```
-Paste the transcript to Claude for checking. The table should hold only confirmed findings,
-with a verdict on every row, and the `prompt_injection` row should be marked **not supported**.
+Paste the output to Claude for checking. What it should show:
+- The header shows `harness: 2.1.282` and `playwright: yes`.
+- The table holds only confirmed findings, with a verdict on every row.
+- The `prompt_injection` row is marked **not supported**.
 
 ### 0.5 Time Part 1
 Read Part 1 (Stage 2 below) aloud once with a stopwatch, tab switches included.
@@ -70,11 +105,17 @@ Read Part 1 (Stage 2 below) aloud once with a stopwatch, tab switches included.
 ## Stage 1 · Recording day setup (off camera, ~10 min)
 
 ### 1.1 VS Code for Part 1
-Open the **unzipped submission** with the 12 tabs in script order, each at its first line:
+Open a **fresh unzip of the submission**, proven byte-identical, with the 12 tabs in script order,
+each at its first line.
+- An older `demo` folder is renamed, not deleted, so nothing Kalpit kept in it is lost.
+  `demo-*` folders are git-ignored.
+- Any older `demo-old-*` folders from earlier recording days are safe to delete once you've checked them.
+
 ```powershell
-cd C:\verify-final3
-Remove-Item -Recurse -Force demo -ErrorAction SilentlyContinue
+cd C:\Users\kalpi\Kalpit_round_4
+if (Test-Path demo) { Rename-Item demo ("demo-old-" + (Get-Date -Format "yyyyMMdd-HHmmss")) }
 python -m zipfile -e round3-frozen\submission.zip demo
+python tools\verify_engine.py round3-frozen\submission.zip demo
 code demo
 code -g demo\skills\answerability-audit\references\chunking-model.md:40
 code -g demo\skills\ai-readiness-orchestrator\references\gate-rules.md:10
@@ -89,19 +130,24 @@ code -g demo\skills\structured-data-audit\scripts\extract_markup.py:203
 code -g demo\skills\ai-readiness-orchestrator\scripts\severity.py:26
 code -g demo\DESIGN.md:369
 ```
+- `verify_engine.py` must end with `RESULT : ENGINE UNCHANGED`.
+- You should see 12 tabs. If `code` isn't recognised, open the `demo` folder in VS Code by hand
+  and open each file with `Ctrl+P`, typing its name then `:line` (for example `chunking-model.md:40`).
 - In VS Code, turn on Zen mode (`Ctrl+K Z`), set the font to 20, turn the minimap off and use a high-contrast theme.
 - Click tab 1. `Ctrl+PgDn` then walks the tabs in script order.
 
 ### 1.2 Terminal for Part 2
-This is a fresh folder, exactly as in REPLAY step 1:
+This is a fresh folder, exactly as in REPLAY step 1 and run sheet §A.1.
+- `demo-live` holds the last take or rehearsal. If a take in it isn't saved yet (Stage 4), save it first.
+
 ```powershell
-cd C:\verify-final3
+cd C:\Users\kalpi\Kalpit_round_4
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 Remove-Item -Recurse -Force demo-live -ErrorAction SilentlyContinue
 mkdir demo-live
 Copy-Item round3-frozen\submission.zip demo-live\
 cd demo-live
-..\.venv-rec\Scripts\Activate.ps1
+..\.venv\Scripts\Activate.ps1
 python --version
 python -m zipfile -e submission.zip brand-ai-readiness-audit
 cd brand-ai-readiness-audit
@@ -109,10 +155,15 @@ python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
 $env:DISABLE_AUTOUPDATER = "1"
 $env:PYTHONUTF8 = "1"
 python ..\..\tools\verify_engine.py ..\submission.zip .
-Clear-Host
+claude
 ```
 - `python --version` must print Python 3.11.15.
 - The `verify_engine.py` run is a dry run of the on-camera command and must end with `RESULT : ENGINE UNCHANGED`.
+- The last line starts Claude Code once, **off camera**, so its first-run questions don't land in the take.
+  - If it asks whether you trust the files in this folder, answer **Yes**.
+  - Don't send it a prompt: type `/exit`, then `Clear-Host`.
+- Leave this window open: Part 2 starts here, and the venv and both `$env:` settings belong to this window.
+  If you close it, run this whole block again.
 
 ### 1.3 Clipboard, screen and recorder
 - **Clipboard:** copy the REPLAY step-2 prompt, from `Use the ai-readiness-orchestrator skill` to `URL: `.
@@ -212,8 +263,9 @@ Part 1 may be recorded in several takes.
 - On-camera URL: `https://docs.pytest.org/`.
 - Harness: Claude Code 2.1.282. Model: Claude Opus 5.5.
 
-Start in the terminal from Stage 1.2: folder `C:\verify-final3\demo-live\brand-ai-readiness-audit`,
-venv active, and the screen cleared.
+Start in the terminal window from Stage 1.2:
+- folder `C:\Users\kalpi\Kalpit_round_4\demo-live\brand-ai-readiness-audit`;
+- venv active, and the screen cleared.
 
 ### 0:00–0:02 · Title strip
 | | |
@@ -314,7 +366,7 @@ Type `/exit` in Claude Code and stop recording.
 ### If it goes sideways during the take
 | what happens | do |
 |---|---|
-| Permission prompt | Approve it on camera and trim the pause. It is part of the real run. |
+| Permission prompt, or the folder-trust question | Approve it on camera and trim the pause. It is part of the real run. |
 | The agent chains a command (`...; echo $LASTEXITCODE`), or tries `python3`, and gets blocked | It retries the plain command. Approve if asked, and trim the retry. |
 | `no evidence bundle was produced`, a crash, or more than 5 min | Stop. Start a **new take on `https://www.sphinx-doc.org/`**, after changing the first `TEST_SITE_URLS` entry, the step-2 example and the run sheet to match, and re-running `python tools\check_replay.py`. **Never splice.** |
 | Too long for 2:00 | Trim waits and the agent's thinking harder, then drop the *(optional)* sentence. Never cut: the typed URL, the `Skill(...)` call, the pass-2 line, the table, the verdicts, or the drill-down. |
@@ -323,10 +375,14 @@ Type `/exit` in Claude Code and stop recording.
 
 ## Stage 4 · After recording
 
-Run these from `C:\verify-final3`:
+Right after the take, before any other Claude Code session, check that nothing is saved yet:
 ```powershell
-cd C:\verify-final3
-Remove-Item -Recurse -Force recorded-run -ErrorAction SilentlyContinue
+cd C:\Users\kalpi\Kalpit_round_4
+Test-Path recorded-run
+```
+This must print `False`. If it prints `True`, an earlier run is saved there: stop and ask before
+overwriting it. Then save the run, its session transcript and the video's hash:
+```powershell
 Copy-Item -Recurse demo-live\brand-ai-readiness-audit\audit-output recorded-run
 Get-ChildItem $env:USERPROFILE\.claude\projects\*demo-live-brand-ai-readiness-audit* | Get-ChildItem -Filter *.jsonl | Sort-Object LastWriteTime | Select-Object -Last 1 | Copy-Item -Destination recorded-run\session.jsonl
 python tools\tool_calls.py recorded-run\session.jsonl
@@ -335,6 +391,8 @@ python tools\check_replay.py
 ```
 - `tools\tool_calls.py` must show the `Skill` call.
 - Write the raw video's file name, length and hash into `recorded-run\README.md`. The video itself stays out of git.
+- Then commit it, as run sheet §F says:
+  `git add recorded-run`, then `git commit -m "Recorded run: docs.pytest.org"`, then `git push origin final-3`.
 
 Final checks:
 - Part 1 is 3:00 or less, Part 2 is 2:00 or less, and the total is 5:00 or less.
