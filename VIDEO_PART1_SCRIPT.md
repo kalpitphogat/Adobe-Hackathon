@@ -1,5 +1,9 @@
 # Video Part 1: Thought process (hard cap 3:00)
 
+> **Superseded by [`VIDEO_SCRIPT.md`](VIDEO_SCRIPT.md)** (2026-09-26): both parts, shot by shot, with
+> every anchor checked against the zip by `tools/check_script_anchors.py`. This earlier draft is kept
+> for its history; record from `VIDEO_SCRIPT.md`.
+
 **Rubric line this part is scored on (35 points):** *"Signal discovery, severity logic, and fix
 derivation are sound, non-obvious, and traceable to the submitted code."* And the rule that
 bites: *"Narration that cannot be traced to the submitted code earns no credit."*

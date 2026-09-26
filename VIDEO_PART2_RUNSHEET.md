@@ -1,5 +1,9 @@
 # Video Part 2: Live trial run (hard cap 2:00 after trimming)
 
+> **What to say** is in [`VIDEO_SCRIPT.md`](VIDEO_SCRIPT.md) §2, with a drill-down card for each likely
+> finding. This run sheet stays the operations manual: setup (§A), what's on screen (§B), and what to
+> do if something breaks (§E).
+
 **Rubric (35 points):** *"On an unseen URL, the live agent run surfaces real, evidence-backed
 findings — few misses, few false positives."*
 **Integrity gate:** one real, continuous run. Trimming idle waits is allowed; splicing is not.

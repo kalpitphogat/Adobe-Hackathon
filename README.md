@@ -38,7 +38,8 @@ below was actually run: on our Windows machine (`rehearsal/` has the transcripts
 | **Linux / macOS** | judges not on Windows | CI runs ENV_SETUP as written + steps 1 and 3 + A and C on Ubuntu and macOS: all pass |
 
 `tools/check_replay.py` checks the REPLAY file (fields, URLs, steps) and that it matches the run
-sheet and the installed harness version. It must print `0 problem(s)` before recording.
+sheet and the installed harness version. `tools/check_script_anchors.py` checks every file:line the
+video script cites against the submitted zip itself. Both must print `0 problem(s)` before recording.
 
 ## Where the reasoning lives in code
 
@@ -55,7 +56,8 @@ All paths are inside the unzipped submission; line numbers were checked against 
 | ICE score and total ranking order | `skills/ai-readiness-orchestrator/scripts/severity.py:26–29`, `:68` |
 | fixed false positives can't come back | `tests/test_regressions.py` R1–R12 |
 
-The Part 1 narration with the same anchors is `VIDEO_PART1_SCRIPT.md`.
+The video script, `VIDEO_SCRIPT.md`, shows each of these on screen while it is said; its anchor
+ledger (57 file:line rows) is checked against the zip by `tools/check_script_anchors.py`, locally and in CI.
 
 **When to use the browser** is decided by the agent, not the engine, from pass 1's own evidence:
 `SITE_MATRIX.md` (11 sites, including 5 test sites that isolate each case), `STRATEGY_COMPARISON.md`
@@ -76,11 +78,13 @@ structured-data price mismatch on IKEA. The agent's evidence check caught both i
 | path | what |
 |---|---|
 | `REPLAY_IT_Professionals.txt` | the reproduction manifest (submitted with the video) |
-| `VIDEO_PART1_SCRIPT.md`, `VIDEO_PART2_RUNSHEET.md` | narration and live-run sheet |
+| `VIDEO_SCRIPT.md` | the video, word for word and shot by shot: Part 1 narration, Part 2 lines and drill-down cards, anchor ledger |
+| `VIDEO_PART2_RUNSHEET.md` | live-run operations: fresh folder, recorder, what to do if something breaks |
+| `VIDEO_PART1_SCRIPT.md` | the earlier Part 1 draft, superseded by `VIDEO_SCRIPT.md` |
 | `CONSTRAINTS.md` | every rule in the Round 4 brief, with status and evidence |
 | `round3-frozen/` | the Round 3 upload and its hash; never edited |
 | `rehearsal/` | agent transcripts from every rehearsal, dated |
-| `tools/` | `check_replay.py`, `verify_engine.py`, `rehearse.ps1`, `tool_calls.py`, `prescreen.py`, `scout.py`, `summarize.py`, `diff_reports.py`, `count_links.py`, `check_price.py` |
+| `tools/` | `check_replay.py`, `check_script_anchors.py`, `verify_engine.py`, `rehearse.ps1`, `tool_calls.py`, `prescreen.py`, `scout.py`, `summarize.py`, `diff_reports.py`, `count_links.py`, `check_price.py` |
 | `.github/workflows/` | `replay-portability.yml`: the REPLAY on Ubuntu and macOS |
 | `NOTES.md`, `SCOUTING.md`, `COMPARISON_ikea.md` | findings about the engine |
 
@@ -98,7 +102,8 @@ cd demo; ..\.venv\Scripts\python.exe tests\run_offline.py   # PASS on 3.11.15
 ## Deliverables
 
 - [x] `REPLAY_IT_Professionals.txt`, rehearsed from clean unzips, with three tested fallbacks
-- [x] `VIDEO_PART1_SCRIPT.md`: 380 words (~2:43), every claim tied to a file and line
+- [x] `VIDEO_SCRIPT.md`: Part 1 389 words (~2:49 incl. title card, cut ladder to 2:32) and Part 2
+  lines with a drill-down card per likely finding; every claim tied to a file and line, machine-checked
 - [x] `VIDEO_PART2_RUNSHEET.md`: live run on https://docs.pytest.org/
 - [ ] The video: Part 1 ≤ 3:00, Part 2 ≤ 2:00, total ≤ 5:00
 
