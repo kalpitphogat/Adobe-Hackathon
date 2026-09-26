@@ -1,0 +1,3 @@
+<p class="price">__FILL_IN__:amount __FILL_IN__:currency</p>
+<!-- or, if pricing is genuinely quote-based: -->
+<p><a href="/contact">Request pricing</a> — typical range __FILL_IN__:range</p>

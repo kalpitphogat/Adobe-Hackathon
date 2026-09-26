@@ -1,0 +1,46 @@
+{
+  "audited_at": "2026-09-26T20:18:51Z",
+  "crawl": {
+    "malformed_hrefs": [],
+    "pages_fetched": 25,
+    "pages_rendered": 0,
+    "pages_requested": 25,
+    "per_host_delay_s": 0.4,
+    "robots_respected": true,
+    "robots_status": 200,
+    "sample_strategy": "stratified:5_types",
+    "truncated_by_budget": false,
+    "urls_skipped_by_robots": [],
+    "urls_skipped_by_traps": [
+      {
+        "rule": "search_results",
+        "url": "https://www.npr.org/search/"
+      }
+    ],
+    "workers": 5
+  },
+  "degraded_capabilities": [
+    {
+      "affects": [
+        "act.perf.above_fold_weight",
+        "read.render.nav_links_js_only",
+        "read.render.raw_text_gap"
+      ],
+      "capability": "rendered_dom",
+      "confidence_effect": "read.render.empty_spa_shell drops from critical/confirmed to high/likely",
+      "reason": "playwright not installed (No module named 'playwright')"
+    }
+  ],
+  "elapsed_s": 26.32,
+  "notes": [],
+  "resolved_origin": "https://www.npr.org",
+  "schema_version": "1.0",
+  "seed_url": "https://www.npr.org/",
+  "status": "partial",
+  "tool_versions": {
+    "collector": "1.0.0",
+    "python": "3.11.9",
+    "renderer": "none",
+    "transport": "live"
+  }
+}

@@ -1,0 +1,2 @@
+<h1>__FILL_IN__:what_this_page_is</h1>
+<p>__FILL_IN__:product_name is __FILL_IN__:category for __FILL_IN__:audience. It __FILL_IN__:primary_outcome.</p>

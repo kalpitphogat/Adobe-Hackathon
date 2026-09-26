@@ -1,0 +1,53 @@
+TEST_SITE_URLS: https://www.npr.org/
+LLM_MODEL: Claude Opus 5.5 (model id claude-opus-5-5)                    # name + version
+AGENT_HARNESS: Claude Code v2.1.283                                      # name + version (npm @anthropic-ai/claude-code@2.1.283)
+ENV_SETUP: Python 3.9+ standard library only (no pip install; recorded with Python 3.11.9, no Playwright); Node 18+ then: npm install -g @anthropic-ai/claude-code@2.1.283 ; claude (log in once)
+TEST_STEPS:
+ 1. cd into a folder that contains the unchanged Round 3 package submission.zip (sha256 1c872c598dcac741c712cbf9e671f024881a9ba251e2b4da66995f81b6cf8dcf; in our repo checkout this is the repo root)
+ 2. claude --plugin-dir ./submission.zip --model claude-opus-5-5 --allowedTools "Bash(python:*)" "Bash(python3:*)" "Bash(curl:*)" "Read"
+ 3. At the Claude Code prompt paste verbatim: Use the ai-readiness-orchestrator skill to audit https://www.npr.org/ . Stay in the current directory and run the skill's own script with default flags and an absolute output path, giving that command a 10-minute timeout: python "<skill base directory>/scripts/orchestrate.py" https://www.npr.org/ --out "$PWD/audit-output/www.npr.org" (use python3 if python is not on PATH). Report only what the engine wrote to ./audit-output/www.npr.org/audit-report.json and add no findings of your own. Then: (1) show the summary counts and a table of every finding in the report's own order: id, severity, stage, confidence, ICE, blocked_by, title; (2) drill into F-001: quote its evidence, say why it has that severity and how many findings it caps via blocked_by, and show its fix, mechanism, patch and verification; (3) corroborate F-001's evidence against the live site with one read-only request and show the raw lines; (4) list the fixes that are not blocked, sorted by ICE score, highest first.
+ 4. The agent invokes the skill submission:ai-readiness-orchestrator, which runs the engine's scripts/orchestrate.py (audit about 40 s, whole session about 2 min). The engine writes ./audit-output/www.npr.org/audit-report.json plus report.md, fix_patches/ and evidence/. Findings appear in the chat as summary counts, a table in the engine's priority order, the F-001 drill-down with a live robots.txt check, and the unblocked fixes sorted by ICE.
+EXPECTED_OUTPUT: ./audit-output/www.npr.org/audit-report.json            # relative to the folder where claude was started
+
+# ---------------------------------------------------------------------------
+# Notes. Every line below starts with '#'; the six fields above are the manifest.
+#
+# WHAT A CORRECT REPLAY SHOWS (same substance as the video; exact counts move with npr.org's pages):
+#   F-001 critical, confirmed: reach.robots.ai_search_bot_blocked. robots.txt disallows ChatGPT-User,
+#   OAI-SearchBot, Claude-SearchBot, Claude-User and PerplexityBot with "Disallow: /" (lines 47, 54, 74,
+#   77 and 98 of npr.org/robots.txt when we ran it), and most discoverability findings are capped at medium
+#   with blocked_by F-001. A medium finding records the contested bots (Google-Extended, Applebot-Extended,
+#   FacebookBot). An info finding records the training-only bots (GPTBot, CCBot, ClaudeBot, ...), explicitly
+#   not a defect. Engagement (act) findings are never capped by F-001.
+#
+# JUDGE-CHOSEN URL: in step 3 replace https://www.npr.org/ (twice) and www.npr.org (twice) with your URL and
+#   its hostname. The report then lands in ./audit-output/<hostname>/audit-report.json.
+#
+# SAME RUN, HEADLESS (for scripted replay):
+#   bash:        claude -p --plugin-dir ./submission.zip --model claude-opus-5-5 --allowedTools "Bash(python:*)" "Bash(python3:*)" "Bash(curl:*)" "Read" < round4/PROMPT.txt
+#   PowerShell:  Get-Content round4/PROMPT.txt -Raw | claude -p --plugin-dir ./submission.zip --model claude-opus-5-5 --allowedTools "Bash(python:*)" "Bash(python3:*)" "Bash(curl:*)" "Read"
+#   (round4/PROMPT.txt holds the step-3 prompt byte-for-byte.)
+#
+# SAME ENGINE FROM THE REPO FOLDER: claude --plugin-dir ./brand-ai-readiness-audit ... loads identical bytes
+#   (verified by python round4/verify_round4.py). The skill is then named
+#   brand-ai-readiness-audit:ai-readiness-orchestrator. The prompt names the skill without a prefix, so it works for both.
+#
+# FALLBACK WITHOUT A PAID HARNESS (deterministic engine, no LLM; the findings are identical because the agent only
+#   invokes the engine and reads its report):
+#   python -m zipfile -e submission.zip round3
+#   cd round3
+#   python skills/ai-readiness-orchestrator/scripts/orchestrate.py https://www.npr.org/ --out ../audit-output/www.npr.org
+#   -> ../audit-output/www.npr.org/audit-report.json (report.md is the human-readable version, ordered by priority)
+#
+# WHY --out IS ABSOLUTE: the Round 3 orchestrator starts its sub-skills with cwd set to the marketplace root, so a
+#   relative --out only resolves correctly when run from that root (as the Round 3 docs do). From anywhere else,
+#   pass an absolute path, as the prompt does with $PWD. This is Round 3 behaviour, unchanged.
+#
+# OUR RECORDED RUN: round4/recorded-run/www.npr.org/ in the repo holds the video take's audit-report.json, report.md,
+#   robots.txt, evidence hashes and a PASS re-derivation of every finding from the captured evidence.
+#   A pre-recording rehearsal of these exact steps is in round4/rehearsal/www.npr.org/ (with its agent transcript).
+#   Compare any replay to it:  python round4/verify_round4.py --compare <ours>/audit-report.json ./audit-output/www.npr.org/audit-report.json
+#
+# INTEGRITY: python round4/verify_round4.py proves the engine is byte-identical to Round 3
+#   (commit ede3a6ba776f31c6760c3fb7516cb7c66596b1ff, branch final-submission, 155 packaged files).
+# GUARDRAILS: read-only (GET and HEAD only), robots.txt respected, 25-page cap, 0.4 s per-host delay, no bot-UA probing.

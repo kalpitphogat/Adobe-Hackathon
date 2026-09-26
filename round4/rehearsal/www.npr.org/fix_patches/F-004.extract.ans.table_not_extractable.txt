@@ -1,0 +1,9 @@
+<table>
+  <caption>__FILL_IN__:what_this_table_lists</caption>
+  <thead>
+    <tr><th scope="col">__FILL_IN__:column_1</th><th scope="col">__FILL_IN__:column_2</th></tr>
+  </thead>
+  <tbody>
+    <tr><th scope="row">__FILL_IN__:row_label</th><td>__FILL_IN__:value</td></tr>
+  </tbody>
+</table>

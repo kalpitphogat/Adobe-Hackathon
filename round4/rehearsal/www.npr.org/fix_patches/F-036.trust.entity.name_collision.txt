@@ -1,0 +1,4 @@
+<p>NPR is a __FILL_IN__:category for __FILL_IN__:audience, based in __FILL_IN__:location.</p>
+<!-- and in the Organization node: -->
+"description": "__FILL_IN__:one_line_category_description",
+"sameAs": ["__FILL_IN__:wikidata_or_wikipedia_url", "__FILL_IN__:linkedin_url"]

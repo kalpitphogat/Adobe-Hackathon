@@ -1,0 +1,15 @@
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://www.npr.org/#organization",
+  "name": "NPR - Breaking News, Analysis, Music, Arts & Podcasts : NPR",
+  "url": "https://www.npr.org/",
+  "description": "Top stories in the U.S. and world news, politics, health, science, business, music, arts and culture. Nonprofit journalism with a mission. This is NPR.",
+  "sameAs": [
+    "__FILL_IN__:your_wikipedia_or_wikidata_url",
+    "__FILL_IN__:your_linkedin_url",
+    "__FILL_IN__:your_primary_social_or_github_url"
+  ]
+}
+</script>

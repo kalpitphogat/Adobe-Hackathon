@@ -4,6 +4,12 @@
 
 Team: Lakshya, Tanmay, Kalpit
 
+> **Round 4 (live agent demo):** the reproduction manifest is
+> [`REPLAY_LakshyaTanmayKalpit.txt`](REPLAY_LakshyaTanmayKalpit.txt), and the video script,
+> verifier and rehearsal are in [`round4/`](round4/README.md). The engine is the Round 3
+> engine, unchanged: `python round4/verify_round4.py` proves `submission.zip` and
+> `brand-ai-readiness-audit/` are byte-identical to the Round 3 commit.
+
 Point it at any website. It reports **why AI assistants don't find, cite, or
 correctly describe the brand**, and **why visitors who do arrive leave without
 acting** — every claim backed by evidence, every fix paste-ready and ordered by

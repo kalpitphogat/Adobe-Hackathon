@@ -1,0 +1,257 @@
+{
+  "archetype": "publisher",
+  "archetype_confidence": 0.95,
+  "archetype_scores": {},
+  "archetype_signals": [
+    "bylines (+2.0)",
+    "many_article_urls (+2.5)",
+    "schema_article (+2.5)"
+  ],
+  "notes": [],
+  "page_type_counts": {
+    "article": 23,
+    "category": 1,
+    "home": 1
+  },
+  "pages": {
+    "https://www.npr.org/": {
+      "confidence": 0.95,
+      "page_type": "home",
+      "signals": [
+        "URL path matches ^/?$, an unambiguous home path"
+      ]
+    },
+    "https://www.npr.org/2021/01/11/955692434/procrastination-is-more-than-putting-things-off-heres-how-to-kick-the-habit": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/2022/07/11/1110926267/digital-minimalism-can-help-find-balance": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/2022/12/09/1141872654/build-a-healthy-relationship-with-your-in-laws": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/2026/09/24/nx-s1-5931971/trump-nih-science-funding-disruptions-charts": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/2026/09/24/nx-s1-5974336/teen-pregnancy-prevention-unspent-funding": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/2026/09/24/nx-s1-5978798/your-mother-your-mother-your-mother-review": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/2026/09/24/nx-s1-5978892/willem-dafoe-late-fame-lighthouse-poor-things-italy-farming-spiderman-green-goblin": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/2026/09/24/nx-s1-5979058/where-is-austin-tice-a-meeting-in-muskat": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/2026/09/25/g-s1-144665/trump-arch-fat-bear-media-ai-news-quiz": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/2026/09/25/g-s1-144948/pandemic-prevention-treaty-agreement-world-health-organization": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/2026/09/25/nx-s1-5976804/supreme-court-trump-save-noncitizen-voting": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/2026/09/25/nx-s1-5976939/primetime-review-robert-pattinson-to-catch-a-predator": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/2026/09/25/nx-s1-5978096/republicans-trump-midterm-elections": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/2026/09/25/nx-s1-5978875/midterms-redistricting-trump-missouri": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/2026/09/25/nx-s1-5979852/israels-prime-minister-addresses-u-n-general-assembly": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/about-npr/1136563345/accessibility": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/about-npr/178660742/public-radio-finances": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/about-npr/179876898/terms-of-use": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/about-npr/179878450/privacy-policy": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/about-npr/186948703/corporate-sponsorship": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/about/": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    },
+    "https://www.npr.org/lifekit": {
+      "confidence": 0.5,
+      "page_type": "article",
+      "signals": [
+        "2012 words with no type-specific signal"
+      ]
+    },
+    "https://www.npr.org/sections/news/": {
+      "confidence": 0.8,
+      "page_type": "category",
+      "signals": [
+        "URL path matches /(blog|news|insights|stories|resources)/?$ implying category"
+      ]
+    },
+    "https://www.npr.org/support/": {
+      "confidence": 0.92,
+      "page_type": "article",
+      "signals": [
+        "schema @type newsarticle implies article"
+      ]
+    }
+  },
+  "schema_version": "1.0",
+  "site": "https://www.npr.org",
+  "skill": "site-profile-classifier",
+  "thresholds": {
+    "above_fold_bytes_max": 1200000,
+    "boilerplate_ratio_max": 0.7,
+    "broken_link_count_max": 5,
+    "broken_link_rate_max": 0.02,
+    "chunk_overlap_ratio": 0.15,
+    "chunk_target_tokens": 300,
+    "competing_primary_ctas_max": 3,
+    "direct_answer_max_words": 50,
+    "evidence_markers_min_words": 400,
+    "form_fields_max": {
+      "contact": 8,
+      "home": 5,
+      "other": 7,
+      "pricing": 5,
+      "product": 6,
+      "utility": 30
+    },
+    "gated_content_ratio_max": 0.2,
+    "high_friction_fields": [
+      "phone",
+      "tel",
+      "company",
+      "organisation",
+      "organization",
+      "job_title",
+      "jobtitle",
+      "dob",
+      "date_of_birth",
+      "birthday",
+      "address1",
+      "address_line_1",
+      "street",
+      "postcode",
+      "zip",
+      "fax"
+    ],
+    "internal_links_hub_min": 15,
+    "onward_links_min": 3,
+    "page_bytes_max": 3000000,
+    "render_gap_min_rendered_words": 200,
+    "render_gap_raw_ratio_max": 0.3,
+    "require_cost_signal": false,
+    "sitemap_coverage_gap_ratio": 0.4,
+    "stale_volatile_days": 365,
+    "structured_data_min_words": 200,
+    "surface_llms_txt": false,
+    "thin_content_words": {
+      "about": 100,
+      "article": 350,
+      "category": 50,
+      "contact": 40,
+      "docs": 200,
+      "home": 100,
+      "other": 150,
+      "pricing": 120,
+      "product": 120,
+      "utility": 0
+    },
+    "ttfb_median_ms_max": 800
+  }
+}

@@ -1,0 +1,50 @@
+name: Round 4
+
+# Round 4 is a demonstration round: the engine must be the Round 3 engine,
+# byte for byte, and the reproduction manifest must be well formed. This job
+# proves both on every push. It is separate from ci.yml, which still validates
+# the Round 3 marketplace exactly as it was submitted.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.9 is the floor the marketplace declares.
+        python-version: ["3.9", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # the freeze is regenerated from the Round 3 commit
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Engine freeze, manifest, narration anchors, goldens
+        run: python round4/verify_round4.py --goldens
+
+      - name: ENGINE_FREEZE.json is derived from the Round 3 commit, not hand-edited
+        run: |
+          python round4/verify_round4.py --make-freeze
+          git diff --exit-code -- round4/ENGINE_FREEZE.json
+
+      - name: The archived rehearsal report meets the handout's report floor
+        run: |
+          python - <<'PY'
+          import json, sys
+          r = json.load(open("round4/rehearsal/www.npr.org/audit-report.json", encoding="utf-8"))
+          assert {"site", "audited_at", "summary", "findings"} <= set(r), "report floor missing"
+          for f in r["findings"]:
+              gap = {"id", "title", "severity", "evidence", "suggested_action"} - set(f)
+              assert not gap, f"{f.get('id')} missing {gap}"
+          top = r["findings"][0]
+          assert top["check_id"] == "reach.robots.ai_search_bot_blocked" and top["severity"] == "critical"
+          print(f"rehearsal report OK: {len(r['findings'])} findings, F-001 = {top['check_id']}")
+          PY

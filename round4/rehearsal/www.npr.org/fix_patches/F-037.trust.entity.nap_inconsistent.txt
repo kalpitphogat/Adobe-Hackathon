@@ -1,0 +1,7 @@
+"address": {
+  "@type": "PostalAddress",
+  "streetAddress": "__FILL_IN__:canonical_street",
+  "addressLocality": "__FILL_IN__:city",
+  "postalCode": "__FILL_IN__:postcode"
+},
+"telephone": "__FILL_IN__:canonical_phone"

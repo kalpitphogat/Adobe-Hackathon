@@ -1,0 +1,1675 @@
+{
+  "audit_status": "partial",
+  "audited_at": "2026-09-26T20:18:51Z",
+  "evidence_bundle": {
+    "degraded_capabilities": [
+      {
+        "affects": [
+          "act.perf.above_fold_weight",
+          "read.render.nav_links_js_only",
+          "read.render.raw_text_gap"
+        ],
+        "capability": "rendered_dom",
+        "confidence_effect": "read.render.empty_spa_shell drops from critical/confirmed to high/likely",
+        "reason": "playwright not installed (No module named 'playwright')"
+      }
+    ],
+    "pages_fetched": 25,
+    "pages_rendered": 0,
+    "path": "evidence"
+  },
+  "findings": [
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "reach.robots.ai_search_bot_blocked",
+      "confidence": "confirmed",
+      "evidence": "ChatGPT-User blocked by \"Disallow: /\" (line 47); Claude-SearchBot blocked by \"Disallow: /\" (line 74); Claude-User blocked by \"Disallow: /\" (line 77); OAI-SearchBot blocked by \"Disallow: /\" (line 54); PerplexityBot blocked by \"Disallow: /\" (line 98). Each of these fetches pages at answer time to ground or cite a response, so blocking them removes this brand from those assistants' answers entirely. 25 of 25 discovered paths are disallowed for these agents. Bot classification from a snapshot dated 2026-09-09 (upstream commit 0e111dcc24cb). 8 training-only bot(s) are also blocked, which is a separate and legitimate licensing choice.",
+      "id": "F-001",
+      "severity": "critical",
+      "stage": "reach",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 9.3,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 10.0
+        },
+        "mechanism": "Retrieval crawlers fetch the page at the moment a user asks a question; if they are refused, the brand cannot appear as a source no matter how good the page is.",
+        "patch": "User-agent: ChatGPT-User\nAllow: /\n\nUser-agent: Claude-SearchBot\nAllow: /\n\nUser-agent: Claude-User\nAllow: /\n\nUser-agent: OAI-SearchBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n",
+        "patch_path": "fix_patches/F-001.reach.robots.ai_search_bot_blocked.txt",
+        "priority": "critical",
+        "source": "RFC 9309 section 2.2.2; vendor crawler documentation per references/ai-bots.json",
+        "summary": "Allow ChatGPT-User, Claude-SearchBot, Claude-User, OAI-SearchBot, PerplexityBot in robots.txt, keeping any training-bot policy separate.",
+        "verification": "curl -s https://www.npr.org/robots.txt and confirm each of ChatGPT-User, Claude-SearchBot, Claude-User, OAI-SearchBot, PerplexityBot has an Allow rule that is at least as specific as any Disallow"
+      },
+      "title": "robots.txt blocks 5 AI retrieval crawler(s) that cite sources at answer time"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.orient.no_value_proposition",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/ (page type home). H1 is '(none)'. The first 400 characters of observed content read: \"NPR - Breaking News, Analysis, Music, Arts & Podcasts Top stories in the U.S.\" | \"and world news, politics, health, science, business, music, arts and culture.\" | \"Nonprofit journalism with a mission.\". None of these names an audience or an outcome - no phrase of the form \"for <who>\", \"helps <who> <do what>\", or \"<product> is a <category>\" appears. A first-time visitor has to infer what this is.",
+      "id": "F-002",
+      "severity": "high",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 8.0
+        },
+        "mechanism": "A visitor decides whether to stay from the first screen; without a sentence that names them, they have to do the work of inferring relevance, and most leave instead.",
+        "patch": "<h1>__FILL_IN__:what_this_page_is</h1>\n<p>__FILL_IN__:product_name is __FILL_IN__:category for __FILL_IN__:audience. It __FILL_IN__:primary_outcome.</p>",
+        "patch_path": "fix_patches/F-002.act.orient.no_value_proposition.txt",
+        "priority": "high",
+        "source": "references/cro-frameworks.md",
+        "summary": "Open with one sentence naming the audience and the outcome.",
+        "verification": "Open https://www.npr.org/ and read only the first screen: can a stranger say who it is for and what it does?"
+      },
+      "title": "The first screen never says who this is for or what it does"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "read.nontext.informative_image_no_alt",
+      "confidence": "confirmed",
+      "evidence": "https://www.npr.org/: 45 of 124 images classified as content-bearing have empty or missing alt text: https://npr.brightspotcdn.com/dims3/default/strip/false/crop/2048x1152+0+0/resize/800/quality/85/format/jpeg/?url=http%3A%2F%2Fnpr-brightspot.s3.amazonaws.com%2Fea%2F24%2Fba5d86fb473b879bc32ab847fd80%2F20260818-alex-ferreira-performs-a-tiny-desk-concert-at-npr-in-washington-d-c-vanessa-castillo-3-2-6.jpg, https://npr.brightspotcdn.com/dims3/default/strip/false/crop/2000x1125+0+0/resize/800/quality/85/format/jpeg/?url=http%3A%2F%2Fnpr-brightspot.s3.amazonaws.com%2F78%2F42%2Fec2087a647099a3e3183edc883d2%2F20260819-yendry-credit-zayrharodriguez-5.jpg, https://npr.brightspotcdn.com/dims3/default/strip/false/crop/2000x1125+0+0/resize/800/quality/85/format/jpeg/?url=http%3A%2F%2Fnpr-brightspot.s3.amazonaws.com%2F37%2Fb6%2F76fad03049e7843686a99747def6%2F20260727-monlaferte-credit-zayrharodriguez-3.jpg, https://npr.brightspotcdn.com/dims3/default/strip/false/crop/3857x2168+0+0/resize/800/quality/85/format/jpeg/?url=http%3A%2F%2Fnpr-brightspot.s3.amazonaws.com%2F3e%2F8a%2F773776ac41e8a4fea05cb663dc6b%2F0910-tdc-torikelly-mz18.jpg. Images were classified as content-bearing because they sit in the main content region, are larger than 100x100, and are not icons, logos or sprites. Decorative images and chrome were excluded and are not counted here.",
+      "id": "F-003",
+      "severity": "medium",
+      "stage": "read",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "Alt text is the only textual representation of an image available to a reader that cannot see it, so it is the only route by which the image's content can be extracted.",
+        "patch": "<img src=\"https://npr.brightspotcdn.com/dims3/default/strip/false/crop/2048x1152+0+0/resize/800/quality/85/format/jpeg/?url=http%3A%2F%2Fnpr-brightspot.s3.amazonaws.com%2Fea%2F24%2Fba5d86fb473b879bc32ab847fd80%2F20260818-alex-ferreira-performs-a-tiny-desk-concert-at-npr-in-washington-d-c-vanessa-castillo-3-2-6.jpg\" alt=\"__FILL_IN__:what_this_image_communicates\">\n<img src=\"https://npr.brightspotcdn.com/dims3/default/strip/false/crop/2000x1125+0+0/resize/800/quality/85/format/jpeg/?url=http%3A%2F%2Fnpr-brightspot.s3.amazonaws.com%2F78%2F42%2Fec2087a647099a3e3183edc883d2%2F20260819-yendry-credit-zayrharodriguez-5.jpg\" alt=\"__FILL_IN__:what_this_image_communicates\">\n<img src=\"https://npr.brightspotcdn.com/dims3/default/strip/false/crop/2000x1125+0+0/resize/800/quality/85/format/jpeg/?url=http%3A%2F%2Fnpr-brightspot.s3.amazonaws.com%2F37%2Fb6%2F76fad03049e7843686a99747def6%2F20260727-monlaferte-credit-zayrharodriguez-3.jpg\" alt=\"__FILL_IN__:what_this_image_communicates\">\n<img src=\"https://npr.brightspotcdn.com/dims3/default/strip/false/crop/3857x2168+0+0/resize/800/quality/85/format/jpeg/?url=http%3A%2F%2Fnpr-brightspot.s3.amazonaws.com%2F3e%2F8a%2F773776ac41e8a4fea05cb663dc6b%2F0910-tdc-torikelly-mz18.jpg\" alt=\"__FILL_IN__:what_this_image_communicates\">",
+        "patch_path": "fix_patches/F-003.read.nontext.informative_image_no_alt.txt",
+        "priority": "medium",
+        "source": "WCAG 2.2 Success Criterion 1.1.1 Non-text Content",
+        "summary": "Add alt text that states what the image communicates, not what it depicts.",
+        "verification": "curl -s https://www.npr.org/ | grep -c 'alt=\"\"'"
+      },
+      "title": "45 content image(s) carry no alt text"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/about-npr/179878450/privacy-policy"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.table_not_extractable",
+      "confidence": "confirmed",
+      "evidence": "1 data table(s) across 1 page(s) contain no <th>, no scope attribute, no <thead> and no <caption>, so no cell is bound to what it means: https://www.npr.org/about-npr/179878450/privacy-policy (11x4 grid). A retrieval system can read the values but cannot say what any of them is a value OF, so it will either decline to quote the table or attach a number to the wrong label. Tables marked role=\"presentation\" and grids smaller than 3x2 were not judged.",
+      "id": "F-004",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "Extractors bind a cell to its column through the header row; with no <th>, scope or caption there is no machine-readable link between a value and its meaning, so the fact cannot be quoted with the label that makes it true.",
+        "patch": "<table>\n  <caption>__FILL_IN__:what_this_table_lists</caption>\n  <thead>\n    <tr><th scope=\"col\">__FILL_IN__:column_1</th><th scope=\"col\">__FILL_IN__:column_2</th></tr>\n  </thead>\n  <tbody>\n    <tr><th scope=\"row\">__FILL_IN__:row_label</th><td>__FILL_IN__:value</td></tr>\n  </tbody>\n</table>",
+        "patch_path": "fix_patches/F-004.extract.ans.table_not_extractable.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Label the table: make the first row <th> cells and add a <caption>.",
+        "verification": "For each data table, confirm every column has a <th scope=\"col\"> and the table has a <caption> naming what it lists."
+      },
+      "title": "Table data on 1 page(s) carries no column or row labels"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/lifekit"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.title_not_entity_bearing",
+      "confidence": "confirmed",
+      "evidence": "https://www.npr.org/lifekit has <title>Life Kit : NPR</title> (14 characters). It is too short to carry both the subject and a descriptor. The H1 says 'Life Kit'. The title is the strongest single signal of what a page is about, and it is often the only text shown beside a citation.",
+      "id": "F-005",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "The title is used as the page's label wherever it is referenced, so a generic title makes the page indistinguishable from every other page.",
+        "patch": "<title>Life Kit \u2014 __FILL_IN__:what_this_page_says_about_it</title>",
+        "patch_path": "fix_patches/F-005.extract.ans.title_not_entity_bearing.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Write a title that names the subject and what the page says about it.",
+        "verification": "curl -s https://www.npr.org/lifekit | grep -o '<title>[^<]*</title>'"
+      },
+      "title": "The page title is 'Life Kit : NPR', which does not say what the page is about"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.sd.identity_graph_weak",
+      "confidence": "confirmed",
+      "evidence": "On https://www.npr.org/: the homepage declares ['speakablespecification'] and none of it is an Organization, LocalBusiness or Person node, so nothing states who runs this site.",
+      "id": "F-006",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.7,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A named, linked entity lets a consumer connect statements on this site to the same entity elsewhere; without it the brand is an unlinked string that may collide with other things sharing the name.",
+        "patch": "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"Organization\",\n  \"@id\": \"https://www.npr.org/#organization\",\n  \"name\": \"NPR - Breaking News, Analysis, Music, Arts & Podcasts : NPR\",\n  \"url\": \"https://www.npr.org/\",\n  \"description\": \"Top stories in the U.S. and world news, politics, health, science, business, music, arts and culture. Nonprofit journalism with a mission. This is NPR.\",\n  \"sameAs\": [\n    \"__FILL_IN__:your_wikipedia_or_wikidata_url\",\n    \"__FILL_IN__:your_linkedin_url\",\n    \"__FILL_IN__:your_primary_social_or_github_url\"\n  ]\n}\n</script>",
+        "patch_path": "fix_patches/F-006.extract.sd.identity_graph_weak.txt",
+        "priority": "medium",
+        "source": "schema.org/Organization; handout appendix, Why agreement across the web matters",
+        "summary": "Publish an Organization node on the homepage with sameAs links to your real profiles.",
+        "verification": "curl -s https://www.npr.org/ | grep -o '\"sameAs\"[^]]*]'"
+      },
+      "title": "The site does not clearly state who publishes it"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "reach.robots.dual_purpose_bot_blocked",
+      "confidence": "likely",
+      "evidence": "Blocked: Applebot-Extended, FacebookBot, Google-Extended. These are genuinely contested rather than clearly training-only or clearly retrieval. Contested. Controls use of Applebot-crawled content for training Apple foundation models while leaving Applebot search indexing in place. Blocking is a licensing decision, not a visibility defect. Contested. Historically a link-preview crawler, also cited in AI-training contexts. Contested. Google documents this token as controlling whether content helps improve Gemini apps and grounded answers. It is not a crawler in its own right - it modifies how Googlebot-crawled content may be used - so blocking it does not remove the site from Google Search, but it can affect AI-surface grounding. Report as a trade-off the site may have chosen deliberately, never as an error. We report this as a trade-off the site may have chosen deliberately, not as an error. Snapshot 2026-09-09 (upstream commit 0e111dcc24cb).",
+      "id": "F-007",
+      "severity": "medium",
+      "stage": "reach",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "These tokens modify how already-crawled content may be used on AI surfaces rather than whether the page can be fetched, so the cost is exposure, not access.",
+        "patch": "",
+        "priority": "medium",
+        "source": "references/bot-taxonomy.md",
+        "summary": "Decide deliberately whether the AI-surface exposure Applebot-Extended, FacebookBot, Google-Extended controls is wanted.",
+        "verification": "No mechanical check; this is a policy decision to record, not a defect to fix."
+      },
+      "title": "robots.txt blocks 3 crawler(s) whose role is contested"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2022/07/11/1110926267/digital-minimalism-can-help-find-balance"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.chunk_not_self_contained",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2022/07/11/1110926267/digital-minimalism-can-help-find-balance: 5/7 windows (71%) fail the self-containment test. \"Sammy Nickalls, author of Log Off: Self-Help for the Extremely Online, designed \" - never names 'Sylvie Douglis' or any distinctive part of it inside the window; \"Here's how to get started: Set some basic boundaries Enlarge this image Valeriy \" - never names 'Sylvie Douglis' or any distinctive part of it inside the window; \"and you get into the sheets and it just feels so nice to have this time to yours\" - never names 'Sylvie Douglis' or any distinctive part of it inside the window",
+      "id": "F-008",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "An opening pronoun resolves to something outside the passage, so the passage carries no recoverable subject once separated.",
+        "patch": "<!-- was: Sammy Nickalls, author of Log Off: Self-Help for the Extremely Online, designed  -->\n<p>Sylvie Douglis __FILL_IN__:restate_the_point_naming_the_subject</p>",
+        "patch_path": "fix_patches/F-008.extract.ans.chunk_not_self_contained.txt",
+        "priority": "medium",
+        "source": "references/chunking-model.md",
+        "summary": "Name the subject in each paragraph rather than relying on the one before it.",
+        "verification": "Read each paragraph in isolation; does it open by naming its subject?"
+      },
+      "title": "5 of 7 passages do not stand on their own \u2014 on /2022/07/11/1110926267/digital-minimalism-can-help-find-balance"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2022/12/09/1141872654/build-a-healthy-relationship-with-your-in-laws"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.chunk_not_self_contained",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2022/12/09/1141872654/build-a-healthy-relationship-with-your-in-laws: 6/7 windows (86%) fail the self-containment test. \"For many people, getting along with your in-laws can be hard work. They might ha\" - never names 'Andee Tagle' or any distinctive part of it inside the window; \"Long before you arrived, your partner's family were authority figures in their l\" - never names 'Andee Tagle' or any distinctive part of it inside the window; \"Instead of telling her not to bring it, which might hurt her feelings, find a co\" - never names 'Andee Tagle' or any distinctive part of it inside the window",
+      "id": "F-009",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "An opening pronoun resolves to something outside the passage, so the passage carries no recoverable subject once separated.",
+        "patch": "<!-- was: For many people, getting along with your in-laws can be hard work. They might ha -->\n<p>Andee Tagle __FILL_IN__:restate_the_point_naming_the_subject</p>",
+        "patch_path": "fix_patches/F-009.extract.ans.chunk_not_self_contained.txt",
+        "priority": "medium",
+        "source": "references/chunking-model.md",
+        "summary": "Name the subject in each paragraph rather than relying on the one before it.",
+        "verification": "Read each paragraph in isolation; does it open by naming its subject?"
+      },
+      "title": "6 of 7 passages do not stand on their own \u2014 on /2022/12/09/1141872654/build-a-healthy-relationship-with-your-in-laws"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/24/nx-s1-5931971/trump-nih-science-funding-disruptions-charts"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.chunk_not_self_contained",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/24/nx-s1-5931971/trump-nih-science-funding-disruptions-charts: 10/11 windows (91%) fail the self-containment test. \"Sponsor Message Only on NPR Researchers say the Trump administration is finding \" - never names 'Joseph Kim' or any distinctive part of it inside the window; \"Science Scientists reel as turmoil roils National Science Foundation The numbers\" - never names 'Joseph Kim' or any distinctive part of it inside the window; \"She pointed out that as of July \u2014 three-quarters of the way through the fiscal y\" - opens with the unresolved reference 'She'",
+      "id": "F-010",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "An opening pronoun resolves to something outside the passage, so the passage carries no recoverable subject once separated.",
+        "patch": "<!-- was: Sponsor Message Only on NPR Researchers say the Trump administration is finding  -->\n<p>Joseph Kim __FILL_IN__:restate_the_point_naming_the_subject</p>",
+        "patch_path": "fix_patches/F-010.extract.ans.chunk_not_self_contained.txt",
+        "priority": "medium",
+        "source": "references/chunking-model.md",
+        "summary": "Name the subject in each paragraph rather than relying on the one before it.",
+        "verification": "Read each paragraph in isolation; does it open by naming its subject?"
+      },
+      "title": "10 of 11 passages do not stand on their own \u2014 on /2026/09/24/nx-s1-5931971/trump-nih-science-funding-disruptions-charts"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/24/nx-s1-5974336/teen-pregnancy-prevention-unspent-funding"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.chunk_not_self_contained",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/24/nx-s1-5974336/teen-pregnancy-prevention-unspent-funding: 4/5 windows (80%) fail the self-containment test. \"According to a letter from members of Congress shared exclusively with NPR, the \" - never names 'Selena Simmons-Duffin' or any distinctive part of it inside the window; \"\"And so we will have to lay off staff, and there will be youth that go without s\" - never names 'Selena Simmons-Duffin' or any distinctive part of it inside the window; \"Soon after the agency canceled the grants in June, it issued a new funding oppor\" - never names 'Selena Simmons-Duffin' or any distinctive part of it inside the window",
+      "id": "F-011",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "An opening pronoun resolves to something outside the passage, so the passage carries no recoverable subject once separated.",
+        "patch": "<!-- was: According to a letter from members of Congress shared exclusively with NPR, the  -->\n<p>Selena Simmons-Duffin __FILL_IN__:restate_the_point_naming_the_subject</p>",
+        "patch_path": "fix_patches/F-011.extract.ans.chunk_not_self_contained.txt",
+        "priority": "medium",
+        "source": "references/chunking-model.md",
+        "summary": "Name the subject in each paragraph rather than relying on the one before it.",
+        "verification": "Read each paragraph in isolation; does it open by naming its subject?"
+      },
+      "title": "4 of 5 passages do not stand on their own \u2014 on /2026/09/24/nx-s1-5974336/teen-pregnancy-prevention-unspent-funding"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/24/nx-s1-5978798/your-mother-your-mother-your-mother-review"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.chunk_not_self_contained",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/24/nx-s1-5978798/your-mother-your-mother-your-mother-review: 4/5 windows (80%) fail the self-containment test. \"A man approaches the Prophet and asks, \"Who deserves the best of me?\" The questi\" - never names 'Justin Chang' or any distinctive part of it inside the window; \"It's a wildly stylized world of bright neon lights and ugly strip malls, where i\" - opens with the unresolved reference \"It's\"; \"Years later, the two have reunited on what feels like a more original version of\" - never names 'Justin Chang' or any distinctive part of it inside the window",
+      "id": "F-012",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "An opening pronoun resolves to something outside the passage, so the passage carries no recoverable subject once separated.",
+        "patch": "<!-- was: A man approaches the Prophet and asks, \"Who deserves the best of me?\" The questi -->\n<p>Justin Chang __FILL_IN__:restate_the_point_naming_the_subject</p>",
+        "patch_path": "fix_patches/F-012.extract.ans.chunk_not_self_contained.txt",
+        "priority": "medium",
+        "source": "references/chunking-model.md",
+        "summary": "Name the subject in each paragraph rather than relying on the one before it.",
+        "verification": "Read each paragraph in isolation; does it open by naming its subject?"
+      },
+      "title": "4 of 5 passages do not stand on their own \u2014 on /2026/09/24/nx-s1-5978798/your-mother-your-mother-your-mother-review"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/25/g-s1-144948/pandemic-prevention-treaty-agreement-world-health-organization"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.chunk_not_self_contained",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/25/g-s1-144948/pandemic-prevention-treaty-agreement-world-health-organization: 5/6 windows (83%) fail the self-containment test. \"Countries met last week for the eighth round of negotiations in Geneva, but ther\" - never names 'Jonathan Lambert' or any distinctive part of it inside the window; \"At the UN General Assembly on Friday, WHO Director-General Tedros Adhanom Ghebre\" - never names 'Jonathan Lambert' or any distinctive part of it inside the window; \"\"Countries in the global south want ironclad guarantees that if they share a sam\" - never names 'Jonathan Lambert' or any distinctive part of it inside the window",
+      "id": "F-013",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "An opening pronoun resolves to something outside the passage, so the passage carries no recoverable subject once separated.",
+        "patch": "<!-- was: Countries met last week for the eighth round of negotiations in Geneva, but ther -->\n<p>Jonathan Lambert __FILL_IN__:restate_the_point_naming_the_subject</p>",
+        "patch_path": "fix_patches/F-013.extract.ans.chunk_not_self_contained.txt",
+        "priority": "medium",
+        "source": "references/chunking-model.md",
+        "summary": "Name the subject in each paragraph rather than relying on the one before it.",
+        "verification": "Read each paragraph in isolation; does it open by naming its subject?"
+      },
+      "title": "5 of 6 passages do not stand on their own \u2014 on /2026/09/25/g-s1-144948/pandemic-prevention-treaty-agreement-world-health-organization"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/25/nx-s1-5976804/supreme-court-trump-save-noncitizen-voting"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.chunk_not_self_contained",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/25/nx-s1-5976804/supreme-court-trump-save-noncitizen-voting: 7/8 windows (88%) fail the self-containment test. \"Many states uploaded their voter lists to the expanded version of the Systematic\" - never names 'Jude Joffe-Block' or any distinctive part of it inside the window; \"In siding with the Trump administration, the court's majority wrote that the low\" - never names 'Jude Joffe-Block' or any distinctive part of it inside the window; \"We will be doing everything in our power to protect Americans' voting and privac\" - never names 'Jude Joffe-Block' or any distinctive part of it inside the window",
+      "id": "F-014",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "An opening pronoun resolves to something outside the passage, so the passage carries no recoverable subject once separated.",
+        "patch": "<!-- was: Many states uploaded their voter lists to the expanded version of the Systematic -->\n<p>Jude Joffe-Block __FILL_IN__:restate_the_point_naming_the_subject</p>",
+        "patch_path": "fix_patches/F-014.extract.ans.chunk_not_self_contained.txt",
+        "priority": "medium",
+        "source": "references/chunking-model.md",
+        "summary": "Name the subject in each paragraph rather than relying on the one before it.",
+        "verification": "Read each paragraph in isolation; does it open by naming its subject?"
+      },
+      "title": "7 of 8 passages do not stand on their own \u2014 on /2026/09/25/nx-s1-5976804/supreme-court-trump-save-noncitizen-voting"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/25/nx-s1-5978096/republicans-trump-midterm-elections"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.chunk_not_self_contained",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/25/nx-s1-5978096/republicans-trump-midterm-elections: 5/6 windows (83%) fail the self-containment test. \"With less than 40 days until voting ends, the party is scrambling to hold onto a\" - never names 'Elena Moore' or any distinctive part of it inside the window; \"On Tuesday, Utah Republican Sen. John Curtis, who isn't up for reelection until \" - never names 'Elena Moore' or any distinctive part of it inside the window; \"\"Iowans are being squeezed and shouldn't have to foot the bill at the pump or th\" - never names 'Elena Moore' or any distinctive part of it inside the window",
+      "id": "F-015",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "An opening pronoun resolves to something outside the passage, so the passage carries no recoverable subject once separated.",
+        "patch": "<!-- was: With less than 40 days until voting ends, the party is scrambling to hold onto a -->\n<p>Elena Moore __FILL_IN__:restate_the_point_naming_the_subject</p>",
+        "patch_path": "fix_patches/F-015.extract.ans.chunk_not_self_contained.txt",
+        "priority": "medium",
+        "source": "references/chunking-model.md",
+        "summary": "Name the subject in each paragraph rather than relying on the one before it.",
+        "verification": "Read each paragraph in isolation; does it open by naming its subject?"
+      },
+      "title": "5 of 6 passages do not stand on their own \u2014 on /2026/09/25/nx-s1-5978096/republicans-trump-midterm-elections"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/25/nx-s1-5978875/midterms-redistricting-trump-missouri"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.chunk_not_self_contained",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/25/nx-s1-5978875/midterms-redistricting-trump-missouri: 1/3 windows (33%) fail the self-containment test. \"Missouri lawmakers passed the new map last year at the behest of President Trump\" - never names 'Jason Rosenbaum' or any distinctive part of it inside the window",
+      "id": "F-016",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "An opening pronoun resolves to something outside the passage, so the passage carries no recoverable subject once separated.",
+        "patch": "<!-- was: Missouri lawmakers passed the new map last year at the behest of President Trump -->\n<p>Jason Rosenbaum __FILL_IN__:restate_the_point_naming_the_subject</p>",
+        "patch_path": "fix_patches/F-016.extract.ans.chunk_not_self_contained.txt",
+        "priority": "medium",
+        "source": "references/chunking-model.md",
+        "summary": "Name the subject in each paragraph rather than relying on the one before it.",
+        "verification": "Read each paragraph in isolation; does it open by naming its subject?"
+      },
+      "title": "1 of 3 passages do not stand on their own \u2014 on /2026/09/25/nx-s1-5978875/midterms-redistricting-trump-missouri"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/25/nx-s1-5979852/israels-prime-minister-addresses-u-n-general-assembly"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.chunk_not_self_contained",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/25/nx-s1-5979852/israels-prime-minister-addresses-u-n-general-assembly: 5/6 windows (83%) fail the self-containment test. \"He called allegations of Israeli genocide in Gaza \"the biggest lie of the centur\" - opens with the unresolved reference 'He'; \"In a statement responding to Netanyahu's criticism, Mamdani dismissed the Israel\" - never names 'Kat Lonsdorf' or any distinctive part of it inside the window; \"A U.S.-mediated truce between Israel and Hamas has been in place since last Octo\" - never names 'Kat Lonsdorf' or any distinctive part of it inside the window",
+      "id": "F-017",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "An opening pronoun resolves to something outside the passage, so the passage carries no recoverable subject once separated.",
+        "patch": "<!-- was: He called allegations of Israeli genocide in Gaza \"the biggest lie of the centur -->\n<p>Kat Lonsdorf __FILL_IN__:restate_the_point_naming_the_subject</p>",
+        "patch_path": "fix_patches/F-017.extract.ans.chunk_not_self_contained.txt",
+        "priority": "medium",
+        "source": "references/chunking-model.md",
+        "summary": "Name the subject in each paragraph rather than relying on the one before it.",
+        "verification": "Read each paragraph in isolation; does it open by naming its subject?"
+      },
+      "title": "5 of 6 passages do not stand on their own \u2014 on /2026/09/25/nx-s1-5979852/israels-prime-minister-addresses-u-n-general-assembly"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/about-npr/178660742/public-radio-finances"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.chunk_not_self_contained",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/about-npr/178660742/public-radio-finances: 1/3 windows (33%) fail the self-containment test. \"This funding model enabled the flourishing of a uniquely American system of unpa\" - opens with the unresolved reference 'This'",
+      "id": "F-018",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "An opening pronoun resolves to something outside the passage, so the passage carries no recoverable subject once separated.",
+        "patch": "<!-- was: This funding model enabled the flourishing of a uniquely American system of unpa -->\n<p>NPR __FILL_IN__:restate_the_point_naming_the_subject</p>",
+        "patch_path": "fix_patches/F-018.extract.ans.chunk_not_self_contained.txt",
+        "priority": "medium",
+        "source": "references/chunking-model.md",
+        "summary": "Name the subject in each paragraph rather than relying on the one before it.",
+        "verification": "Read each paragraph in isolation; does it open by naming its subject?"
+      },
+      "title": "1 of 3 passages do not stand on their own \u2014 on /about-npr/178660742/public-radio-finances"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/about-npr/179878450/privacy-policy"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.chunk_not_self_contained",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/about-npr/179878450/privacy-policy: 9/36 windows (25%) fail the self-containment test. \"This Privacy Policy applies only to the NPR Services and does not govern the sep\" - opens with the unresolved reference 'This'; \"This may include information such as date of birth, gender, information about yo\" - opens with the unresolved reference 'This'; \"This code does not contain any of your directly identifiable personal informatio\" - opens with the unresolved reference 'This'",
+      "id": "F-019",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "An opening pronoun resolves to something outside the passage, so the passage carries no recoverable subject once separated.",
+        "patch": "<!-- was: This Privacy Policy applies only to the NPR Services and does not govern the sep -->\n<p>NPR __FILL_IN__:restate_the_point_naming_the_subject</p>",
+        "patch_path": "fix_patches/F-019.extract.ans.chunk_not_self_contained.txt",
+        "priority": "medium",
+        "source": "references/chunking-model.md",
+        "summary": "Name the subject in each paragraph rather than relying on the one before it.",
+        "verification": "Read each paragraph in isolation; does it open by naming its subject?"
+      },
+      "title": "9 of 36 passages do not stand on their own \u2014 on /about-npr/179878450/privacy-policy"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2021/01/11/955692434/procrastination-is-more-than-putting-things-off-heres-how-to-kick-the-habit"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.fact_coverage_gap",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2021/01/11/955692434/procrastination-is-more-than-putting-things-off-heres-how-to-kick-the-habit: the page makes 5 derivable claims about 'Keisha \"TK\" Dutes'. Segmenting the 1008 words a no-JS reader sees into 5 overlapping windows of about 300 tokens, 3 of 5 claims survive inside at least one window that still makes sense on its own. The misses: \"Why You Feel So Guilty When You're Not Working\" (from h2) - the only window carrying it never names 'Keisha \"TK\" Dutes' or any distinctive part of it inside the window; \"Faced with a tough decision? The key to choosing may be your mindset\" (from h2) - the only window carrying it never names 'Keisha \"TK\" Dutes' or any distinctive part of it inside the window. Also: https://www.npr.org/2021/01/11/955692434/procrastination-is-more-than-putting-things-off-heres-how-to-kick-the-habit: 4/5 windows (80%) fail the self-containment test. \"Therapist Anastasia Locklin describes chronic procrastination as \"an inability t\" - never names 'Keisha \"TK\" Dutes' or any distinctive part of it inside the window; \"\"That makes us almost put our own self-care and self-preservation on the back bu\" - never names 'Keisha \"TK\" Dutes' or any distinctive part of it inside the window; \"Block out vacations in advance and put systems in place with co-workers so that \" - never names 'Keisha \"TK\" Dutes' or any distinctive part of it inside the window",
+      "id": "F-020",
+      "merged_from": [
+        "extract.ans.chunk_not_self_contained"
+      ],
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A passage that is quoted away from its page loses whatever its pronouns and back-references pointed at, so a claim that depends on them cannot be reproduced as an answer.",
+        "patch": "<!-- Make each claim self-contained IN PROSE. Do not split the page into\n     smaller blocks: Google Search Central states there is no requirement\n     to break content into tiny pieces for AI to understand it. -->\n\n<!-- claim: Why You Feel So Guilty When You're Not Working  (the only window carrying it never names 'Keisha \"TK\" Dutes' or any distinctive part of it inside the window) -->\n<p>Keisha \"TK\" Dutes __FILL_IN__:state_this_claim_in_one_sentence_that_names_the_subject.</p>\n\n<!-- claim: Faced with a tough decision? The key to choosing may be your mindset  (the only window carrying it never names 'Keisha \"TK\" Dutes' or any distinctive part of it inside the window) -->\n<p>Keisha \"TK\" Dutes __FILL_IN__:state_this_claim_in_one_sentence_that_names_the_subject.</p>",
+        "patch_path": "fix_patches/F-020.extract.ans.fact_coverage_gap.txt",
+        "priority": "medium",
+        "source": "Handout appendix, How assistants like ChatGPT use sources; Aggarwal et al., GEO: Generative Engine Optimization, KDD 2024 (arXiv:2311.09735)",
+        "summary": "State each key claim in a sentence that names the subject and stands on its own. Do NOT split the page into smaller blocks.",
+        "verification": "Copy any single paragraph out of the page and read it cold: does it still name what it is about, without the paragraphs around it?"
+      },
+      "title": "fact_coverage 3/5: 2 claim(s) cannot be quoted from this page \u2014 on /2021/01/11/955692434/procrastination-is-more-than-putting-things-off-heres-how-to-kick-the-habit"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/25/nx-s1-5976939/primetime-review-robert-pattinson-to-catch-a-predator"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.fact_coverage_gap",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/25/nx-s1-5976939/primetime-review-robert-pattinson-to-catch-a-predator: the page makes 6 derivable claims about 'Glen Weldon'. Segmenting the 1376 words a no-JS reader sees into 7 overlapping windows of about 300 tokens, 5 of 6 claims survive inside at least one window that still makes sense on its own. The misses: \"A new documentary raises questions about the true crime TV show 'To Catch A Predator'\" (from h2) - the only window carrying it never names 'Glen Weldon' or any distinctive part of it inside the window. Also: https://www.npr.org/2026/09/25/nx-s1-5976939/primetime-review-robert-pattinson-to-catch-a-predator: 6/7 windows (86%) fail the self-containment test. \"It sets out to present its lurid, dark, highly emotional and complicated subject\" - opens with the unresolved reference 'It'; \"Movies A new documentary raises questions about the true crime TV show 'To Catch\" - never names 'Glen Weldon' or any distinctive part of it inside the window; \"Sponsor Message How else to explain the half-hearted insertion of a plot thread \" - never names 'Glen Weldon' or any distinctive part of it inside the window",
+      "id": "F-021",
+      "merged_from": [
+        "extract.ans.chunk_not_self_contained"
+      ],
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A passage that is quoted away from its page loses whatever its pronouns and back-references pointed at, so a claim that depends on them cannot be reproduced as an answer.",
+        "patch": "<!-- Make each claim self-contained IN PROSE. Do not split the page into\n     smaller blocks: Google Search Central states there is no requirement\n     to break content into tiny pieces for AI to understand it. -->\n\n<!-- claim: A new documentary raises questions about the true crime TV show 'To Catch A Predator'  (the only window carrying it never names 'Glen Weldon' or any distinctive part of it inside the window) -->\n<p>Glen Weldon __FILL_IN__:state_this_claim_in_one_sentence_that_names_the_subject.</p>",
+        "patch_path": "fix_patches/F-021.extract.ans.fact_coverage_gap.txt",
+        "priority": "medium",
+        "source": "Handout appendix, How assistants like ChatGPT use sources; Aggarwal et al., GEO: Generative Engine Optimization, KDD 2024 (arXiv:2311.09735)",
+        "summary": "State each key claim in a sentence that names the subject and stands on its own. Do NOT split the page into smaller blocks.",
+        "verification": "Copy any single paragraph out of the page and read it cold: does it still name what it is about, without the paragraphs around it?"
+      },
+      "title": "fact_coverage 5/6: 1 claim(s) cannot be quoted from this page \u2014 on /2026/09/25/nx-s1-5976939/primetime-review-robert-pattinson-to-catch-a-predator"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/lifekit"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.fact_coverage_gap",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/lifekit: the page makes 6 derivable claims about 'NPR'. Segmenting the 1874 words a no-JS reader sees into 8 overlapping windows of about 300 tokens, 5 of 6 claims survive inside at least one window that still makes sense on its own. The misses: \"Think you know procrastination? This quiz offers surprising insights\" (from h2) - the only window carrying it opens with the unresolved reference \"That's\".",
+      "id": "F-022",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A passage that is quoted away from its page loses whatever its pronouns and back-references pointed at, so a claim that depends on them cannot be reproduced as an answer.",
+        "patch": "<!-- Make each claim self-contained IN PROSE. Do not split the page into\n     smaller blocks: Google Search Central states there is no requirement\n     to break content into tiny pieces for AI to understand it. -->\n\n<!-- claim: Think you know procrastination? This quiz offers surprising insights  (the only window carrying it opens with the unresolved reference \"That's\") -->\n<p>NPR __FILL_IN__:state_this_claim_in_one_sentence_that_names_the_subject.</p>",
+        "patch_path": "fix_patches/F-022.extract.ans.fact_coverage_gap.txt",
+        "priority": "medium",
+        "source": "Handout appendix, How assistants like ChatGPT use sources; Aggarwal et al., GEO: Generative Engine Optimization, KDD 2024 (arXiv:2311.09735)",
+        "summary": "State each key claim in a sentence that names the subject and stands on its own. Do NOT split the page into smaller blocks.",
+        "verification": "Copy any single paragraph out of the page and read it cold: does it still name what it is about, without the paragraphs around it?"
+      },
+      "title": "fact_coverage 5/6: 1 claim(s) cannot be quoted from this page \u2014 on /lifekit"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2021/01/11/955692434/procrastination-is-more-than-putting-things-off-heres-how-to-kick-the-habit"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2021/01/11/955692434/procrastination-is-more-than-putting-things-off-heres-how-to-kick-the-habit: the first five sentences are \"How to stop procrastinating : Life Kit Putting off items in your to-do list isn't a sign of laziness\" | \"It's your inner critic coming to life.\" | \"Revisit your relationship with procrastination \u2014 and learn tools to kick the habit.\". None is a definitional statement of at most 50 words that names 'Keisha \"TK\" Dutes' and says what it is. A system answering \"what is Keisha \"TK\" Dutes\" has nothing short and quotable to lift.",
+      "id": "F-023",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>Keisha \"TK\" Dutes is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-023.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"Keisha \"TK\" Dutes is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://www.npr.org/2021/01/11/955692434/procrastination-is-more-than-putting-things-off-heres-how-to-kick-the-habit: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what Keisha \"TK\" Dutes is \u2014 on /2021/01/11/955692434/procrastination-is-more-than-putting-things-off-heres-how-to-kick-the-habit"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2022/12/09/1141872654/build-a-healthy-relationship-with-your-in-laws"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2022/12/09/1141872654/build-a-healthy-relationship-with-your-in-laws: the first five sentences are \"5 common issues you may have with your in-laws \u2014 and what to do about them : Life Kit Creating a rel\" | \"Experts share how to navigate 5 tricky situations, including dealing with in-laws who can't seem to \" | \"NPR Life Kit LISTEN & FOLLOW NPR App Apple Podcasts Spotify Amazon Music iHeart Radio RSS link Life \". None is a definitional statement of at most 50 words that names 'Andee Tagle' and says what it is. A system answering \"what is Andee Tagle\" has nothing short and quotable to lift.",
+      "id": "F-024",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>Andee Tagle is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-024.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"Andee Tagle is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://www.npr.org/2022/12/09/1141872654/build-a-healthy-relationship-with-your-in-laws: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what Andee Tagle is \u2014 on /2022/12/09/1141872654/build-a-healthy-relationship-with-your-in-laws"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/24/nx-s1-5931971/trump-nih-science-funding-disruptions-charts"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/24/nx-s1-5931971/trump-nih-science-funding-disruptions-charts: the first five sentences are \"Under Trump, NIH funding disruptions have evolved, experts say Stories of science funding being cut,\" | \"These six graphics show how those changes have affected U.S.\" | \"biomedical research.\". None is a definitional statement of at most 50 words that names 'Joseph Kim' and says what it is. A system answering \"what is Joseph Kim\" has nothing short and quotable to lift.",
+      "id": "F-025",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>Joseph Kim is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-025.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"Joseph Kim is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://www.npr.org/2026/09/24/nx-s1-5931971/trump-nih-science-funding-disruptions-charts: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what Joseph Kim is \u2014 on /2026/09/24/nx-s1-5931971/trump-nih-science-funding-disruptions-charts"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/24/nx-s1-5978798/your-mother-your-mother-your-mother-review"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/24/nx-s1-5978798/your-mother-your-mother-your-mother-review: the first five sentences are \"'Your Mother' review: Mahershala Ali stars as a devout father ...\" | \"and hitman It's not easy, killing people and raising a family.\" | \"The new action-thriller Your Mother Your Mother Your Mother reaffirms the power of faith \u2014 and delig\". None is a definitional statement of at most 50 words that names 'Justin Chang' and says what it is. A system answering \"what is Justin Chang\" has nothing short and quotable to lift.",
+      "id": "F-026",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>Justin Chang is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-026.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"Justin Chang is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://www.npr.org/2026/09/24/nx-s1-5978798/your-mother-your-mother-your-mother-review: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what Justin Chang is \u2014 on /2026/09/24/nx-s1-5978798/your-mother-your-mother-your-mother-review"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/24/nx-s1-5979058/where-is-austin-tice-a-meeting-in-muskat"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/24/nx-s1-5979058/where-is-austin-tice-a-meeting-in-muskat: the first five sentences are \"Josh uncovers a world of secret negotiations and backchannels.\" | \": Embedded Josh uncovers a hidden world of secret negotiations, backchannels, and high-level talks.\" | \"And, after years of failed promises, Austin\u2019s mother Debra decides to go to Syria herself - alone.\". None is a definitional statement of at most 50 words that names 'Josh Baker' and says what it is. A system answering \"what is Josh Baker\" has nothing short and quotable to lift.",
+      "id": "F-027",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>Josh Baker is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-027.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"Josh Baker is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://www.npr.org/2026/09/24/nx-s1-5979058/where-is-austin-tice-a-meeting-in-muskat: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what Josh Baker is \u2014 on /2026/09/24/nx-s1-5979058/where-is-austin-tice-a-meeting-in-muskat"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/25/g-s1-144665/trump-arch-fat-bear-media-ai-news-quiz"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/25/g-s1-144665/trump-arch-fat-bear-media-ai-news-quiz: the first five sentences are \"Fill in the blank in the quiz: Trump's says his triumphal arch will include _____ Plus: It's a very \" | \"But which one?\" | \"Special Series The NPR news quiz Have you been paying attention?\". None is a definitional statement of at most 50 words that names 'Holly J. Morris' and says what it is. A system answering \"what is Holly J. Morris\" has nothing short and quotable to lift.",
+      "id": "F-028",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>Holly J. Morris is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-028.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"Holly J. Morris is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://www.npr.org/2026/09/25/g-s1-144665/trump-arch-fat-bear-media-ai-news-quiz: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what Holly J. Morris is \u2014 on /2026/09/25/g-s1-144665/trump-arch-fat-bear-media-ai-news-quiz"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/25/g-s1-144948/pandemic-prevention-treaty-agreement-world-health-organization"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/25/g-s1-144948/pandemic-prevention-treaty-agreement-world-health-organization: the first five sentences are \"What's holding up the pandemic treaty?\" | \"The treaty aims to help the countries of the world prepare for \u2014 and defeat \u2014 any future pandemic.\" | \"Why hasn't it gone into effect?\". None is a definitional statement of at most 50 words that names 'Jonathan Lambert' and says what it is. A system answering \"what is Jonathan Lambert\" has nothing short and quotable to lift.",
+      "id": "F-029",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>Jonathan Lambert is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-029.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"Jonathan Lambert is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://www.npr.org/2026/09/25/g-s1-144948/pandemic-prevention-treaty-agreement-world-health-organization: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what Jonathan Lambert is \u2014 on /2026/09/25/g-s1-144948/pandemic-prevention-treaty-agreement-world-health-organization"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/25/nx-s1-5976939/primetime-review-robert-pattinson-to-catch-a-predator"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/25/nx-s1-5976939/primetime-review-robert-pattinson-to-catch-a-predator: the first five sentences are \"'Primetime' review: Lurid 'To Catch a Predator' story doesn't probe deep enough Primetime dramatizes\" | \"It's full of big swings from the director and the actors \u2014 but doesn't engage with the most complica\" | \"Pop Culture Happy Hour Pop culture in high spirits Television Movies Music Books Performing Arts Pop\". None is a definitional statement of at most 50 words that names 'Glen Weldon' and says what it is. A system answering \"what is Glen Weldon\" has nothing short and quotable to lift.",
+      "id": "F-030",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>Glen Weldon is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-030.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"Glen Weldon is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://www.npr.org/2026/09/25/nx-s1-5976939/primetime-review-robert-pattinson-to-catch-a-predator: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what Glen Weldon is \u2014 on /2026/09/25/nx-s1-5976939/primetime-review-robert-pattinson-to-catch-a-predator"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/25/nx-s1-5979852/israels-prime-minister-addresses-u-n-general-assembly"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2026/09/25/nx-s1-5979852/israels-prime-minister-addresses-u-n-general-assembly: the first five sentences are \"Israel's Netanyahu slams critics, including Mamdani, at the U.N.\" | \"Middle East crises draw major focus as the U.N.\" | \"General Assembly hears from Israel, the Palestinian Authority and Yemen.\". None is a definitional statement of at most 50 words that names 'Kat Lonsdorf' and says what it is. A system answering \"what is Kat Lonsdorf\" has nothing short and quotable to lift.",
+      "id": "F-031",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>Kat Lonsdorf is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-031.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"Kat Lonsdorf is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://www.npr.org/2026/09/25/nx-s1-5979852/israels-prime-minister-addresses-u-n-general-assembly: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what Kat Lonsdorf is \u2014 on /2026/09/25/nx-s1-5979852/israels-prime-minister-addresses-u-n-general-assembly"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/about-npr/179876898/terms-of-use"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/about-npr/179876898/terms-of-use: the first five sentences are \"Terms of Use Please read NPR's Terms of Use.\" | \"Terms of Use May 3, 2013 9:55 AM ET Updated: September 10, 2025 See related: NPR Permissions and NPR\". None is a definitional statement of at most 50 words that names 'NPR' and says what it is. A system answering \"what is NPR\" has nothing short and quotable to lift.",
+      "id": "F-032",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>NPR is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-032.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"NPR is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://www.npr.org/about-npr/179876898/terms-of-use: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what NPR is \u2014 on /about-npr/179876898/terms-of-use"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/about-npr/179878450/privacy-policy"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/about-npr/179878450/privacy-policy: the first five sentences are \"NPR Online Privacy Policy Please read NPR's Online Privacy Policy.\" | \"NPR Online Privacy Policy May 7, 2013 9:51 AM ET Last Updated: September 10, 2025 Please click on th\" | \"Privacy Policy Scope Welcome to the NPR Privacy Policy.\". None is a definitional statement of at most 50 words that names 'NPR' and says what it is. A system answering \"what is NPR\" has nothing short and quotable to lift.",
+      "id": "F-033",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>NPR is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-033.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"NPR is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://www.npr.org/about-npr/179878450/privacy-policy: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what NPR is \u2014 on /about-npr/179878450/privacy-policy"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/lifekit"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.no_direct_answer_block",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/lifekit: the first five sentences are \"Life Kit Tools to help you get it together.\" | \"Life Kit Tools To Help You Get It Together Health Money Parenting Dear Life Kit Life Skills Podcast \" | \"Read this comic first September 12, 2025 \u2022 It's hard to know when to give up on a goal, especially w\". None is a definitional statement of at most 50 words that names 'NPR' and says what it is. A system answering \"what is NPR\" has nothing short and quotable to lift.",
+      "id": "F-034",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A short definitional sentence is directly quotable as an answer; a reader that has to synthesise one from scattered prose usually picks a source that did the work.",
+        "patch": "<p>NPR is __FILL_IN__:category that __FILL_IN__:what_it_does_for_whom.</p>",
+        "patch_path": "fix_patches/F-034.extract.ans.no_direct_answer_block.txt",
+        "priority": "medium",
+        "source": "references/geo-methods.md",
+        "summary": "Open with one sentence of the form \"NPR is a \u2026 that \u2026\".",
+        "verification": "Read the first two sentences of https://www.npr.org/lifekit: do they answer \"what is this?\" without further reading?"
+      },
+      "title": "Nothing near the top of the page states plainly what NPR is \u2014 on /lifekit"
+    },
+    {
+      "affected_url_count": 4,
+      "affected_urls": [
+        "https://www.npr.org/2022/12/09/1141872654/build-a-healthy-relationship-with-your-in-laws",
+        "https://www.npr.org/about-npr/1136563345/accessibility",
+        "https://www.npr.org/about-npr/179876898/terms-of-use",
+        "https://www.npr.org/lifekit"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "trust.date.stale_volatile_facts",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/2022/12/09/1141872654/build-a-healthy-relationship-with-your-in-laws last dated 2022-12-19 (1378 days ago) while containing the time-sensitive phrase 'this year'; https://www.npr.org/about-npr/1136563345/accessibility last dated 2022-11-16 (1411 days ago) while containing the time-sensitive phrase 'currently'; https://www.npr.org/about-npr/179876898/terms-of-use last dated 2013-05-03 (4895 days ago) while containing the time-sensitive phrase 'currently'; https://www.npr.org/lifekit last dated 2025-09-12 (380 days ago) while containing the time-sensitive phrase 'latest'. The staleness window for this archetype is 365 days.",
+      "id": "F-035",
+      "severity": "medium",
+      "stage": "trust",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A page asserting a current price or hours, last touched years ago, is a weaker source than a recently confirmed one making the same claim.",
+        "patch": "\"dateModified\": \"__FILL_IN__:YYYY-MM-DD\"  <!-- update when the facts are re-confirmed -->",
+        "patch_path": "fix_patches/F-035.trust.date.stale_volatile_facts.txt",
+        "priority": "medium",
+        "source": "schema.org/Article dateModified",
+        "summary": "Review these pages and refresh dateModified when the facts are confirmed.",
+        "verification": "curl -s https://www.npr.org/2022/12/09/1141872654/build-a-healthy-relationship-with-your-in-laws | grep -o 'dateModified[^,]*'"
+      },
+      "title": "4 page(s) state time-sensitive facts but have not been updated"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "trust.entity.name_collision",
+      "confidence": "likely",
+      "evidence": "The brand name 'NPR' is a single short generic word. Within 10 words of the name on https://www.npr.org/ there is no descriptor saying what kind of thing it is, and no schema description supplies one. A system that encounters this name elsewhere has nothing to tie it back to this organisation.",
+      "id": "F-036",
+      "severity": "medium",
+      "stage": "trust",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A descriptor beside the name gives a disambiguating anchor, so statements about this entity can be separated from statements about others sharing the name.",
+        "patch": "<p>NPR is a __FILL_IN__:category for __FILL_IN__:audience, based in __FILL_IN__:location.</p>\n<!-- and in the Organization node: -->\n\"description\": \"__FILL_IN__:one_line_category_description\",\n\"sameAs\": [\"__FILL_IN__:wikidata_or_wikipedia_url\", \"__FILL_IN__:linkedin_url\"]",
+        "patch_path": "fix_patches/F-036.trust.entity.name_collision.txt",
+        "priority": "medium",
+        "source": "Handout appendix, Why agreement across the web matters",
+        "summary": "Put a category descriptor next to the name, and add sameAs links.",
+        "verification": "Search the exact name and see whether this organisation is the first unambiguous result; if not, the descriptor is doing no work yet."
+      },
+      "title": "The name 'NPR' is ambiguous and nothing on the homepage distinguishes it"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "trust.entity.nap_inconsistent",
+      "confidence": "likely",
+      "evidence": "address: \"4 primaries. the state's high court\" (first seen on https://www.npr.org/2026/09/25/nx-s1-5978875/midterms-redistricting-trump-missouri), '1111 north capitol street' (first seen on https://www.npr.org/about-npr/179876898/terms-of-use); phone: '2022169823' (first seen on https://www.npr.org/2021/01/11/955692434/procrastination-is-more-than-putting-things-off-heres-how-to-kick-the-habit), '2025133240' (first seen on https://www.npr.org/about-npr/179876898/terms-of-use), '2025133021' (first seen on https://www.npr.org/about-npr/179876898/terms-of-use). Phone numbers were compared on digits only and addresses on collapsed whitespace, so formatting differences are not counted as variants.",
+      "id": "F-037",
+      "severity": "medium",
+      "stage": "trust",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "Cross-source agreement is what makes a detail believable; a site that disagrees with itself gives a checker no version to settle on.",
+        "patch": "\"address\": {\n  \"@type\": \"PostalAddress\",\n  \"streetAddress\": \"__FILL_IN__:canonical_street\",\n  \"addressLocality\": \"__FILL_IN__:city\",\n  \"postalCode\": \"__FILL_IN__:postcode\"\n},\n\"telephone\": \"__FILL_IN__:canonical_phone\"",
+        "patch_path": "fix_patches/F-037.trust.entity.nap_inconsistent.txt",
+        "priority": "medium",
+        "source": "Handout appendix, Why agreement across the web matters",
+        "summary": "Publish one canonical address and phone number, and render every mention from it.",
+        "verification": "Grep the rendered site for phone digits; expect exactly one distinct value."
+      },
+      "title": "The site states more than one address or phone number for itself"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "trust.entity.no_external_corroboration",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/ declares 0 sameAs link(s), of which 0 point at an independent identity source such as Wikipedia, Wikidata, Companies House, LinkedIn or GitHub. Across 25 crawled pages the site links outward to 88 distinct external host(s). This says what we observed ON THIS SITE. It is not evidence that no one else mentions the brand, which cannot be established from the site alone, so this finding is reported at likely confidence and never as confirmed.",
+      "id": "F-038",
+      "severity": "medium",
+      "stage": "trust",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "sameAs states that this site and an independent record describe one entity, which lets a checker corroborate a claim here against a source elsewhere instead of taking it on trust.",
+        "patch": "\"sameAs\": [\n  \"__FILL_IN__:wikidata_or_wikipedia_url\",\n  \"__FILL_IN__:linkedin_company_url\",\n  \"__FILL_IN__:github_or_crunchbase_url\"\n]\n<!-- Only list profiles that genuinely describe this same entity. -->",
+        "patch_path": "fix_patches/F-038.trust.entity.no_external_corroboration.txt",
+        "priority": "medium",
+        "source": "schema.org/sameAs; handout appendix, Why agreement across the web matters",
+        "summary": "Add sameAs links from your Organization node to profiles you already control.",
+        "verification": "curl -s https://www.npr.org/ | grep -o '\"sameAs\"[^]]*]'"
+      },
+      "title": "Nothing connects this site to an independent record of the same entity"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/about-npr/178660742/public-radio-finances"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.context.assumes_prior_context",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/about-npr/178660742/public-radio-finances: \"That is the promise of a free press in a democracy.\" (opens with the unresolved reference 'That'). Most visitors arrive on a deep page from search or a shared link with no prior session, so copy written for someone mid-journey reads as though they have missed something.",
+      "id": "F-039",
+      "severity": "medium",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A reference to state the visitor does not hold cannot be resolved, so the sentence carries no information and signals the page was not meant for them.",
+        "patch": "<!-- was: That is the promise of a free press in a democracy. -->\n<p>__FILL_IN__:restate_without_assuming_prior_context</p>",
+        "patch_path": "fix_patches/F-039.act.context.assumes_prior_context.txt",
+        "priority": "medium",
+        "source": "Handout appendix, Personalization and prior context",
+        "summary": "Rewrite these passages so they stand on their own for a first-time reader.",
+        "verification": "Read each passage cold, as a stranger: does it depend on something you were never told?"
+      },
+      "title": "1 passage(s) assume context a first-time visitor does not have \u2014 on /about-npr/178660742/public-radio-finances"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/about-npr/179876898/terms-of-use"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.context.assumes_prior_context",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/about-npr/179876898/terms-of-use: \"NPR will make the NPR+ Benefits available to you for so long as you continue your recurring donation to your s\" (assumes a selection the visitor has not made via 'your selected station or to the '); \"You agree that you will indemnify and hold harmless NPR, its Member stations, Content Providers, and their res\" (assumes an earlier reference via 'the above representations'); \"IF APPLICABLE LAW DOES NOT ALLOW THE EXCLUSION OF SOME OR ALL OF THE ABOVE IMPLIED OR STATUTORY WARRANTIES TO \" (assumes an earlier reference via 'THE ABOVE IMPLIED'). Most visitors arrive on a deep page from search or a shared link with no prior session, so copy written for someone mid-journey reads as though they have missed something.",
+      "id": "F-040",
+      "severity": "medium",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A reference to state the visitor does not hold cannot be resolved, so the sentence carries no information and signals the page was not meant for them.",
+        "patch": "<!-- was: NPR will make the NPR+ Benefits available to you for so long as you continue your recurrin -->\n<p>__FILL_IN__:restate_without_assuming_prior_context</p>\n<!-- was: You agree that you will indemnify and hold harmless NPR, its Member stations, Content Prov -->\n<p>__FILL_IN__:restate_without_assuming_prior_context</p>\n<!-- was: IF APPLICABLE LAW DOES NOT ALLOW THE EXCLUSION OF SOME OR ALL OF THE ABOVE IMPLIED OR STAT -->\n<p>__FILL_IN__:restate_without_assuming_prior_context</p>",
+        "patch_path": "fix_patches/F-040.act.context.assumes_prior_context.txt",
+        "priority": "medium",
+        "source": "Handout appendix, Personalization and prior context",
+        "summary": "Rewrite these passages so they stand on their own for a first-time reader.",
+        "verification": "Read each passage cold, as a stranger: does it depend on something you were never told?"
+      },
+      "title": "3 passage(s) assume context a first-time visitor does not have \u2014 on /about-npr/179876898/terms-of-use"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/about-npr/179878450/privacy-policy"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.context.assumes_prior_context",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/about-npr/179878450/privacy-policy: \"As described above, we may work with third-party analytics services to set tracking cookies or pixels on brows\" (assumes text earlier on the page via 'As described above'); \"For example, as described above, when you enter your email address on our Services (either to log in, or to si\" (assumes text earlier on the page via 'as described above'). Most visitors arrive on a deep page from search or a shared link with no prior session, so copy written for someone mid-journey reads as though they have missed something.",
+      "id": "F-041",
+      "severity": "medium",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A reference to state the visitor does not hold cannot be resolved, so the sentence carries no information and signals the page was not meant for them.",
+        "patch": "<!-- was: As described above, we may work with third-party analytics services to set tracking cookie -->\n<p>__FILL_IN__:restate_without_assuming_prior_context</p>\n<!-- was: For example, as described above, when you enter your email address on our Services (either -->\n<p>__FILL_IN__:restate_without_assuming_prior_context</p>",
+        "patch_path": "fix_patches/F-041.act.context.assumes_prior_context.txt",
+        "priority": "medium",
+        "source": "Handout appendix, Personalization and prior context",
+        "summary": "Rewrite these passages so they stand on their own for a first-time reader.",
+        "verification": "Read each passage cold, as a stranger: does it depend on something you were never told?"
+      },
+      "title": "2 passage(s) assume context a first-time visitor does not have \u2014 on /about-npr/179878450/privacy-policy"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/lifekit"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.context.assumes_prior_context",
+      "confidence": "likely",
+      "evidence": "https://www.npr.org/lifekit: \"As your current self, go back in time and give your younger self the reassurance you needed to hear back then.\" (assumes a selection the visitor has not made via 'your current self'). Most visitors arrive on a deep page from search or a shared link with no prior session, so copy written for someone mid-journey reads as though they have missed something.",
+      "id": "F-042",
+      "severity": "medium",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.7,
+        "ice_components": {
+          "confidence": 6.0,
+          "ease": 9.0,
+          "impact": 5.0
+        },
+        "mechanism": "A reference to state the visitor does not hold cannot be resolved, so the sentence carries no information and signals the page was not meant for them.",
+        "patch": "<!-- was: As your current self, go back in time and give your younger self the reassurance you neede -->\n<p>__FILL_IN__:restate_without_assuming_prior_context</p>",
+        "patch_path": "fix_patches/F-042.act.context.assumes_prior_context.txt",
+        "priority": "medium",
+        "source": "Handout appendix, Personalization and prior context",
+        "summary": "Rewrite these passages so they stand on their own for a first-time reader.",
+        "verification": "Read each passage cold, as a stranger: does it depend on something you were never told?"
+      },
+      "title": "1 passage(s) assume context a first-time visitor does not have \u2014 on /lifekit"
+    },
+    {
+      "affected_url_count": 2,
+      "affected_urls": [
+        "https://www.npr.org/",
+        "https://www.npr.org/sections/news/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.sd.expected_type_missing",
+      "confidence": "confirmed",
+      "evidence": "https://www.npr.org/ is a home page declaring ['speakablespecification'] but none of ['Organization', 'WebSite', 'LocalBusiness', 'Person']; https://www.npr.org/sections/news/ is a category page declaring ['speakablespecification'] but none of ['CollectionPage', 'ItemList']",
+      "id": "F-043",
+      "severity": "medium",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "medium",
+        "ice": 6.3,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 5.0,
+          "impact": 5.0
+        },
+        "mechanism": "A consumer selects markup by type; a product page typed only as WebPage carries no price, no availability and nothing a shopping question can use.",
+        "patch": "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"Organization\",\n  \"name\": 'NPR - Breaking News, Analysis, Music, Arts & Podcasts : NPR',\n  \"url\": \"https://www.npr.org/\"\n}\n</script>",
+        "patch_path": "fix_patches/F-043.extract.sd.expected_type_missing.txt",
+        "priority": "medium",
+        "source": "schema.org type hierarchy",
+        "summary": "Declare the type that matches what the page is about.",
+        "verification": "curl -s https://www.npr.org/ | grep -o '\"@type\"[^,}]*'"
+      },
+      "title": "2 page(s) declare structured data of the wrong kind"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/sitemap.xml"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "reach.sitemap.coverage_gap",
+      "confidence": "confirmed",
+      "evidence": "13 of 25 crawled pages (52%) are not listed, for example https://www.npr.org/, https://www.npr.org/2021/01/11/955692434/procrastination-is-more-than-putting-things-off-heres-how-to-kick-the-habit, https://www.npr.org/2022/07/11/1110926267/digital-minimalism-can-help-find-balance; all 160 entries share 0 distinct lastmod value(s), so lastmod carries no information about what changed",
+      "id": "F-044",
+      "severity": "low",
+      "stage": "reach",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.0,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 3.0
+        },
+        "mechanism": "Crawlers use lastmod to decide what to re-fetch; a constant or absent value gives them nothing to prioritise, so changed pages are refreshed no sooner than unchanged ones.",
+        "patch": "  <url><loc>https://www.npr.org/</loc></url>\n  <url><loc>https://www.npr.org/2021/01/11/955692434/procrastination-is-more-than-putting-things-off-heres-how-to-kick-the-habit</loc></url>\n  <url><loc>https://www.npr.org/2022/07/11/1110926267/digital-minimalism-can-help-find-balance</loc></url>\n  <url><loc>https://www.npr.org/2022/12/09/1141872654/build-a-healthy-relationship-with-your-in-laws</loc></url>\n  <url><loc>https://www.npr.org/about-npr/1136563345/accessibility</loc></url>",
+        "patch_path": "fix_patches/F-044.reach.sitemap.coverage_gap.txt",
+        "priority": "low",
+        "source": "sitemaps.org protocol 0.9",
+        "summary": "Regenerate the sitemap from the live route list with real lastmod values.",
+        "verification": "curl -s https://www.npr.org/sitemap.xml | grep -c '<loc>'"
+      },
+      "title": "The sitemap does not usefully describe the site"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/",
+        "https://www.npr.org/2021/01/11/955692434/procrastination-is-more-than-putting-things-off-heres-how-to-kick-the-habit",
+        "https://www.npr.org/2022/07/11/1110926267/digital-minimalism-can-help-find-balance",
+        "https://www.npr.org/2022/12/09/1141872654/build-a-healthy-relationship-with-your-in-laws",
+        "https://www.npr.org/2026/09/24/nx-s1-5931971/trump-nih-science-funding-disruptions-charts",
+        "https://www.npr.org/2026/09/24/nx-s1-5974336/teen-pregnancy-prevention-unspent-funding",
+        "https://www.npr.org/2026/09/24/nx-s1-5978798/your-mother-your-mother-your-mother-review",
+        "https://www.npr.org/2026/09/24/nx-s1-5978892/willem-dafoe-late-fame-lighthouse-poor-things-italy-farming-spiderman-green-goblin",
+        "https://www.npr.org/2026/09/24/nx-s1-5979058/where-is-austin-tice-a-meeting-in-muskat",
+        "https://www.npr.org/2026/09/25/g-s1-144948/pandemic-prevention-treaty-agreement-world-health-organization",
+        "https://www.npr.org/2026/09/25/nx-s1-5976804/supreme-court-trump-save-noncitizen-voting",
+        "https://www.npr.org/2026/09/25/nx-s1-5976939/primetime-review-robert-pattinson-to-catch-a-predator",
+        "https://www.npr.org/2026/09/25/nx-s1-5978096/republicans-trump-midterm-elections",
+        "https://www.npr.org/2026/09/25/nx-s1-5978875/midterms-redistricting-trump-missouri",
+        "https://www.npr.org/2026/09/25/nx-s1-5979852/israels-prime-minister-addresses-u-n-general-assembly",
+        "https://www.npr.org/about-npr/1136563345/accessibility",
+        "https://www.npr.org/about-npr/178660742/public-radio-finances",
+        "https://www.npr.org/about-npr/179876898/terms-of-use",
+        "https://www.npr.org/about-npr/179878450/privacy-policy",
+        "https://www.npr.org/about-npr/186948703/corporate-sponsorship",
+        "https://www.npr.org/about/",
+        "https://www.npr.org/lifekit",
+        "https://www.npr.org/sections/news/",
+        "https://www.npr.org/support/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "extract.ans.heading_structure_unusable",
+      "confidence": "confirmed",
+      "evidence": "This is a site-wide pattern, not a one-page defect: it appears on 24 of 25 crawled pages (96%), so it is almost certainly emitted by a shared template and fixable in one place. Reported once rather than 24 times. Example: https://www.npr.org/: no H1; heading levels skip from h4 to h6. Outline: h2:'Health Reporting in the States', h2:'Health', h2:'Weather', h2:'Technology', h2:'Only on NPR', h2:'Business', h2:'National', h2:'Deep Dive'. Headings are where a reader decides which part of a page answers the question, so an outline that does not divide the content leaves it to guess.",
+      "id": "F-045",
+      "severity": "low",
+      "stage": "extract",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.0,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 3.0
+        },
+        "mechanism": "Headings mark the boundaries a reader uses to locate the relevant part of a long page; without them the whole page is one undifferentiated block.",
+        "patch": "<h1>__FILL_IN__:page_subject</h1>\n<h2>__FILL_IN__:question_this_section_answers</h2>",
+        "patch_path": "fix_patches/F-045.extract.ans.heading_structure_unusable.txt",
+        "priority": "low",
+        "source": "references/chunking-model.md",
+        "summary": "Give the page one H1 and H2 sections that name what each part answers.",
+        "verification": "curl -s https://www.npr.org/ | grep -oE '<h[1-3][^>]*>' | sort | uniq -c"
+      },
+      "title": "The heading outline does not divide this page usefully \u2014 on 24 of 25 crawled pages"
+    },
+    {
+      "affected_url_count": 11,
+      "affected_urls": [
+        "https://www.npr.org/2026/09/24/nx-s1-5978892/willem-dafoe-late-fame-lighthouse-poor-things-italy-farming-spiderman-green-goblin",
+        "https://www.npr.org/2026/09/25/g-s1-144665/trump-arch-fat-bear-media-ai-news-quiz",
+        "https://www.npr.org/2026/09/25/g-s1-144948/pandemic-prevention-treaty-agreement-world-health-organization",
+        "https://www.npr.org/2026/09/25/nx-s1-5976939/primetime-review-robert-pattinson-to-catch-a-predator",
+        "https://www.npr.org/2026/09/25/nx-s1-5978096/republicans-trump-midterm-elections",
+        "https://www.npr.org/2026/09/25/nx-s1-5978875/midterms-redistricting-trump-missouri",
+        "https://www.npr.org/about-npr/1136563345/accessibility",
+        "https://www.npr.org/about-npr/178660742/public-radio-finances",
+        "https://www.npr.org/about-npr/179878450/privacy-policy",
+        "https://www.npr.org/about-npr/186948703/corporate-sponsorship",
+        "https://www.npr.org/support/"
+      ],
+      "blocked_by": "F-001",
+      "category": "discoverability",
+      "check_id": "trust.authorship.unattributed",
+      "confidence": "confirmed",
+      "evidence": "No schema author property and no byline text on: https://www.npr.org/2026/09/24/nx-s1-5978892/willem-dafoe-late-fame-lighthouse-poor-things-italy-farming-spiderman-green-goblin, https://www.npr.org/2026/09/25/g-s1-144665/trump-arch-fat-bear-media-ai-news-quiz, https://www.npr.org/2026/09/25/g-s1-144948/pandemic-prevention-treaty-agreement-world-health-organization, https://www.npr.org/2026/09/25/nx-s1-5976939/primetime-review-robert-pattinson-to-catch-a-predator.",
+      "id": "F-046",
+      "severity": "low",
+      "stage": "trust",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.0,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 3.0
+        },
+        "mechanism": "Attribution gives a claim an accountable source, which is one of the few signals separating a considered piece from anonymous copy.",
+        "patch": "\"author\": { \"@type\": \"Person\", \"name\": \"__FILL_IN__:author_name\" }",
+        "patch_path": "fix_patches/F-046.trust.authorship.unattributed.txt",
+        "priority": "low",
+        "source": "schema.org/Article author",
+        "summary": "Attribute each article to a named person or to the organisation.",
+        "verification": "curl -s https://www.npr.org/2026/09/24/nx-s1-5978892/willem-dafoe-late-fame-lighthouse-poor-things-italy-farming-spiderman-green-goblin | grep -o '\"author\"[^}]*}'"
+      },
+      "title": "11 article(s) name nobody as the author"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/sections/news/"
+      ],
+      "blocked_by": null,
+      "category": "engagement",
+      "check_id": "act.trust.no_cost_signal",
+      "confidence": "confirmed",
+      "evidence": "https://www.npr.org/sections/news/ is a category page. No currency amount appears in its 2463 words of observed content, no schema.org offers.price is declared, no phrase such as \"contact sales\" or \"request pricing\" appears, and none of its 110 internal links leads to a pricing or quote page.",
+      "id": "F-047",
+      "severity": "low",
+      "stage": "act",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 7.0,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 3.0
+        },
+        "mechanism": "Cost is the question a visitor on a commercial page is trying to answer; leaving it unanswerable ends the visit rather than deferring it.",
+        "patch": "<p class=\"price\">__FILL_IN__:amount __FILL_IN__:currency</p>\n<!-- or, if pricing is genuinely quote-based: -->\n<p><a href=\"/contact\">Request pricing</a> \u2014 typical range __FILL_IN__:range</p>",
+        "patch_path": "fix_patches/F-047.act.trust.no_cost_signal.txt",
+        "priority": "low",
+        "source": "references/cro-frameworks.md",
+        "summary": "State a price, a price range, or an explicit route to getting one.",
+        "verification": "curl -s https://www.npr.org/sections/news/ | grep -Eo '[$\u00a3\u20ac][0-9,]+' | head -3"
+      },
+      "title": "A category page gives no indication of cost and no path to one"
+    },
+    {
+      "affected_url_count": 1,
+      "affected_urls": [
+        "https://www.npr.org/"
+      ],
+      "blocked_by": null,
+      "category": "discoverability",
+      "check_id": "reach.robots.ai_training_bot_blocked",
+      "confidence": "confirmed",
+      "evidence": "Blocked: Bytespider, CCBot, ClaudeBot, Diffbot, GPTBot, Omgilibot, anthropic-ai, cohere-ai. These collect content for model training corpora, not for answering questions at retrieval time. Blocking them does not reduce whether this brand is found or cited by AI assistants. Retrieval crawlers are separately blocked and are reported above as the real problem. Classification from a snapshot dated 2026-09-09 (upstream commit 0e111dcc24cb).",
+      "id": "F-048",
+      "severity": "info",
+      "stage": "reach",
+      "suggested_action": {
+        "effort": "low",
+        "ice": 6.3,
+        "ice_components": {
+          "confidence": 9.0,
+          "ease": 9.0,
+          "impact": 1.0
+        },
+        "mechanism": "Training-corpus collection and answer-time retrieval are separate pipelines with separate user-agent tokens; blocking the former does not affect the latter.",
+        "patch": "",
+        "priority": "low",
+        "source": "references/bot-taxonomy.md",
+        "summary": "No change required. This is a content-licensing decision, and we report it only so it is visible.",
+        "verification": "No action to verify. Revisit only if the site's licensing stance changes."
+      },
+      "title": "robots.txt blocks 8 training-only crawler(s) \u2014 recorded as an observation, not a defect"
+    }
+  ],
+  "generator": {
+    "ai_bots_snapshot_date": "2026-09-09",
+    "ai_bots_source_commit": "0e111dcc24cbcdf4e609edde70f9f9184eac8b02",
+    "checks_available": 66,
+    "checks_run": 21,
+    "name": "brand-ai-readiness-audit",
+    "tool_versions": {
+      "collector": "1.0.0",
+      "python": "3.11.9",
+      "renderer": "none",
+      "transport": "live"
+    },
+    "version": "1.0.0"
+  },
+  "limitations": [
+    {
+      "checks_not_run": [
+        "reach.edge.bot_ua_blocked",
+        "reach.edge.bot_ua_challenged"
+      ],
+      "confidence_effect": "not assessed; re-run with --probe-bot-ua to close this gap",
+      "optional_feature": true,
+      "reason": "Edge and CDN reachability for named AI crawlers was not assessed, because --probe-bot-ua was not set. This is the highest-value check in this marketplace: a CDN or WAF rule that returns 403 to OAI-SearchBot, PerplexityBot or Claude-SearchBot removes a brand from those assistants entirely, and leaves no trace in robots.txt or in what a human sees. If you own this site, re-run the orchestrator with the --probe-bot-ua flag:\n    orchestrate.py <url> --out ./audit-output --probe-bot-ua\nThat sends ONE request per crawler, to the homepage only, with an auditor token appended to the user-agent string so it is identifiable in your logs. It is off by default because sending named-crawler user-agents to a site you do not own is not something an audit should do without being asked.",
+      "scope": "site"
+    }
+  ],
+  "proactive_recommendations": [],
+  "schema_version": "1.0",
+  "site": "www.npr.org",
+  "summary": {
+    "blocked_findings": 38,
+    "by_category": {
+      "discoverability": 42,
+      "engagement": 6
+    },
+    "by_stage": {
+      "act": 6,
+      "extract": 32,
+      "reach": 4,
+      "read": 1,
+      "trust": 5
+    },
+    "critical": 1,
+    "high": 1,
+    "info": 1,
+    "low": 4,
+    "medium": 41,
+    "suppressed_by_rule": [
+      {
+        "check_id": "act.perf.above_fold_weight",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "extract.ans.fact_coverage_gap",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "extract.ans.no_direct_answer_block",
+        "count": 3,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "extract.ans.no_evidence_markers",
+        "count": 2,
+        "reason": "suppressed by threshold",
+        "rule": "suppressed by threshold"
+      },
+      {
+        "check_id": "extract.ans.thin_content_for_page_type",
+        "count": 23,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "extract.sd.expected_type_missing",
+        "count": 1,
+        "reason": "suppressed by low classifier confidence",
+        "rule": "suppressed by low classifier confidence"
+      },
+      {
+        "check_id": "reach.agent.llms_txt_absent",
+        "count": 1,
+        "reason": "suppressed by design",
+        "rule": "suppressed by design"
+      },
+      {
+        "check_id": "reach.edge.bot_ua_blocked",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "reach.edge.bot_ua_challenged",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "read.render.nav_links_js_only",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "read.render.raw_text_gap",
+        "count": 1,
+        "reason": "not assessed",
+        "rule": "not assessed"
+      },
+      {
+        "check_id": "sitewide_collapse",
+        "count": 1,
+        "reason": "extract.ans.heading_structure_unusable: 24 page-level findings collapsed into one site-wide finding covering 24 pages",
+        "rule": "extract.ans.heading_structure_unusable: 24 page-level findings collapsed into one site-wide finding covering 24 pages"
+      }
+    ],
+    "total_findings": 48
+  }
+}

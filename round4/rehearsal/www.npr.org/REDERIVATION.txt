@@ -1,0 +1,11 @@
+Re-derivation of this run's findings from its captured evidence bundle
+======================================================================
+
+command : python brand-ai-readiness-audit/skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle <evidence> --out <tmp>
+network : none (--bundle re-analyses the captured bundle; nothing is fetched)
+result  : PASS: identical: 48 findings, same order, ids, severities, evidence and patches; report.md byte-identical
+
+The engine is deterministic for a fixed evidence bundle, so every finding in
+audit-report.json follows mechanically from the captured evidence. A live
+replay can still differ below the top finding when the site's own pages change
+between runs; the bundle hashes in EVIDENCE_SHA256SUMS pin what this run saw.

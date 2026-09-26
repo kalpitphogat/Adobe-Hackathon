@@ -1,0 +1,6 @@
+<!-- Make each claim self-contained IN PROSE. Do not split the page into
+     smaller blocks: Google Search Central states there is no requirement
+     to break content into tiny pieces for AI to understand it. -->
+
+<!-- claim: Think you know procrastination? This quiz offers surprising insights  (the only window carrying it opens with the unresolved reference "That's") -->
+<p>NPR __FILL_IN__:state_this_claim_in_one_sentence_that_names_the_subject.</p>

@@ -1,0 +1,6 @@
+"sameAs": [
+  "__FILL_IN__:wikidata_or_wikipedia_url",
+  "__FILL_IN__:linkedin_company_url",
+  "__FILL_IN__:github_or_crunchbase_url"
+]
+<!-- Only list profiles that genuinely describe this same entity. -->

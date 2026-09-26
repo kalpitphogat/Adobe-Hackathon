@@ -1,0 +1,5 @@
+  <url><loc>https://www.npr.org/</loc></url>
+  <url><loc>https://www.npr.org/2021/01/11/955692434/procrastination-is-more-than-putting-things-off-heres-how-to-kick-the-habit</loc></url>
+  <url><loc>https://www.npr.org/2022/07/11/1110926267/digital-minimalism-can-help-find-balance</loc></url>
+  <url><loc>https://www.npr.org/2022/12/09/1141872654/build-a-healthy-relationship-with-your-in-laws</loc></url>
+  <url><loc>https://www.npr.org/about-npr/1136563345/accessibility</loc></url>

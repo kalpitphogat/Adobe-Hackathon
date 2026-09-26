@@ -1,0 +1,6 @@
+<!-- Make each claim self-contained IN PROSE. Do not split the page into
+     smaller blocks: Google Search Central states there is no requirement
+     to break content into tiny pieces for AI to understand it. -->
+
+<!-- claim: A new documentary raises questions about the true crime TV show 'To Catch A Predator'  (the only window carrying it never names 'Glen Weldon' or any distinctive part of it inside the window) -->
+<p>Glen Weldon __FILL_IN__:state_this_claim_in_one_sentence_that_names_the_subject.</p>

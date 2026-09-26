@@ -1,0 +1,27 @@
+{
+  "site": "www.npr.org",
+  "audited_at": "2026-09-26T20:18:51Z",
+  "archived_at": "2026-09-26T20:24:31Z",
+  "note": "Pre-recording rehearsal made by the agent on 2026-09-26 UTC with the exact REPLAY steps in headless mode (claude -p), Claude Code 2.1.283, claude-opus-5-5. NOT the video take.",
+  "summary": {
+    "total_findings": 48,
+    "critical": 1,
+    "high": 1,
+    "medium": 41,
+    "low": 4,
+    "info": 1,
+    "blocked_findings": 38
+  },
+  "top_finding": {
+    "id": "F-001",
+    "check_id": "reach.robots.ai_search_bot_blocked",
+    "severity": "critical"
+  },
+  "audit_report_sha256": "8222d026c5f2a201a847f8da74d310b3d1f2efaaad019dfb56ee7f225e4bcdc7",
+  "evidence_bundle_files": 66,
+  "rederivation": "PASS",
+  "engine": {
+    "round3_commit": "ede3a6ba776f31c6760c3fb7516cb7c66596b1ff",
+    "submission_zip_sha256": "1c872c598dcac741c712cbf9e671f024881a9ba251e2b4da66995f81b6cf8dcf"
+  }
+}
