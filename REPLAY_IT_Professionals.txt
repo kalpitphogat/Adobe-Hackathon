@@ -28,7 +28,8 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #
 # QUICK START (no agent needed -- just Python 3.9+ and the zip you already have)
 # ------------------------------------------------------------------------------
-#   mkdir replay && cd replay
+#   mkdir replay
+#   cd replay
 #   python -m zipfile -e /path/to/submission.zip brand-ai-readiness-audit
 #   cd brand-ai-readiness-audit
 #   python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --no-render --out ./audit-precheck
@@ -139,6 +140,10 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # the Windows code page, so a page title or quote with non-Latin characters
 # cannot crash a print. Set it before starting claude so every python command
 # the agent runs inherits it (cmd: set PYTHONUTF8=1). Harmless elsewhere.
+# If PowerShell refuses .venv\Scripts\Activate.ps1 with "running scripts is
+# disabled on this system" (the default on Windows 10 and 11), run
+#   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+# first. It lasts only for that PowerShell window.
 # Why "Skill" is in --allowedTools: the prompt asks the agent to use the
 # ai-readiness-orchestrator skill, and Claude Code loads a skill through its
 # Skill tool. Allowing it means the entrypoint loads without a permission
