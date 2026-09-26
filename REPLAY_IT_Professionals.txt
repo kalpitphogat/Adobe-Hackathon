@@ -9,7 +9,7 @@ TEST_STEPS:
       python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
       claude --model claude-opus-5-5 --allowedTools "Skill" "Bash(python:*)" "PowerShell(python:*)" "Read"
  2. Paste this prompt verbatim, replacing <URL> at the very end with one of the TEST_SITE_URLS (the video uses https://docs.pytest.org/) or any URL of your choice:
-      Use the ai-readiness-orchestrator skill, the entrypoint of this marketplace (skills/ai-readiness-orchestrator/SKILL.md), and follow its Procedure to audit the URL given at the end of this message, running the orchestrator from this directory in two passes. Pass 1, without a browser: the URL with --no-render --out ./audit-precheck. Then, with one python -c command, count the pages in audit-precheck/evidence/pages.jsonl that have status 200 and an empty links.internal list. If there are any, the crawler may be missing content that JavaScript builds, so pass 2 is a full run with the browser: the URL with --out ./audit-output. If there are none, pass 2 re-analyses the same evidence without crawling again: --bundle ./audit-precheck/evidence --out ./audit-output. Say in one line which pass 2 you ran and why. Run each command on its own, with no pipes, redirects or chained commands. Do not create, change or delete any file yourself, and do not add findings that are not in the report. When the report is written, read audit-output/audit-report.json and give, briefly: (1) audit_status, the counts by severity, and the checks listed as not assessed; (2) the top 5 findings in report order, which is the engine's priority order (severity, then ICE), as a table of rank, id, severity, confidence, ICE (from suggested_action.ice) and title; (3) an evidence check: go through the critical or high findings whose confidence is confirmed, in report order (if there are none, the first findings in report order), and stop at the first one your check supports or after 5 checks; for each, fetch one affected URL yourself with an inline python -c command and say in one line whether what you see supports the evidence (supported, partly supported, or not supported), quoting the numbers you saw. Use urllib for the raw HTML. For any check_id starting with read.render, and whenever the evidence compares the raw HTML with the rendered page or quotes values shown only after JavaScript runs, you must also load the page with Playwright if it is installed and count the same thing on both sides, same-host links only for links. (4) A drill-down on the finding your check supported (if none was, say so): its evidence, severity and confidence, mechanism, paste-ready patch, ICE components, how many findings have blocked_by pointing at it, and its verification step. Report the engine's findings exactly as written; your evidence check is commentary and must not change the report. URL: <URL>
+      Use the ai-readiness-orchestrator skill, the entrypoint of this marketplace (skills/ai-readiness-orchestrator/SKILL.md), and follow its Procedure to audit the URL given at the end of this message, running the orchestrator from this directory in two passes. Pass 1, without a browser: the URL with --no-render --out ./audit-precheck. Then, with one python -c command, count the pages in audit-precheck/evidence/pages.jsonl that have status 200 and an empty links.internal list. If there are any, the crawler may be missing content that JavaScript builds, so pass 2 is a full run with the browser: the URL with --out ./audit-output. If there are none, pass 2 re-analyses the same evidence without crawling again: --bundle ./audit-precheck/evidence --out ./audit-output. Say in one line which pass 2 you ran and why. Run each command on its own, with no pipes, redirects or chained commands. Do not create, change or delete any file yourself, and do not add findings that are not in the report. When the report is written, read audit-output/audit-report.json and give, briefly: (1) audit_status, the counts by severity, and the checks listed as not assessed; (2) the top 5 findings whose confidence is confirmed, in report order, which is the engine's priority order (severity, then ICE), as a table of rank, id, severity, confidence, ICE (from suggested_action.ice), title and your verdict from part 3 (if fewer than 5 are confirmed, fill the table with the next findings in report order); under the table, one line giving how many findings are confirmed and how many are likely, and the id, severity and title of the highest-ranked likely finding, so nothing in the report is hidden; (3) an evidence check on every row of that table, in order: for each, fetch one affected URL yourself with an inline python -c command (robots.txt for a reach.robots finding) and give its verdict (supported, partly supported, or not supported) with one line quoting the numbers or text you saw. Judge what the finding claims, not only whether its quoted text is there: a page that discusses a topic is not an instruction, a feed or a redirect stub is not a page a visitor reads, and a robots.txt group that disallows only some paths does not block the site. Use urllib for the raw HTML. For any check_id starting with read.render, and whenever the evidence compares the raw HTML with the rendered page or quotes values shown only after JavaScript runs, you must also load the page with Playwright if it is installed and count the same thing on both sides, same-host links only for links. (4) A drill-down on the highest-ranked row your check supported (if none was, say so): its evidence, severity and confidence, mechanism, paste-ready patch, ICE components, how many findings have blocked_by pointing at it, and its verification step. Report the engine's findings exactly as written; your evidence check is commentary and must not change the report. URL: <URL>
  3. The agent loads the entrypoint with the Skill tool (Skill: ai-readiness-orchestrator) and runs the orchestrator in two passes from the marketplace root. Pass 1, no browser:
       python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --no-render --out ./audit-precheck
     It then counts the pages that came back with status 200 and no same-site links in their raw HTML (the same count as this command):
@@ -18,7 +18,7 @@ TEST_STEPS:
       python skills/ai-readiness-orchestrator/scripts/orchestrate.py <URL> --out ./audit-output
     If it is 0, pass 2 re-analyses the same evidence without crawling again:
       python skills/ai-readiness-orchestrator/scripts/orchestrate.py --bundle ./audit-precheck/evidence --out ./audit-output
-    The report is written to ./audit-output/ as audit-report.json (fixed schema), report.md (plain-English version) and fix_patches/ (one paste-ready patch per finding). The agent then prints, in the terminal: which pass 2 it ran and why, the status and counts, the top 5 fixes in priority order with their ICE scores, its evidence check on the confirmed high findings (stopping at the first one it supports), and a drill-down (evidence, severity, fix, patch) on that finding.
+    The report is written to ./audit-output/ as audit-report.json (fixed schema), report.md (plain-English version) and fix_patches/ (one paste-ready patch per finding). The agent then prints, in the terminal: which pass 2 it ran and why, the status and counts, the top 5 confirmed findings in priority order with their ICE scores and its own verdict on each (it re-fetches every one), how many likely findings the report holds beyond that table, and a drill-down (evidence, severity, fix, patch) on the highest-ranked finding its check supported.
 EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 
 # ============================================================================
@@ -70,6 +70,27 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # What two passes give up: sites only partly built by JavaScript, where the
 # crawler already sees some links (Spotify, IKEA, and one of our test sites):
 # their true browser findings are not measured. Fallback E measures them.
+#
+# ---- WHY THE TABLE SHOWS CONFIRMED FINDINGS, EACH ONE RE-CHECKED ------------
+# Every finding carries the engine's own confidence: "confirmed" means a
+# deterministic check saw it, "likely" means a heuristic inferred it. The
+# report keeps both, in the engine's order. The agent's table shows the first
+# five confirmed ones; the line under it counts the likely ones and names the
+# highest, so nothing is hidden. Then the agent re-fetches every row.
+# Measured 2026-09-26 on 20 public sites (the ones a restricted network let us
+# reach: package registries, documentation, and docker.com, anaconda.com,
+# ubuntu.com, cloud.google.com, apache.org, gradle.org), each of the 100 rows
+# graded by hand from its evidence, every disputed one against the live page:
+#   * first five findings in report order: 35 held up (7 of them rated too
+#     severe); 57 of the other 65 were "likely" heuristics (KNOWN LIMITS);
+#   * first five confirmed findings: 82 held up (7 of them rated too severe),
+#     7 were weak and 11 were false. Six of the 11 are the three cases prompt
+#     part 3 names: a page about prompt injection read as an injection
+#     (docker.com, anaconda.com, cloud.google.com), a feed or a redirect stub
+#     read as a page (pub.dev/feed.atom, gradle.org/install), and a robots.txt
+#     group that disallows a few paths read as a block (ubuntu.com).
+# The engine and its report are unchanged: only what the agent shows first,
+# and what it re-checks, changed.
 #
 # TEAM: IT_Professionals (Lakshya, Tanmay, Kalpit)
 #
@@ -306,11 +327,48 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #    as disagreeing.
 #  * trust.integrity.prompt_injection fires on pages that discuss prompt
 #    injection (e.g. an acceptable-use policy), not only on pages that do it.
+#    It is critical and confirmed, so it ranks first: on 2026-09-26 it was the
+#    top finding on docker.com (a blog post saying "system prompt"),
+#    anaconda.com and cloud.google.com (guide and product pages saying
+#    "prompt injection"). Prompt part 3 asks the agent to tell the two apart.
+#  * reach.robots.ai_search_bot_blocked is critical whenever an AI retrieval
+#    bot's group disallows any discovered path. ubuntu.com's AI group allows
+#    its product and content sections and disallows utility paths (search,
+#    account, login, contact forms, thank-you pages, blog archives and tags),
+#    yet the finding says the brand is removed from those assistants' answers
+#    entirely.
+#  * reach.index.noindex_on_content rates one noindex page critical even where
+#    the noindex looks deliberate: a package page on pub.dev
+#    (built_collection), packagist.org/statistics, a ubuntu.com blog post whose
+#    canonical is on canonical.com.
+#  * act.blocker.not_mobile_ready also fires on URLs that are not pages: an
+#    Atom feed (pub.dev/feed.atom) and a 162-byte redirect stub
+#    (gradle.org/install).
+#  * reach.sitemap.absent_or_invalid accepts only XML: pub.dev's plain-text
+#    sitemaps, declared in its robots.txt and valid under the sitemaps
+#    protocol, are reported as not a sitemap.
 #  * act.orient.no_value_proposition and act.cta.absent_for_page_type are
 #    "likely", not "confirmed", and misfire on some homepages; the CTA check
-#    counts links in the raw HTML, so a JavaScript-built page can read as empty.
+#    counts links in the raw HTML, so a JavaScript-built page can read as empty,
+#    and it misses action labels in other languages (cn.ubuntu.com's Download
+#    and Contact us buttons, in Chinese, read as no action at all).
+#  * Other "likely" heuristics rank high and misfire:
+#    extract.ans.fact_coverage_gap does not match "49 pounds" to a schema
+#    price of 49.00 GBP (on a test site), and on nuget.org took the title
+#    "Home" as the page's subject; extract.ans.no_direct_answer_block joins
+#    the H1 to the first sentence and can pick an article's author as its
+#    subject;
+#    read.nontext.key_fact_image_only expects a price on free product pages
+#    (Go packages, anaconda.com's desktop app). This is why the agent's table
+#    shows confirmed findings (see WHY THE TABLE SHOWS CONFIRMED FINDINGS).
+#  * Not reported: content that is merely old. On a test site whose newest
+#    date was 2018 and whose prices were "last reviewed January 2018", no
+#    freshness finding fired; nor did extract.sd.contradicts_visible_content
+#    when the schema foundingDate contradicted the founding year on the page.
 #  * A bot-protection page ("you have been blocked") can be audited as if it
-#    were the site's content.
+#    were the site's content; on pypi.org project pages and metacpan.org
+#    (2026-09-26) such pages also produced soft-404, thin-content and
+#    value-proposition findings.
 #  * A server that answers with Brotli compression (content-encoding: br)
 #    although it was asked for gzip/deflate is read as unreadable bytes, so
 #    that page appears empty (seen on berkshirehathaway.com).

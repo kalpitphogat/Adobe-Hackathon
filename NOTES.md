@@ -104,3 +104,58 @@ On six public sites the browser changed no finding at all. So the agent now runs
 otherwise it re-analyses pass 1's evidence with `--bundle`. Across 34 sites: always rendering gave
 24 true and 24 false browser findings, two passes 13 true and 1 false (`SITE_MATRIX.md`).
 Rehearsed 10× with `claude -p` (`rehearsal/2026-09-25_twopass_*`).
+
+## 13. The agent's table shows confirmed findings, and it re-checks every row
+
+The engine ranks by severity, then ICE, and several high-severity "likely" heuristics
+(`extract.ans.fact_coverage_gap`, `act.orient.no_value_proposition`,
+`read.nontext.key_fact_image_only`, `act.cta.absent_for_page_type`) crowd the top of the report.
+On 2026-09-26 both passes were run on 20 public sites (the ones a restricted network allowed), and
+each row of two candidate tables was graded by hand from its evidence, every disputed row
+against the live page (curl): T true, S true but rated too severe, W weak (a count or claim a reader cannot check, or a borderline threshold),
+F false.
+
+| table | T | S | W | F |
+|---|---|---|---|---|
+| first 5 findings in report order (the old prompt) | 28 | 7 | 31 | 34 |
+| first 5 **confirmed** findings (the new prompt) | 75 | 7 | 7 | 11 |
+
+Confirmed-table rows, in order (F and S noted):
+
+| site | rows | notes |
+|---|---|---|
+| jsr.io | S T T W W | S: noindex critical on package-version pages |
+| rubygems.org | T W T T T | W: `/sign_out` 404 counted as a broken link |
+| pkg.go.dev | T T T W W | |
+| hub.docker.com | T T T T T | |
+| bitbucket.org | S T F T T | S: http link to the status page rated high; F: its 403 counted as broken |
+| nodejs.org/en | T T T T T | |
+| www.nuget.org | T T T F T | F: `/packages` (a listing) treated as dated content |
+| pub.dev | S F T F T | F: viewport on `feed.atom`; F: plain-text sitemaps called "not a sitemap" |
+| hex.pm | T T T T T | |
+| metacpan.org | T T F W F | F: soft-404 and thin content produced by a bot-protection page |
+| packagist.org | S T T T W | S: noindex critical on `/statistics` |
+| pypi.org | T T T T T | |
+| www.docker.com | F T T T T | F: prompt injection = a blog post saying "system prompt" |
+| www.anaconda.com | F T T T T | F: prompt injection = product pages saying "prompt injection" |
+| ubuntu.com | S F S T T | F: AI group disallows only noise paths, called a block; S: noindex, cross-host canonical |
+| cloud.google.com | F T T T T | F: prompt injection; T: robots.txt and sitemap.xml return HTML (checked with curl) |
+| www.apache.org | T T T T T | |
+| kotlinlang.org | T T T T T | |
+| gradle.org | S F T T T | F: viewport on a 162-byte redirect stub |
+| yarnpkg.com | T T T T T | |
+
+Six of the 11 F rows are the three cases prompt part 3 now names (topic text read as an
+instruction, a feed or stub read as a page, a partial robots.txt group read as a block). The
+prompt keeps the report untouched: the table is chosen by the engine's own `confidence` field, and
+the line under it gives the likely count and the highest likely finding.
+
+Also run that day: 12 small test sites built for the purpose (a clean control plus one planted
+defect each). The engine missed old content (newest date 2018, prices "last reviewed January
+2018") and a schema `foundingDate` that contradicts the page (both now in the REPLAY's KNOWN
+LIMITS). It also never reports a missing meta description (the collector reads it, but no check
+fires on its absence), and it reported a site with no structured data at all only as a medium
+identity finding.
+
+Not yet rehearsed with an agent: the table selection above was replayed on the saved reports. Run
+sheet §A 1b rehearses it once with `claude -p` before recording.

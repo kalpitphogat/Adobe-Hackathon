@@ -21,7 +21,7 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 | # | rule | status | how we meet it · evidence |
 |---|---|---|---|
 | 3.1 | Part 1 methodology **≤ 3:00** | ✅ 🎬 | `VIDEO_SCRIPT.md` Part 1: 389 spoken words ≈ 2:49 at 145 wpm incl. title card and pauses; `tools/check_script_anchors.py` fails if the full cut would pass 3:00 even at 140 wpm; a fixed cut ladder (GEO line, golden line, phone/price line) brings it to 349 words ≈ 2:32 |
-| 3.2 | Part 2 trial run **≤ 2:00** | 🎬 | Run sheet timeline ends 1:50; agent output cut to top 5 and a stop-at-first-supported evidence check |
+| 3.2 | Part 2 trial run **≤ 2:00** | 🎬 | Run sheet timeline ends 1:50; agent output is one table (top 5 confirmed findings, a verdict on every row, the likely count under it) and one drill-down |
 | 3.3 | May crop idle waits; **may not splice** a run that didn't happen | 🎬 | One continuous take; raw file kept; "⏩ trimmed" captions; retake = new URL, never a splice |
 | 3.4 | Part 1: how we discovered the findings (field research, what separates cited vs ignored sites, distilled into repeatable checks) | ✅ | `VIDEO_SCRIPT.md` cold open + Act I answer "what separates them" directly: the handout's reach/read/quote sentence (`chunking-model.md:40–43`), crawler roles and what blocking each costs (`ai-bots.json:12–14, :71`, `check_robots.py:286/318`), the GEO finding (`geo-methods.md:14–24`); Act IV: the five-site field test (`DESIGN.md:374–379`) and the zero-recall miss (`DESIGN.md:322–335`) |
 | 3.5 | Part 1: how we assigned severities | ✅ | `VIDEO_SCRIPT.md` Act II (severity vs confidence, `apply_cascade`, Rule 0, the `site_b` golden), plus the crawler-role severities in Act I |
@@ -31,10 +31,10 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 | 3.9 | **Enter the URL on camera**; real, continuous; interaction, not a pre-rendered report | 🎬 | REPLAY prompt ends in `URL:`; URL typed live |
 | 3.10 | Show the agent invoking the **entrypoint skill**, fetching, reasoning, producing findings | ✅ 🎬 | Claude Code loads it with its Skill tool: `Skill(ai-readiness-orchestrator)` is the first tool call in every rehearsal (`rehearsal/*_skill.md`, `*_final.md`), then `orchestrate.py`; run sheet holds on both |
 | 3.11 | **Drill into ≥ 1 finding**: real evidence, its severity, the suggested fix | ✅ 🎬 | Prompt step "drill-down"; run sheet section D |
-| 3.12 | **Show fixes sorted/prioritised by impact** | ✅ | Prompt asks for the top 10 in report order (severity → ICE) with ICE as a column; rehearsed on IKEA (`rehearsal/2026-09-24_ikea_opus_newprompt.md`): highs first, ICE shown |
+| 3.12 | **Show fixes sorted/prioritised by impact** | ✅ ⚠️ | Prompt asks for the top 5 **confirmed** findings in report order (severity → ICE), with ICE and the agent's verdict as columns, and counts the likely ones under the table. Report order rehearsed on IKEA (`rehearsal/2026-09-24_ikea_opus_newprompt.md`: highs first, ICE shown); the confirmed-only table (2026-09-26) still needs one rehearsal (run sheet §A 1b) |
 | 3.13 | **State harness and model on camera** | 🎬 | `claude --version` + `/model` at 0:00–0:10 |
 | 3.14 | **One line on wiring**: it's really the Round 3 entrypoint, not a hardcoded demo | ✅ 🎬 | On camera: `verify_engine.py` → ENGINE UNCHANGED, then the Skill call; the wiring line at 0:22; session transcript kept afterwards (run sheet F) |
-| 3.15 | Everything shown comes from the submitted engine, live, so a judge reaches the same substance | ✅ | Prompt: "do not add findings that are not in the report"; the evidence check is labelled commentary. On IKEA it marked the engine's price finding "not supported" without altering the report |
+| 3.15 | Everything shown comes from the submitted engine, live, so a judge reaches the same substance | ✅ | Prompt: "do not add findings that are not in the report"; the evidence check is labelled commentary. On IKEA it marked the engine's price finding "not supported" without altering the report. The table selects by the engine's own `confidence` field and states the likely count, so nothing is hidden (REPLAY: WHY THE TABLE SHOWS CONFIRMED FINDINGS) |
 
 ## §4 Harness and model
 

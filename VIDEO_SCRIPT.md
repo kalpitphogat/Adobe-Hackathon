@@ -60,6 +60,11 @@ python tools/check_replay.py           # REPLAY fields + harness version → 0 p
 Then do **run sheet §A** (fresh `demo-live/`, clipboard prompt without the URL, recorder on).
 **Do not open or audit https://docs.pytest.org/ with the engine before the take.** It has to be unseen.
 
+**The step-2 prompt changed on 2026-09-26:** the table now shows the top 5 *confirmed* findings and
+the agent re-checks **every** row. Rehearse it once before the take (run sheet §A, step 1b) on a
+*seen* site. `https://www.docker.com/` is the useful one: its top confirmed finding is a
+`trust.integrity.prompt_injection` false positive, which the verdict column should mark *not supported*.
+
 **VS Code for Part 1:** open the **unzipped submission** (`demo/`, never another copy). Zen mode
 (`Ctrl+K Z`), font 20, minimap off, high-contrast theme. Pre-open these tabs **in this order**
 so `Ctrl+PgDn` walks the script. Each is already scrolled to its first line:
@@ -256,14 +261,14 @@ the evidence check or the drill-down.
 | **0:38–0:50** | The agent's `python -c` count on `pages.jsonl`, then its one line naming pass 2 and why, then the pass-2 command. **Hold 2 s on the "why" line.** | **If the count is 0:** > Pass one: no browser. The agent checks that crawl for any page only JavaScript could build. **None** · so pass two re-reads the **same evidence**, no second crawl. <br><br> **If the count is above 0:** > Pass one: no browser. The agent checks that crawl for pages only JavaScript could build. It found **[N]** · so pass two **renders** the site in Chromium. |
 | — | *Trim the second pass and the agent's reading.* Badge: **⏩ ~Ns trimmed** | |
 | **0:50–1:00** | Final answer, section (1): `audit_status`, counts by severity, "not assessed". | **If `partial`:** > **[N] findings** from six audit skills. Status **partial**, and it says why: **[the browser checks weren't run]**, so they're listed as **not assessed.** <br><br> **If `complete`:** > **[N] findings** from six audit skills. Status **complete**. The one blind spot it names is the edge probe, which stays off unless you own the site. |
-| **1:00–1:10** | Section (2): the **top-5 table**, with the ICE column. Scroll slowly. | > Here are the fixes, **sorted by impact**: severity first, then ICE. *(opt:)* That's the **engine's** order, not the model's. |
-| **1:10–1:22** | Section (3): the **evidence check**. Hold on the line that says *supported*, with its numbers. | > Now the agent **audits the auditor.** It fetches the page itself: **[what it counted, e.g. "zero JSON-LD blocks"]**. **Supported.** That's commentary; the report stays exactly as the engine wrote it. <br><br> *If a finding before it came back* **not supported**, *add Card F first (below).* |
+| **1:00–1:10** | Section (2): the **table of the top 5 confirmed findings**, with the ICE column, and the line under it counting the likely ones. Scroll slowly. | > Here are the fixes, **sorted by impact**: severity first, then ICE. These are the ones a deterministic check **confirmed**; the **[N] likely** ones are counted right under the table, not hidden. *(opt:)* That's the **engine's** order, not the model's. |
+| **1:10–1:22** | Section (3): the **verdict column**. The agent re-fetched **every row**. Hold on a line that says *supported*, with its numbers. | > Now the agent **audits the auditor.** It re-fetches **every row** itself: **[what it counted, e.g. "zero JSON-LD blocks"]**. **Supported.** That's commentary; the report stays exactly as the engine wrote it. <br><br> *If any row came back* **not supported**, *add Card F first (below).* |
 | **1:22–1:48** | Section (4): the **drill-down**. Scroll it top to bottom: evidence, severity/confidence, mechanism, patch, ICE, `blocked_by` count, verification. Optionally flip to VS Code on `audit-output/audit-report.json`, `Ctrl+F` the `check_id` (run sheet §D). | **Read the card below that matches the finding on screen.** |
 | **1:48–1:55** | Stay on the verification command, or the `fix_patches/` folder in VS Code. | > Evidence, severity, mechanism, patch, and a **command to verify it**, on every finding. It's all in **REPLAY_IT_Professionals.txt.** Pick your own URL · and **check us.** |
 
 ### Drill-down cards: read the one that matches the screen
 
-The agent picks the drill-down itself: **the highest-ranked finding its evidence check supported**.
+The agent picks the drill-down itself: **the highest-ranked row of its table that its evidence check supported**.
 Each card is ~45 words (~20 s). Swap in the real numbers from the screen.
 
 **Card A · `extract.sd.absent_on_eligible_page`** ("… eligible page(s) carry no structured data at all"). The most likely card on a docs site.
@@ -291,14 +296,15 @@ Anchors: `diff_raw_rendered.py:163–164` (high/confirmed), `:179` (mechanism).
 Anchors: `date_consistency.py:143–144` (medium/confirmed), `:158` (mechanism), `:168–169` (`__FILL_IN__` dates).
 > Drill-down: **[N]** pages of dated content carry **no date at all.** Freshness is weighed when sources disagree, and an undated page **can't compete** on it. Medium, confirmed. The patch adds datePublished and dateModified as **FILL_IN**, because we will **not invent a date.** ICE **7.7**.
 
-**Card F · the evidence check says *not supported*** (most likely on `read.render.nav_links_js_only`). Read it **before** the card for the finding that *was* supported:
-> Look, the agent says **this one doesn't hold** on the live page. So we'd verify before acting, and the report stays exactly as the engine wrote it. It moves on to **[F-00x]**, which **does.**
+**Card F · a row's verdict is *not supported*** (most likely on `read.render.nav_links_js_only`, or on `trust.integrity.prompt_injection` when the page only *discusses* AI). Read it **before** the card for the finding that *was* supported:
+> Look, the agent says **this one doesn't hold** on the live page. So we'd verify before acting, and the report stays exactly as the engine wrote it. The drill-down is on **[F-00x]**, which **does.**
 
 *This is a strength, not a stumble: it's the "check us" promise happening on camera. Don't trim it out.*
 
-**Never drill into** `act.orient.no_value_proposition`, `act.cta.absent_for_page_type` (both *likely*,
-and they misfire), `trust.integrity.prompt_injection` on a page that only *discusses* AI, or
+**Never drill into** `trust.integrity.prompt_injection` on a page that only *discusses* AI, or
 `read.render.nav_links_js_only` unless the agent's same-host counts back it up (run sheet §C).
+`act.orient.no_value_proposition` and `act.cta.absent_for_page_type` are *likely*, so they are no
+longer in the table; they only appear if fewer than five findings are confirmed. Don't drill into them.
 
 ### If it goes sideways
 
@@ -456,6 +462,7 @@ The checker also recomputes three numbers the script speaks: **29** crawlers in 
 
 - [ ] `python tools/check_script_anchors.py` → `0 problem(s)`
 - [ ] `python tools/check_replay.py` → `0 problem(s)` (harness still 2.1.282)
+- [ ] The 2026-09-26 step-2 prompt rehearsed once on a seen site (run sheet §A 1b), transcript in `rehearsal/`: table of confirmed findings, a verdict on every row
 - [ ] Part 1 timed read-through ≤ 2:50 (cut ladder applied if not)
 - [ ] VS Code shows the **unzipped submission**, tabs 1–12 in order, captions prepared in the editor
 - [ ] Run sheet §A done: fresh `demo-live/`, `ENGINE UNCHANGED`, prompt on the clipboard **without** the URL

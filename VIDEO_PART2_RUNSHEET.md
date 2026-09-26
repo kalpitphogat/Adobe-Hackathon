@@ -37,10 +37,15 @@ only pre-screened for robots.txt and homepage links with `tools/prescreen.py`.
    $env:PYTHONUTF8 = "1"            # UTF-8 for every python the agent runs (no cp1252 crashes)
    ```
    `demo-live/` is new, so there is no leftover `audit-output/`. It's git-ignored.
-1b. **Rehearse the two-pass prompt once on this machine, on a *seen* site** (e.g. the Guardian,
-   `tools\rehearse.ps1`). It was rehearsed 10 times on Linux (`rehearsal/2026-09-25_twopass_*`),
-   not yet on Windows. Check that the agent runs pass 1 with `--no-render --out ./audit-precheck`,
-   prints the count, and picks pass 2 by it.
+1b. **Rehearse the prompt once on this machine, on a *seen* site**:
+   `powershell -File tools\rehearse.ps1 -Url https://www.docker.com/ -Label docker_confirmed`.
+   The two passes were rehearsed 10 times on Linux (`rehearsal/2026-09-25_twopass_*`); the
+   2026-09-26 table change (top 5 *confirmed* findings, a verdict on every row) has **not** been
+   rehearsed yet. Check that the agent runs pass 1 with `--no-render --out ./audit-precheck`,
+   prints the count and picks pass 2 by it; that its table holds only confirmed findings, with the
+   likely count underneath; and that it gives every row a verdict. On docker.com the top confirmed
+   finding was a `trust.integrity.prompt_injection` false positive (a blog post that says "system
+   prompt"), so that row should come back *not supported*.
 2. **Integrity:** `python ..\..\tools\verify_engine.py ..\submission.zip .` must end with
    `RESULT : ENGINE UNCHANGED` (155 files, plus the 73-file `.claude/skills` copy). You'll run
    this same command on camera.
@@ -70,8 +75,8 @@ engine's crawl are the parts you cut.
 | — | *(trim the crawl wait; put a small on-screen caption "⏩ crawl, ~40 s trimmed")* | |
 | 0:30 | The agent's count of pages with no same-site links, then pass 2 (`--bundle ./audit-precheck/evidence`, or the browser run if the count is above 0), and its one line saying which and why. **Hold 2 s on that line.** | "First pass without a browser. A browser only helps when a crawler sees an empty page, so the agent checks for that. Here it [did / didn't] find one, so it [renders / re-analyses the same evidence]." Say what's on screen. |
 | 0:38 | Agent reads `audit-output/audit-report.json`, prints status + counts. | "Six audit skills over one crawl. The findings come from our engine; the model only runs it and double-checks it." If the status is `partial`: "Partial means the report lists what it didn't measure, here the browser checks." |
-| 0:45 | Agent's **priority table** (top 5 in report order, ICE column). | "The fixes in priority order: severity first, then ICE, meaning impact, confidence and ease. This is the order to work in." |
-| 1:00 | Agent's **evidence check**: confirmed high findings in order, until one holds up. | "Before trusting them, the agent re-fetches each page itself, raw and rendered, until one finding holds up. The report stays exactly as the engine wrote it." |
+| 0:45 | Agent's **priority table**: the top 5 **confirmed** findings in report order, ICE and verdict columns, and the line under it counting the likely ones. | "The fixes in priority order: severity first, then ICE, meaning impact, confidence and ease. These are the ones a deterministic check confirmed; the likely ones are counted right under the table." |
+| 1:00 | Agent's **evidence check**: a verdict on **every row**, each from its own fetch. | "Before trusting them, the agent re-fetches every page in the table itself, raw and rendered where it matters, and marks each one supported or not. The report stays exactly as the engine wrote it." |
 | 1:15 | Agent's **drill-down** on that finding. Optionally flip to VS Code (section D). | Name the finding; walk evidence, severity, fix and patch (section D wording). |
 | 1:50 | — | "Same steps, same URL, in REPLAY_IT_Professionals.txt." |
 
@@ -82,8 +87,8 @@ claim a number of checks or pages the output doesn't show.
 
 ## C. Which finding gets the drill-down
 
-The prompt makes the agent pick it: **the highest-ranked finding its own evidence check marked
-supported**. In rehearsals that was `extract.sd.absent_on_eligible_page` (Django, Sonnet and Opus),
+The prompt makes the agent pick it: **the highest-ranked row of its table that its own evidence
+check marked supported**. In rehearsals that was `extract.sd.absent_on_eligible_page` (Django, Sonnet and Opus),
 `read.render.nav_links_js_only` where the gap was real (IKEA, verified 112 → 204 same-host links),
 and `reach.robots.ai_search_bot_blocked` (Guardian). Follow the agent. Only if it picks one of the
 "never" checks below should you talk over a different confirmed finding from its table, in this order:
@@ -99,7 +104,9 @@ and `reach.robots.ai_search_bot_blocked` (Guardian). Follow the agent. Only if i
   **unless** the agent's rendered-page count backs it up (as on IKEA). The engine counts
   off-site links on the rendered side (`NOTES.md` §8), so the gap is often not real.
 - `act.orient.no_value_proposition`, `act.cta.absent_for_page_type`: `likely`, and misfire often.
-- `trust.integrity.prompt_injection` on a page that merely discusses AI.
+  They are only in the table when fewer than five findings are confirmed.
+- `trust.integrity.prompt_injection` on a page that merely discusses AI (the verdict column should
+  already say *not supported*).
 
 ---
 
@@ -129,7 +136,7 @@ python -c "import urllib.request as u;print(u.urlopen('https://docs.pytest.org/e
 
 | what happens | do this |
 |---|---|
-| The agent's evidence check says a finding is **not supported** (likely for `nav_links_js_only`) | **Keep it in.** Say: "The evidence check disagrees here, so we'd verify before acting. The report stays exactly as the engine wrote it." That's an honest, strong moment. Don't drill into that finding. |
+| The agent's evidence check says a row is **not supported** (likely for `nav_links_js_only`, or `prompt_injection` on a page that only discusses AI) | **Keep it in.** Say: "The evidence check disagrees here, so we'd verify before acting. The report stays exactly as the engine wrote it." That's an honest, strong moment. Don't drill into that finding. |
 | Claude Code asks permission for a command | Approve it on camera ("yes"). It's part of the real run; trim the pause. On Windows the agent sometimes tries the orchestrator first as a chained command (`...; echo $LASTEXITCODE`), which is blocked; it then retries the plain command. Only one crawl runs (checked in `rehearsal/*_skill.md`). |
 | Run exits with `no evidence bundle was produced` | You aren't in the marketplace root. Stop, `cd` into `demo-live\brand-ai-readiness-audit`, and **start a new take on the backup URL** (below). |
 | Run takes past 5 min / crashes on a crawl delay | New take on the backup URL; REPLAY troubleshooting mentions `--time-budget 600`. |

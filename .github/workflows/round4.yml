@@ -10,7 +10,7 @@ name: Round 4 replay
 
 on:
   push:
-    branches: [final, final-2, round4-demo-cli]
+    branches: [final, final-2, final-3, round4-demo-cli]
   workflow_dispatch:
 
 permissions:
