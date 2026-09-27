@@ -49,6 +49,7 @@ All paths are inside the unzipped submission; line numbers were checked against 
 | reach → read → extract → trust ordering and the gate cascade | `skills/ai-readiness-orchestrator/scripts/gate_model.py:117` (`apply_cascade`), `references/gate-rules.md` |
 | engagement is never capped by crawler access (Rule 0) | `gate_model.py:128`; Rule 0b in `skills/engagement-audit/scripts/gating.py:32` |
 | retrieval vs training crawlers | `skills/crawl-access-audit/references/ai-bots.json` (29 bots); `scripts/check_robots.py:286` critical, `:318` info |
+| what we refuse to over-rate: llms.txt is LOW, docs sites only (Google: no effect; ~300,000 domains: no link to citations) | `skills/ai-readiness-orchestrator/references/suppression-rules.md:22–27`; enforced at `skills/crawl-access-audit/scripts/check_agent_files.py:24`, `:62` |
 | what each severity means; confidence kept separate | `skills/ai-readiness-orchestrator/references/severity-model.md` |
 | every fix carries a mechanism, or the finding is rejected | `orchestrate.py:242` (`validate_finding`) |
 | missing values say `__FILL_IN__`, never a guess | e.g. `skills/structured-data-audit/scripts/check_hierarchy.py:211` |
@@ -101,7 +102,7 @@ cd demo; ..\.venv\Scripts\python.exe tests\run_offline.py   # PASS on 3.11.15
 ## Deliverables
 
 - [x] `REPLAY_IT_Professionals.txt`, rehearsed from clean unzips, with three tested fallbacks
-- [x] `VIDEO_SCRIPT.md`: Part 1 391 words (~2:50 incl. title card, cut ladder to 2:32) and Part 2
+- [x] `VIDEO_SCRIPT.md`: Part 1 392 words (~2:50 incl. title card, cut ladder to 2:35) and Part 2
   lines with a drill-down card per likely finding; every claim tied to a file and line, machine-checked
 - [x] `VIDEO_PART2_RUNSHEET.md`: live run on https://docs.pytest.org/
 - [ ] The video: Part 1 ≤ 3:00, Part 2 ≤ 2:00, total ≤ 5:00

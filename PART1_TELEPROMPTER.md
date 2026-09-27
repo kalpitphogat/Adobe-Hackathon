@@ -5,7 +5,7 @@ Only the DO and the SAY, one step per block, separated by rules. Generated from 
 wording here is identical to it.
 
 - **Bold** = lean on the word. `·` = a half-beat pause.
-- 10 tabs, fourteen spoken beats, 391 words, about 2:55 at 140 words a minute (cap 3:00).
+- 10 tabs plus the llms.txt file, thirteen spoken beats, 392 words, about 2:56 at 140 words a minute (cap 3:00).
 - Say nothing while you press keys: every split falls on a pause or between two sentences.
 - A `>` note under a step is direction, not speech.
 
@@ -27,7 +27,7 @@ wording here is identical to it.
 
 **DO** — Tab 1 is on screen, on line 40. Click **40**, Shift+click **43**.
 
-**SAY** — "Ask an AI assistant about a brand, and it either **quotes** the site or acts as if it **doesn't exist**. The handout explains why: unless a page is easy to **reach, read and quote**, it never reaches the answer. Our agent finds **which step fails**."
+**SAY** — "Ask an AI assistant about a brand, and it either **quotes** the site or acts as if it **doesn't exist**. The handout says why: a page that isn't easy to **reach, read and quote** never reaches the answer. Our agent finds **which step fails**."
 
 > *Slow down on "doesn't exist", and smile on the last sentence.*
 
@@ -87,7 +87,17 @@ wording here is identical to it.
 
 **DO** — `Ctrl+G` → type `318` → `Enter`. Click **318**: `severity="info"`.
 
-**SAY** — "and merely **informational** against a training one."
+**SAY** — "**info** against a training one."
+
+---
+
+*`suppression-rules.md`, opened with `Ctrl+P` · CAPTION `suppression-rules.md:22–27 · enforced: check_agent_files.py:24 docs sites only, :62 severity="low" · tests/test_suppression.py`*
+
+### Step 4c
+
+**DO** — `Ctrl+P` → type `suppression-rules.md:22` → `Enter`. Click **22**, Shift+click **27**. It opens as a new tab just right of tab 4, so the next `Ctrl+PgDn` still reaches tab 5.
+
+**SAY** — "Hype inflates severity: Google says llms.txt neither helps nor harms, and nearly **300,000 domains** showed no link to citations. Ours: **low**."
 
 ---
 
@@ -139,14 +149,6 @@ wording here is identical to it.
 
 ---
 
-### Step 6e
-
-**DO** — Click **56**, Shift+click **57**: "Capping asserts a weaker claim. Suppression asserts none."
-
-**SAY** — "A cap still claims something · suppression claims **nothing**."
-
-> *cut-ladder step 3 drops this row*
-
 > *Capping says "real, but moot"; suppression says "we never looked". You are now on tab 2, so step 7 uses `Ctrl+P`, not `Ctrl+PgDn`.*
 
 ---
@@ -195,17 +197,7 @@ wording here is identical to it.
 
 **DO** — `Ctrl+G` → type `13` → `Enter`. Click **13**, Shift+click **15**.
 
-**SAY** — "Impact uses the **capped** severity, so a moot defect cannot outrank its blocker,"
-
----
-
-### Step 9c
-
-**DO** — `Ctrl+G` → type `68` → `Enter`. Click **68**, Shift+click **71**.
-
-**SAY** — "and **the same evidence always ranks the same way**."
-
-> *cut-ladder step 2 drops this row; end 9b on "blocker."*
+**SAY** — "Impact uses the **capped** severity, so a moot defect cannot outrank its blocker."
 
 ---
 
@@ -235,7 +227,7 @@ wording here is identical to it.
 
 **SAY** — "Two of them: we were reading file sizes as **phone numbers**, and telling a free download page to publish a **price**."
 
-> *cut-ladder step 4 drops this row*
+> *cut-ladder step 2 drops this row*
 
 > *Let 10c breathe. It is the one laugh in Part 1, and it turns "twelve false positives" into something a judge can picture.*
 
