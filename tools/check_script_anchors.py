@@ -28,8 +28,11 @@ PART1_CAP_SECONDS = 180   # brief: Part 1 hard cap 3:00
 PART1_TAB_SECONDS = 8     # title card plus pauses the narration doesn't cover
 
 
-def part1_spoken_words(script: str) -> int:
-    """Words in the '>' lines between the PART 1 heading and the cut ladder (the full cut)."""
+def part1_spoken_words(script: str, bonus: bool = False) -> int:
+    """Words in the '>' lines between the PART 1 heading and the cut ladder.
+
+    Lines starting with **BONUS** are optional extras: counted only when bonus=True, so the
+    3:00 check times the main read."""
     start = script.index("PART 1 · Thought process")
     end = script.index("### If the timed run is long")
     words = 0
@@ -39,6 +42,10 @@ def part1_spoken_words(script: str) -> int:
         text = line[2:]
         if text.startswith("Spoken lines are"):
             continue  # the legend, not narration
+        if text.startswith("**BONUS**") != bonus:
+            continue
+        if bonus:
+            text = text[len("**BONUS**"):]
         text = re.sub(r"[*`·]", " ", text)
         words += sum(1 for w in text.split() if re.search(r"\w", w))  # "**price**." is one word
     return words
@@ -100,6 +107,9 @@ def main() -> int:
             "11 blocked by F-001 (site_b golden)": (blocked, 11),
             "summary.blocked_findings = 11": (golden["summary"]["blocked_findings"], 11),
             "94 __FILL_IN__ lines in skills/*.py": (fill_in, 94),
+            "bonus B5: 1 critical in the site_b golden": (sum(f["severity"] == "critical" for f in golden["findings"]), 1),
+            "bonus B5: 8 engagement findings in the site_b golden": (sum(f.get("category") != "discoverability" for f in golden["findings"]), 8),
+            "bonus B5: no engagement finding is capped": (sum(1 for f in golden["findings"] if f.get("category") != "discoverability" and f.get("blocked_by")), 0),
         }
         for label, (got, want) in facts.items():
             if got == want:
@@ -116,6 +126,10 @@ def main() -> int:
 
     print(f"[ OK ] {ok} anchor(s) and fact(s) match the submitted zip ({len(rows)} ledger rows)")
     print(f"[ -- ] {verdict}; at 155 wpm {words / 155 * 60 + PART1_TAB_SECONDS:.0f} s")
+    extra = part1_spoken_words(script, bonus=True)
+    total = (words + extra) / PART1_WPM_FLOOR * 60 + PART1_TAB_SECONDS
+    print(f"[ -- ] with every BONUS line: +{extra} words, {words + extra} in all, about "
+          f"{int(total // 60)}:{int(total % 60):02d} at {PART1_WPM_FLOOR} wpm (optional, not held to the cap)")
     for p in problems:
         print(f"[FAIL] {p}")
     print(f"\n{len(problems)} problem(s)")

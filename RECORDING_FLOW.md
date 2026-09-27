@@ -330,7 +330,8 @@ Part 1 may be recorded in several takes.
 
 | step | DO | SAY |
 |---|---|---|
-| 3a | `Ctrl+PgDn` → tab 3, on line 12. Click **12**, Shift+click **14**. | "Most lists tell you which AI crawlers to **block**. We asked what blocking each one **costs**, and sorted 29 by role." |
+| B1 | `Ctrl+PgDn` → tab 3, on line 12. Click **12**, Shift+click **14**. | **BONUS** "Reach is the first stage, and it taught us our first rule." |
+| 3a | Same screen as B1. If you skipped B1: `Ctrl+PgDn` → tab 3, on line 12. Click **12**, Shift+click **14**. | "Most lists tell you which AI crawlers to **block**. We asked what blocking each one **costs**, and sorted 29 by role." |
 | 3b | `Ctrl+G` → type `71` → `Enter`. Click **71**, Shift+click **72**: `"GPTBot"` … `"category": "training"`, then "Blocking it does not remove a site from ChatGPT search results". | "Block GPTBot, and you have only opted out of **training**." |
 | 3c | `Ctrl+G` → type `26` → `Enter`. Click **26**: "Blocking one of these removes the brand from that assistant's answers." | "Block a **retrieval** crawler, and you **vanish from that assistant's answers**." |
 
@@ -347,12 +348,20 @@ Part 1 may be recorded in several takes.
 |---|---|---|
 | 4c | `Ctrl+P` → type `suppression-rules.md:22` → `Enter`. Click **22**, Shift+click **27**. It opens as a new tab just right of tab 4, so the next `Ctrl+PgDn` still reaches tab 5. | "Hype doesn't set our severity. Google says llms.txt neither helps nor harms visibility, and a study of nearly **300,000 domains** found no link to AI citations. Most tools rate a missing llms.txt **high**; we rate it **low**." |
 
+**BONUS: `geo-methods.md`, opened with `Ctrl+P`** · CAPTION `geo-methods.md:5–7 GEO, KDD 2024 · :14–16 the three rewrites · :23–27 fires at low: a benchmark gain, not a defect`
+
+| step | DO | SAY |
+|---|---|---|
+| B2a | `Ctrl+P` → type `geo-methods.md:14` → `Enter`. Click **14**, Shift+click **16** (the paper's name and KDD 2024 are on lines 5–7, just above). It opens next to the llms.txt tab, so the next `Ctrl+PgDn` still reaches tab 5. | **BONUS** "We calibrate against research, not instinct. The GEO paper, from KDD 2024, found that citing sources, adding statistics and adding quotations made a page more prominent in AI answers." |
+| B2b | `Ctrl+G` → type `23` → `Enter`. Click **23**, Shift+click **27**: "fires at **low** severity" … "in a benchmark". | **BONUS** "That gain was measured in a benchmark, not on any real brand, so a page with none of the three gets only a **low** finding." |
+
 ### 1:17–1:47 · Act II · How bad, how sure
 **Tab 5 `severity-model.md`** · CAPTION `severity-model.md:43`
 
 | step | DO | SAY |
 |---|---|---|
 | 5 | `Ctrl+PgDn` → tab 5, on line 43. Click **43**. | "Each finding has two ratings: **severity**, how bad if true, and **confidence**, how sure we are." |
+| B3 | `Ctrl+G` → type `56` → `Enter`. Click **56**, Shift+click **57**: "A clean report and a report that could not look are different things". | **BONUS** "A check that cannot run says so, because a clean report and a report that **couldn't look** are different things." |
 
 **Tab 6 `gate_model.py`** · CAPTION `gate_model.py:117–122 apply_cascade · :42 ceiling "medium" · :120 cap, never delete · :129 Rule 0, why: gate-rules.md:31–32`
 
@@ -366,9 +375,16 @@ Part 1 may be recorded in several takes.
 | step | DO | SAY |
 |---|---|---|
 | 6c | `Ctrl+P` → type `gate-rules.md:54` → `Enter`. This is tab 2 again, no new tab. Click **54**, Shift+click **57**: "`read` failures suppress engagement findings because the evidence is absent." | "But if we never saw the page a visitor sees, we **suppress** its engagement findings, because we have no evidence." |
+| B4 | No key press: lines **56–57** are already highlighted: "Capping asserts a weaker claim. Suppression asserts none." | **BONUS** "A cap still makes a weaker claim; a suppression makes **no claim** at all." |
 
-*Capping says "real, but moot"; suppression says "we never looked". You are now on tab 2, so step 7
-uses `Ctrl+P`, not `Ctrl+PgDn`.*
+**BONUS: `site_b.report.md`, opened with `Ctrl+P`** · CAPTION `tests/golden/site_b.report.md:58–60 · site_b.audit-report.json: 1 critical, 11 blocked_by F-001, 8 engagement findings, none capped`
+
+| step | DO | SAY |
+|---|---|---|
+| B5 | `Ctrl+P` → type `site_b.report.md:58` → `Enter`. Click **58**, Shift+click **60**: "11 finding(s) are recorded but capped at medium because F-001". | **BONUS** "Our golden test report shows the cascade: **one** critical blocker, **eleven** findings capped behind it, and all **eight** engagement findings left untouched." |
+
+*Capping says "real, but moot"; suppression says "we never looked". You are now on tab 2 (or on
+`site_b.report.md` after B5), so step 7 uses `Ctrl+P`, not `Ctrl+PgDn`.*
 
 ### 1:47–2:10 · Act III · Every fix earns its place
 **Tab 7 `orchestrate.py`** · CAPTION `orchestrate.py:242 validate_finding · rejection logged at :695`
@@ -376,6 +392,7 @@ uses `Ctrl+P`, not `Ctrl+PgDn`.*
 | step | DO | SAY |
 |---|---|---|
 | 7 | `Ctrl+P` → type `orchestrate.py:242` → `Enter` (**not** `Ctrl+PgDn`: 6c left you on tab 2). Click **242**, Shift+click **253**. | "Every fix must say **why** it works, so `validate_finding` rejects any finding without a mechanism." |
+| B6 | No key press: the caption already cites `orchestrate.py:695`, where the rejection is logged. | **BONUS** "It also logs every rejection, so no finding is dropped silently." |
 
 **Tab 8 `extract_markup.py`** · CAPTION `extract_markup.py:204 · "__FILL_IN__" when a value is absent (94 places in the engine)`
 
@@ -390,6 +407,7 @@ uses `Ctrl+P`, not `Ctrl+PgDn`.*
 |---|---|---|
 | 9a | `Ctrl+PgDn` → tab 9, on line 26. Click **26**, Shift+click **29**. | "We rank fixes by **ICE**: impact, confidence and ease." |
 | 9b | `Ctrl+G` → type `13` → `Enter`. Click **13**, Shift+click **15**. | "Impact uses the **capped** severity, so a blocked finding never outranks its blocker." |
+| B7 | `Ctrl+G` → type `68` → `Enter`. Click **68**, Shift+click **71**: `def sort_key` … "the ordering is total and therefore deterministic". | **BONUS** "The order is total, so the same evidence always ranks the **same way**." |
 
 ### 2:10–2:48 · Act IV · The day the real web proved us wrong
 **Tab 10 `DESIGN.md`, the field test** · CAPTION `DESIGN.md:374–379 · field test on five live sites`, then `DESIGN.md:377–378`
@@ -444,29 +462,12 @@ Each step drops whole sentences.
 - the zero-recall story (10d–10e)
 - the closing quote
 
-### Restore lines: only if your timed read is under 2:45
-These are the lines that did not fit. Each is a complete sentence and is still in the anchor ledger,
-so it is safe to put back.
-
-**Mind the cap.** The full read is already 2:59 at 150 words a minute. A timed read under 2:45 means
-you speak faster than that: add one line at a time and time it again, staying at 2:55 or under. At
-150 words a minute, any restore line needs a cut-ladder step to pay for it. Re-run
-`python tools\check_script_anchors.py` after any restore: it must still print `0 problem(s)`.
-
-| step | DO | SAY |
-|---|---|---|
-| R1, before 3a (+6 words) | No new shot: tab 3, lines **12–14**, as in 3a. | "Reach taught us our first rule." |
-| R5, after 7 (+5 words) | No new shot: the caption already cites `:695`. | "It also logs every rejection." |
-| R6, after 9b (+8 words) | `Ctrl+G` → type `68` → `Enter`. Click **68**, Shift+click **71**. | "The same evidence always ranks the **same way**." |
-| R7, after 6c (+8 words) | No new shot: lines **56–57** are already highlighted: "Capping asserts a weaker claim. Suppression asserts none." | "A cap still claims something; suppression claims **nothing**." |
-| R2, after 5 (+19 words) | In tab 5, `Ctrl+G` → type `56` → `Enter`. Click **56**, Shift+click **57**. CAPTION `severity-model.md:56` | "A check that cannot run says so, because a clean report and one that **couldn't look** are different things." |
-| R3, after 4c (+24 words) | `Ctrl+P` → type `geo-methods.md:14` → `Enter`. Click **14**, Shift+click **19**, then `Ctrl+G 24`, click **24**. CAPTION `geo-methods.md:14–24 · GEO (KDD 2024): a benchmark gain, not a defect` | "We calibrate against research, not instinct: the GEO paper shows that adding statistics helps **in a benchmark**, so a page without them scores **low**." |
-| R4, after 6c (+19 words) | `Ctrl+P` → type `site_b.report.md:58` → `Enter`. Click **58**, Shift+click **60**. CAPTION `tests/golden/site_b.report.md:60 · same in site_b.audit-report.json:109 ("blocked_by": "F-001")` | "You can see the cascade in our golden report: **one** critical, **eleven** findings waiting on it, and engagement untouched." |
-
-- **R2 says in plain words what 6c says precisely.** Restore it only if Rule 0b landed badly.
-- **R4 is last:** Part 2's Card B already shows the same cascade on a live site.
-- R3 and R4 open a file that is **not** one of the ten tabs, so afterwards come back with `Ctrl+P` and
-  the `file:line` of the step you were on, not `Ctrl+PgDn`.
+### BONUS rows
+The rows whose SAY starts with **BONUS** (B1–B7) are optional: the arguments that did not fit under
+3:00, written in place as complete sentences. Say them for a longer cut or a practice read; skip them
+for the 3:00 take. To skip one, skip its keys too. Skipping B2 or B5 skips their `Ctrl+P`, and the
+next row's keys still work; skipping B1 means doing its keys in 3a, as 3a says.
+`python tools\check_script_anchors.py` times the main read without them and prints the total with them.
 
 ## Stage 3 · PART 2 · Live trial run (cap 2:00 after trimming, target 1:55)
 
