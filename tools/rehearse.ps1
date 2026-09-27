@@ -53,6 +53,13 @@ $answer = python "$repo\tools\tool_calls.py" $log --answer | Out-String
 Set-Location $base
 $engine = (python "$repo\tools\verify_engine.py" submission.zip brand-ai-readiness-audit | Select-Object -Last 2) -join "`n"
 Set-Location brand-ai-readiness-audit
+# the finding check that RECORDING_FLOW Stage 4 runs after the take: the answer against the
+# report, then each shown finding re-fetched on the live site
+if ($report) {
+    $check = python "$repo\tools\check_findings.py" --report "audit-output\audit-report.json" --answer $log | Out-String
+} else {
+    $check = "no report was written, so there is nothing to check`n"
+}
 
 $header = @"
 <!-- rehearsal: $Label | url: $Url | model: $Model | harness: $(claude --version) | python: $pyver | playwright: $pw | exit: $code | seconds: $secs | report written: $report -->
@@ -61,5 +68,6 @@ $engine
 -->
 
 "@
-[IO.File]::WriteAllText($out, $header + $answer, (New-Object Text.UTF8Encoding $false))
-"rehearsal $Label -> exit $code, $secs s, report=$report, saved $out"
+$body = $header + $answer + "`n## Finding check (tools/check_findings.py)`n`n" + '```' + "`n" + $check + '```' + "`n"
+[IO.File]::WriteAllText($out, $body, (New-Object Text.UTF8Encoding $false))
+"rehearsal $Label -> exit $code, $secs s, report=$report, finding check: $(($check.Trim() -split "`n")[-1]), saved $out"

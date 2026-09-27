@@ -37,6 +37,11 @@ jobs:
       - name: Every file:line the video script cites says what the script claims
         run: python tools/check_script_anchors.py VIDEO_SCRIPT.md round3-frozen/submission.zip
 
+      # Integrity floor: the video may not show a finding the engine did not produce. The check
+      # run after the take must pass a faithful answer and fail every tampered one.
+      - name: The finding check catches an invented or misquoted finding
+        run: python tools/check_findings.py --self-test
+
       - name: The engine's own suites pass from a fresh unzip of submission.zip
         run: |
           mkdir -p "$RUNNER_TEMP/engine" && cd "$RUNNER_TEMP/engine"

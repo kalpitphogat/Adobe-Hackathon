@@ -116,6 +116,7 @@ Paste the output to Claude for checking. What it should show:
 - The header shows `harness: 2.1.282` and `playwright: yes`.
 - The table holds only confirmed findings, with a verdict on every row.
 - The `prompt_injection` row is marked **not supported**.
+- The file ends with the finding check that Stage 4 runs after the take. It must end with `0 problem(s)`.
 
 ### 0.5 Time Part 1
 Set up VS Code as in Stage 1.1 first. Then do Stage 2 once with a stopwatch, reading aloud and
@@ -554,8 +555,28 @@ python tools\check_replay.py
 ```
 - `tools\tool_calls.py` must show the `Skill` call.
 - Write the raw video's file name, length and hash into `recorded-run\README.md`. The video itself stays out of git.
-- Then commit it, as run sheet §F says:
-  `git add recorded-run`, then `git commit -m "Recorded run: docs.pytest.org"`, then `git push origin final-3`.
+
+**Prove every finding on screen is real.** The rules fail a video that shows fabricated
+findings, and the drill-down must show real evidence. Run this straight away, while the site is
+still as it was during the take:
+```powershell
+python tools\check_findings.py recorded-run
+```
+It must end with `0 problem(s)`. It checks two things, and saves both in `recorded-run\finding-check.md`:
+1. **Nothing was invented.** Every row, ID, severity, ICE, title and count the agent showed is
+   the engine's own, from `audit-report.json`. This includes the drill-down's `blocked_by` count.
+2. **What was shown is true on the live site.** It fetches each table row's pages again and
+   counts for itself, without using the engine's code or the agent's.
+
+Reading the result:
+- `[HAND]`: a check it can't do automatically. Open the URL it gives, confirm the claim by eye,
+  and write what you saw in `recorded-run\README.md`.
+- `[WARN]`: read it; it doesn't mean a retake. Example: a row that holds only in part.
+- `[FAIL]`: **don't submit this take.** Paste the output to Claude. A new take uses the backup
+  URL (see "If it goes sideways"), never a splice.
+
+Then commit the run, as run sheet §F says:
+`git add recorded-run`, then `git commit -m "Recorded run: docs.pytest.org"`, then `git push origin final-3`.
 
 Final checks:
 - Part 1 is 3:00 or less, Part 2 is 2:00 or less, and the total is 5:00 or less.

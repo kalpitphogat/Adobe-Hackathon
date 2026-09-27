@@ -12,6 +12,7 @@ on:
       - "round3-frozen/**"
       - "tools/verify_engine.py"
       - "tools/check_replay.py"
+      - "tools/check_findings.py"
       - ".github/workflows/replay-portability.yml"
   workflow_dispatch:
 
@@ -70,6 +71,16 @@ jobs:
           assert f["check_id"] == "reach.robots.ai_search_bot_blocked" and f["severity"] == "critical"
           EOF
           python ../../tools/verify_engine.py ../submission.zip .
+
+      # RECORDING_FLOW Stage 4's finding check, on a clean machine and a real site: the answer a
+      # faithful agent would give, then each of its rows re-fetched live by the check's own code.
+      # Only F-001 is asserted: the Guardian's other rows (images, dates) change by the minute.
+      - name: Finding check - the rows the video would show, re-checked on the live site
+        run: |
+          set -uxo pipefail
+          cd work/brand-ai-readiness-audit
+          python3 ../../tools/check_findings.py --report audit-output/audit-report.json --answer auto | tee ../finding-check.txt || true
+          grep -E "\] F-001 reach\.robots\.ai_search_bot_blocked( \(the drill-down\))?: holds" ../finding-check.txt
 
       - name: Fallback D - always render (proves the Playwright install works)
         run: |

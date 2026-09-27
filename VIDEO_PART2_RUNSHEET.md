@@ -157,4 +157,9 @@ python -c "import urllib.request as u;print(u.urlopen('https://docs.pytest.org/e
    to `recorded-run/session.jsonl`, and write the raw (untrimmed) video's filename, length and
    `(Get-FileHash <raw-video>).Hash` into `recorded-run/README.md`. The video file itself stays out of git.
    Run `python tools\tool_calls.py recorded-run\session.jsonl` once to confirm it shows the Skill call.
-4. Run `tools\check_replay.py` one last time. Then check the total video (Part 1 + Part 2) is ≤ 5:00. Part 1 ≤ 3:00, Part 2 ≤ 2:00, each on its own.
+4. **Prove every finding on screen is real**, straight after the take:
+   `python tools\check_findings.py recorded-run` must end with `0 problem(s)` (`RECORDING_FLOW.md`
+   Stage 4 explains the output). It checks every row, count and ID the agent showed against
+   `audit-report.json`, then re-fetches each shown finding on the live site with its own code, and
+   saves the result in `recorded-run\finding-check.md`. Any `[FAIL]`: don't submit that take.
+5. Run `tools\check_replay.py` one last time. Then check the total video (Part 1 + Part 2) is ≤ 5:00. Part 1 ≤ 3:00, Part 2 ≤ 2:00, each on its own.
