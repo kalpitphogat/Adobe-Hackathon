@@ -207,7 +207,7 @@ the Stage 1.2 window clean: it's the one on camera.
 
 **Clipboard: the step-2 prompt without its `<URL>`.** On camera you paste the prompt and type the
 URL by hand, because the brief wants the URL entered on camera and the prompt pasted word for word
-from the REPLAY. The prompt is one 2,940-character line, so let PowerShell copy it rather than
+from the REPLAY. The prompt is one line of about 3,100 characters, so let PowerShell copy it rather than
 selecting it by hand. It uses the same match as `tools\rehearse.ps1`:
 ```powershell
 $prompt = (Get-Content REPLAY_IT_Professionals.txt -Encoding UTF8 | Where-Object { $_ -match "SKILL\.md" -and $_.TrimEnd().EndsWith("URL: <URL>") } | Select-Object -First 1).Trim()
@@ -530,7 +530,8 @@ Type `/exit` in Claude Code and stop recording.
 |---|---|
 | Permission prompt, or the folder-trust question | Approve it on camera and trim the pause. It is part of the real run. |
 | The agent chains a command (`...; echo $LASTEXITCODE`), or tries `python3`, and gets blocked | It retries the plain command. Approve if asked, and trim the retry. |
-| `no evidence bundle was produced`, a crash, or more than 5 min | Stop. Start a **new take on `https://www.sphinx-doc.org/`**, after changing the first `TEST_SITE_URLS` entry, the step-2 example and the run sheet to match, and re-running `python tools\check_replay.py`. **Never splice.** |
+| The agent's first `orchestrate.py` command starts `python .claude/skills/...` and fails with `no evidence bundle was produced` | Keep going. It ran the copy made for the Skill tool, and it reruns `skills/...` by itself (judge-mode run, 2026-09-27). Approve anything it asks, keep the detour in, and trim only the waiting. It is still one real run. |
+| `no evidence bundle was produced` from `python skills/...`, a crash, or more than 5 min | Stop. Start a **new take on `https://www.sphinx-doc.org/`**, after changing the first `TEST_SITE_URLS` entry, the step-2 example and the run sheet to match, and re-running `python tools\check_replay.py`. **Never splice.** |
 | Too long for 2:00 | Trim waits and the agent's thinking harder, then drop the *(optional)* sentence. Never cut: the typed URL, the `Skill(...)` call, the pass-2 line, the table, the verdicts, or the drill-down. |
 
 ---

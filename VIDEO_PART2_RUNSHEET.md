@@ -38,11 +38,16 @@ only pre-screened for robots.txt and homepage links with `tools/prescreen.py`.
    `demo-live/` is new, so there is no leftover `audit-output/`. It's git-ignored.
 1b. **Rehearse the prompt once on this machine, on a *seen* site**:
    `powershell -File tools\rehearse.ps1 -Url https://www.docker.com/ -Label docker_confirmed`.
-   The two passes were rehearsed 10 times on Linux (`rehearsal/2026-09-25_twopass_*`); the
-   2026-09-26 table change (top 5 *confirmed* findings, a verdict on every row) has **not** been
-   rehearsed yet. Check that the agent runs pass 1 with `--no-render --out ./audit-precheck`,
-   prints the count and picks pass 2 by it; that its table holds only confirmed findings, with the
-   likely count underneath; and that it gives every row a verdict. On docker.com the top confirmed
+   The two passes were rehearsed 10 times on Linux (`rehearsal/2026-09-25_twopass_*`), and the
+   confirmed-only table twice on Windows on 2026-09-27 (docker.com with this script; nasa.gov in
+   judge mode, interactive). On nasa.gov the agent first ran the `.claude/skills` copy of the
+   script, and it misstated the confirmed and likely counts (30 and 19; the report had 24 and 25).
+   So the prompt now names the script path and asks for those counts by code: rehearse the revised
+   prompt once. Check that the agent runs `python skills/...` (not `.claude/skills/...`) for pass 1
+   with `--no-render --out ./audit-precheck`, prints the count and picks pass 2 by it; that its
+   table holds only confirmed findings, with the likely count underneath (and a `python -c` that
+   counted it); and that it gives every row a verdict. The file must end with the finding check at
+   `0 problem(s)`. On docker.com the top confirmed
    finding was a `trust.integrity.prompt_injection` false positive (a blog post that says "system
    prompt"), so that row should come back *not supported*.
 2. **Integrity:** `python ..\..\tools\verify_engine.py ..\submission.zip .` must end with
@@ -137,7 +142,8 @@ python -c "import urllib.request as u;print(u.urlopen('https://docs.pytest.org/e
 |---|---|
 | The agent's evidence check says a row is **not supported** (likely for `nav_links_js_only`, or `prompt_injection` on a page that only discusses AI) | **Keep it in.** Say: "The evidence check disagrees here, so we'd verify before acting. The report stays exactly as the engine wrote it." That's an honest, strong moment. Don't drill into that finding. |
 | Claude Code asks permission for a command | Approve it on camera ("yes"). It's part of the real run; trim the pause. On Windows the agent sometimes tries the orchestrator first as a chained command (`...; echo $LASTEXITCODE`), which is blocked; it then retries the plain command. Only one crawl runs (checked in `rehearsal/*_skill.md`). |
-| Run exits with `no evidence bundle was produced` | You aren't in the marketplace root. Stop, `cd` into `demo-live\brand-ai-readiness-audit`, and **start a new take on the backup URL** (below). |
+| Run exits with `no evidence bundle was produced`, from a command starting `python .claude/skills/...` | The agent ran the copy made for the Skill tool. Keep going: it reruns `skills/...` by itself (judge-mode run, 2026-09-27). Keep the detour in; trim only the waiting. |
+| Run exits with `no evidence bundle was produced`, from `python skills/...` | You aren't in the marketplace root. Stop, `cd` into `demo-live\brand-ai-readiness-audit`, and **start a new take on the backup URL** (below). |
 | Run takes past 5 min / crashes on a crawl delay | New take on the backup URL; REPLAY troubleshooting mentions `--time-budget 600`. |
 | The agent chains a command (`...; echo $LASTEXITCODE`) or pipes it | It's blocked, then it retries plain. The prompt now asks for no pipes or chaining; Opus followed it in the final rehearsals. Trim the retry. |
 | The agent uses `python3` and gets blocked | Approve it on camera, or restart with `"PowerShell(python3:*)"` added (Sonnet did this once on Linux). |
