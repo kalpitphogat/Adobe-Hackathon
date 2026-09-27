@@ -145,6 +145,8 @@ each at its first line.
 
 At the repo root:
 ```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.venv\Scripts\Activate.ps1
 if (Test-Path demo) { Rename-Item demo ("demo-old-" + (Get-Date -Format "yyyyMMdd-HHmmss")) }
 python -m zipfile -e round3-frozen\submission.zip demo
 python tools\verify_engine.py round3-frozen\submission.zip demo
@@ -161,7 +163,9 @@ code -g demo\skills\ai-readiness-orchestrator\scripts\severity.py:26
 code -g demo\DESIGN.md:369
 ```
 - `verify_engine.py` must end with `RESULT : ENGINE UNCHANGED`.
-- You should see 10 tabs. If `code` isn't recognised, open the `demo` folder in VS Code by hand
+- You should see 10 tabs. More than 10 means VS Code reopened tabs from an earlier session: press
+  `Ctrl+K Ctrl+W` in VS Code to close them all, then run the 10 `code -g` lines again.
+- If `code` isn't recognised, open the `demo` folder in VS Code by hand
   and open each file with `Ctrl+P`, typing its name then `:line` (for example `chunking-model.md:40`).
 - VS Code settings: press `Ctrl+,`, keep the **User** tab selected so nothing is written into `demo`,
   then search each setting by name and set it:
@@ -271,8 +275,8 @@ Part 1 may be recorded in several takes.
 **Moving around in VS Code.** Each row below is one screen: do the DO, then say the SAY.
 - `Ctrl+PgDn`: the next tab. Each tab opens on the first line it needs.
 - `Ctrl+G`, type the line number, `Enter`: go to another line in the same file. VS Code puts that line mid-screen.
-- `Ctrl+P`, type `file:line`, `Enter`: jump straight to a line in any file, open or not. Steps 6d,
-  7 and 11 use it, and so do the restore lines.
+- `Ctrl+P`, type `file:line`, `Enter`: jump straight to a line in any file, open or not. Steps 4c,
+  6d, 7 and 11 use it, and so do the restore lines.
 - **Highlight:** click the line number in the left margin. For several lines, click the first number, then **Shift+click** the last.
   - A row that says only "click" needs no jump: that line is already on screen, a few lines away.
   - If a line you need is ever off screen, scroll to it.
@@ -280,7 +284,9 @@ Part 1 may be recorded in several takes.
   Every split falls on a `·` pause or between two sentences, so you never talk while you type.
   The silent key presses can be trimmed in the edit.
 - **Retake:**
-  1. In the Stage 1.1 window, run the 10 `code -g` lines again, so every tab is back on its first line.
+  1. In VS Code press `Ctrl+K Ctrl+W` to close every tab, then run the 10 `code -g` lines again in the
+     Stage 1.1 window. The tabs are back in script order, each on its first line, and no file the last
+     take opened with `Ctrl+P` is left sitting between two of them for `Ctrl+PgDn` to land on.
   2. `Ctrl+P` → `chunking-model.md:40` → `Enter` to start at tab 1, or use the `file:line` of the row you restart from.
 
 ### 0:00–0:02 · Title card
