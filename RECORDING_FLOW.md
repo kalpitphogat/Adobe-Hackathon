@@ -118,8 +118,11 @@ Paste the output to Claude for checking. What it should show:
 - The `prompt_injection` row is marked **not supported**.
 
 ### 0.5 Time Part 1
-Read Part 1 (Stage 2 below) aloud once with a stopwatch, tab switches included.
-**Over 2:50** → apply the cut ladder (end of Stage 2), in order.
+Set up VS Code as in Stage 1.1 first. Then do Stage 2 once with a stopwatch, reading aloud and
+pressing every key in it: tab switches, `Ctrl+G` jumps and highlights.
+- **Over 2:50** → apply the cut ladder (end of Stage 2), in order.
+- Every highlight must fit on screen, and every highlighted line must be readable to its end.
+  If one doesn't, set the font to 18 and check again.
 
 > **Do not** open or audit `https://docs.pytest.org/` with the engine at any point before the take.
 > A browser visit is fine; a run of the audit is not.
@@ -157,8 +160,16 @@ code -g demo\DESIGN.md:369
 - `verify_engine.py` must end with `RESULT : ENGINE UNCHANGED`.
 - You should see 12 tabs. If `code` isn't recognised, open the `demo` folder in VS Code by hand
   and open each file with `Ctrl+P`, typing its name then `:line` (for example `chunking-model.md:40`).
-- In VS Code, turn on Zen mode (`Ctrl+K Z`), set the font to 20, turn the minimap off and use a high-contrast theme.
-- Click tab 1. `Ctrl+PgDn` then walks the tabs in script order.
+- VS Code settings: press `Ctrl+,`, keep the **User** tab selected so nothing is written into `demo`,
+  then search each setting by name and set it:
+  - `editor.fontSize`: 20.
+  - `editor.minimap.enabled`: off.
+  - `editor.wordWrap`: on, so long lines such as `ai-bots.json:26` can be read to the end.
+  - `zenMode.hideLineNumbers`: off. Zen mode hides line numbers unless you turn this off, and
+    Part 1 needs them: the viewer hears "line 286", and you click the numbers to highlight.
+- Theme: `Ctrl+K Ctrl+T` → a High Contrast theme.
+- Click tab 1, then turn on Zen mode (`Ctrl+K Z`). Check the line numbers still show.
+  `Ctrl+PgDn` then walks the tabs in script order.
 
 ### 1.2 Terminal for Part 2
 This is a fresh folder, exactly as in REPLAY step 1 and run sheet §A.1.
@@ -249,9 +260,22 @@ Set-Clipboard -Value $prompt.Substring(0, $prompt.Length - 5)
 ## Stage 2 · PART 1 · Thought process (cap 3:00, target 2:50)
 
 Part 1 may be recorded in several takes.
-- Every shot needs its file on screen, the line highlighted (click its line number), and a
-  lower-third caption.
-- Captions are added in the editor.
+- Every shot needs its file on screen, its lines highlighted, and a lower-third caption.
+- Captions are added in the editor. Each tab's caption is written above its table.
+
+**Moving around in VS Code.** Each row below is one screen: do the DO, then say the SAY.
+- `Ctrl+PgDn`: the next tab. Each tab opens on the first line it needs.
+- `Ctrl+G`, type the line number, `Enter`: go to another line in the same file. VS Code puts that line mid-screen.
+- `Ctrl+P`, type `file:line`, `Enter`: go to a line in another file. Only the closing shot and the bonus lines use it.
+- **Highlight:** click the line number in the left margin. For several lines, click the first number, then **Shift+click** the last.
+  - A row that says only "click" needs no jump: that line is already on screen, a few lines away.
+  - If a line you need is ever off screen, scroll to it.
+- **When a sentence carries on in the next row:** say the row's words, stop, press the keys, then carry on.
+  Every split falls on a `·` pause or between two sentences, so you never talk while you type.
+  The silent key presses can be trimmed in the edit.
+- **Retake:**
+  1. In the Stage 1.1 window, run the 12 `code -g` lines again, so every tab is back on its first line.
+  2. `Ctrl+P` → `chunking-model.md:40` → `Enter` to start at tab 1, or use the `file:line` of the row you restart from.
 
 ### 0:00–0:02 · Title card
 | | |
@@ -260,51 +284,115 @@ Part 1 may be recorded in several takes.
 | SAY | *(silent)* |
 
 ### 0:02–0:21 · Cold open
-| | |
-|---|---|
-| DO | Tab 1 `chunking-model.md`, highlight lines **40–43** |
-| CAPTION | `chunking-model.md:40–43 · the handout, quoted in our code` |
-| SAY | "Ask an AI assistant about a brand: it either **quotes** the site · or acts like it **doesn't exist**. The handout says why: if nothing is easy to **reach, read, and quote**, it won't make the answer. We're IT_Professionals, and our agent finds **which step fails**." |
+**Tab 1 `chunking-model.md`** · CAPTION `chunking-model.md:40–43 · the handout, quoted in our code`
+
+| step | DO | SAY |
+|---|---|---|
+| 1 | Tab 1 is on screen, on line 40. Click **40**, Shift+click **43**. | "Ask an AI assistant about a brand: it either **quotes** the site · or acts like it **doesn't exist**. The handout says why: if nothing is easy to **reach, read, and quote**, it won't make the answer. We're IT_Professionals, and our agent finds **which step fails**." |
 
 *Slow down on "doesn't exist", and smile on the last line.*
 
 ### 0:21–0:58 · Act I · What separates the cited from the ignored
-| DO | CAPTION | SAY |
+**Tab 2 `gate-rules.md`** · CAPTION `gate-rules.md:10 · 66 checks: DESIGN.md:108 (count generated from the code)`
+
+| step | DO | SAY |
 |---|---|---|
-| `Ctrl+PgDn` → Tab 2 `gate-rules.md`, lines **10–14** | `gate-rules.md:10 · 66 checks: DESIGN.md:108 (count generated from the code)` | "And the steps come **in order**, so each of our 66 checks has a stage: reach, read, extract, trust · and act, for visitors." |
-| `Ctrl+PgDn` → Tab 3 `ai-bots.json`, lines **12–14** | `ai-bots.json:12–14 · 29 crawlers: 14 retrieval, 10 training, 5 contested` | "Reach taught us rule one: lists say which AI bots to **block**; we asked what blocking each **costs**, and sorted 29 by role." |
-| `Ctrl+G 71` (GPTBot, `"category": "training"`) | *(same)* | "Block GPTBot: you've opted out of **training**. Block a retrieval bot: you **vanish from its answers**." |
-| `Ctrl+PgDn` → Tab 4 `check_robots.py` line **286**, then `Ctrl+G 318` | `check_robots.py:286 critical · :318 info` | "Same rule · **critical** for one, line 286 · **info** for the other, line 318." |
-| `Ctrl+PgDn` → Tab 5 `geo-methods.md` lines **14–19**, then `Ctrl+G 24` | `geo-methods.md:14–24 · GEO (KDD 2024): a benchmark gain, not a defect` | "Quote: GEO research says statistics help · **in a benchmark** · so their absence scores **low**." *(cut-ladder step 1)* |
+| 2 | `Ctrl+PgDn` → tab 2, on line 10. Click **10**, Shift+click **14**. | "And the steps come **in order**, so each of our 66 checks has a stage: reach, read, extract, trust · and act, for visitors." |
+
+**Tab 3 `ai-bots.json`** · CAPTION `ai-bots.json:12–14 · 29 crawlers: 14 retrieval, 10 training, 5 contested`
+
+| step | DO | SAY |
+|---|---|---|
+| 3a | `Ctrl+PgDn` → tab 3, on line 12. Click **12**, Shift+click **14**. | "Reach taught us rule one: lists say which AI bots to **block**; we asked what blocking each **costs**, and sorted 29 by role." |
+| 3b | `Ctrl+G` → type `71` → `Enter`. Click **71**: `"GPTBot"` … `"category": "training"`. | "Block GPTBot: you've opted out of **training**." |
+| 3c | `Ctrl+G` → type `26` → `Enter`. Click **26**: retrieval bots, "Blocking one of these removes the brand from that assistant's answers." | "Block a retrieval bot: you **vanish from its answers**." |
+
+**Tab 4 `check_robots.py`** · CAPTION `check_robots.py:286 critical · :318 info`
+
+| step | DO | SAY |
+|---|---|---|
+| 4a | `Ctrl+PgDn` → tab 4, on line 286. Click **286**: `severity="critical"`. | "Same rule · **critical** for one, line 286 ·" |
+| 4b | `Ctrl+G` → type `318` → `Enter`. Click **318**: `severity="info"`. | "**info** for the other, line 318." |
+
+**Tab 5 `geo-methods.md`** · CAPTION `geo-methods.md:14–24 · GEO (KDD 2024): a benchmark gain, not a defect` · *cut-ladder step 1 skips 5a–5b*
+
+| step | DO | SAY |
+|---|---|---|
+| 5a | `Ctrl+PgDn` → tab 5, on line 14. Click **14**, Shift+click **19**. | "Quote: GEO research says statistics help · **in a benchmark** ·" |
+| 5b | `Ctrl+G` → type `24` → `Enter`. Click **24**: "it fires at **low** severity". | "so their absence scores **low**." |
 
 ### 0:58–1:35 · Act II · How bad, how sure
-| DO | CAPTION | SAY |
+**Tab 6 `severity-model.md`** · CAPTION `severity-model.md:43 · :56`
+
+| step | DO | SAY |
 |---|---|---|
-| `Ctrl+PgDn` → Tab 6 `severity-model.md` line **43**, then `Ctrl+G 56` | `severity-model.md:43 · :56` | "Severity asks: **how bad, if true?** Confidence is a separate field: **how sure?** A check that couldn't run says so: a clean report and one that couldn't look are **different things**." |
-| `Ctrl+PgDn` → Tab 7 `gate_model.py` line **117** | `gate_model.py:117 apply_cascade · :42 ceiling "medium" · :129 Rule 0` | "A flat checklist gives a site blocking AI crawlers **fifteen criticals**, fourteen of them moot. `apply_cascade` caps those at medium and tags the **one** blocker. **Capped · never deleted.**" |
-| `Ctrl+G 128`, highlight **128–129** | *(same)* | "Line 128: engagement is **never** gated. A visitor from an ad doesn't care if a crawler got in." |
-| `Ctrl+PgDn` → Tab 8 `site_b.report.md` lines **58–60** | `tests/golden/site_b.report.md:60 · same in site_b.audit-report.json:109 ("blocked_by": "F-001")` | "Our golden: **one** critical, **eleven** findings waiting on F-001, engagement untouched." *(cut-ladder step 2)* |
+| 6a | `Ctrl+PgDn` → tab 6, on line 43. Click **43**. | "Severity asks: **how bad, if true?** Confidence is a separate field: **how sure?**" |
+| 6b | `Ctrl+G` → type `56` → `Enter`. Click **56**, Shift+click **57**. | "A check that couldn't run says so: a clean report and one that couldn't look are **different things**." |
+
+**Tab 7 `gate_model.py`** · CAPTION `gate_model.py:117 apply_cascade · :42 ceiling "medium" · :129 Rule 0`
+
+| step | DO | SAY |
+|---|---|---|
+| 7a | `Ctrl+PgDn` → tab 7, on line 117. Click **117**, Shift+click **118**. | "A flat checklist gives a site blocking AI crawlers **fifteen criticals**, fourteen of them moot. `apply_cascade` caps those at medium and tags the **one** blocker." |
+| 7b | Click **120**, three lines down: `Rule 3: cap, never delete.` | "**Capped · never deleted.**" |
+| 7c | `Ctrl+G` → type `128` → `Enter`. Click **128**, Shift+click **129**. | "Line 128: engagement is **never** gated. A visitor from an ad doesn't care if a crawler got in." |
+
+**Tab 8 `site_b.report.md`** · CAPTION `tests/golden/site_b.report.md:60 · same in site_b.audit-report.json:109 ("blocked_by": "F-001")` · *cut-ladder step 2 skips 8*
+
+| step | DO | SAY |
+|---|---|---|
+| 8 | `Ctrl+PgDn` → tab 8, on line 58. Click **58**, Shift+click **60**. | "Our golden: **one** critical, **eleven** findings waiting on F-001, engagement untouched." |
 
 ### 1:35–2:01 · Act III · Every fix earns its place
-| DO | CAPTION | SAY |
+**Tab 9 `orchestrate.py`** · CAPTION `orchestrate.py:242 validate_finding · rejection logged at :695`
+
+| step | DO | SAY |
 |---|---|---|
-| `Ctrl+PgDn` → Tab 9 `orchestrate.py` lines **242–253** | `orchestrate.py:242 validate_finding · rejection logged at :695` | "Every fix must say **why** it works: `validate_finding` rejects any finding without a mechanism, and logs it." |
-| `Ctrl+PgDn` → Tab 10 `extract_markup.py` lines **203–210** | `extract_markup.py:204 · "__FILL_IN__" when a value is absent (94 places in the engine)` | "Patches reuse values seen on the page · **never invented**. Anything missing stays **FILL_IN**." |
-| `Ctrl+PgDn` → Tab 11 `severity.py` lines **26–29**, `Ctrl+G 13`, then `Ctrl+G 68` | `severity.py:27–29 lookups · :13 impact from post-gate severity · :68 total order` | "Priority is **ICE**: impact, confidence, ease, from fixed lookups. Impact uses the **capped** severity, so a moot defect can't outrank its blocker. A total sort order: **same evidence, same ranking.**" |
+| 9 | `Ctrl+PgDn` → tab 9, on line 242. Click **242**, Shift+click **253**. | "Every fix must say **why** it works: `validate_finding` rejects any finding without a mechanism, and logs it." |
+
+**Tab 10 `extract_markup.py`** · CAPTION `extract_markup.py:204 · "__FILL_IN__" when a value is absent (94 places in the engine)`
+
+| step | DO | SAY |
+|---|---|---|
+| 10a | `Ctrl+PgDn` → tab 10, on line 203. Click **203**, Shift+click **204**: `Never invented.` | "Patches reuse values seen on the page · **never invented**." |
+| 10b | Click **209**, Shift+click **210**, five lines down: `__FILL_IN__`. | "Anything missing stays **FILL_IN**." |
+
+**Tab 11 `severity.py`** · CAPTION `severity.py:27–29 lookups · :13 impact from post-gate severity · :68 total order`
+
+| step | DO | SAY |
+|---|---|---|
+| 11a | `Ctrl+PgDn` → tab 11, on line 26. Click **26**, Shift+click **29**. | "Priority is **ICE**: impact, confidence, ease, from fixed lookups." |
+| 11b | `Ctrl+G` → type `13` → `Enter`. Click **13**, Shift+click **15**. | "Impact uses the **capped** severity, so a moot defect can't outrank its blocker." |
+| 11c | `Ctrl+G` → type `68` → `Enter`. Click **68**, Shift+click **71**. | "A total sort order: **same evidence, same ranking.**" |
 
 ### 2:01–2:47 · Act IV · The day the real web proved us wrong
-| DO | CAPTION | SAY |
+**Tab 12 `DESIGN.md`, the field test** · CAPTION `DESIGN.md:374–379 · field test on five live sites`
+
+| step | DO | SAY |
 |---|---|---|
-| `Ctrl+PgDn` → Tab 12 `DESIGN.md` lines **369–380** | `DESIGN.md:374–379 · field test on five live sites` | "Then the real web **humbled** us. Five live sites · **365 findings** · which was itself the finding. File sizes read as **phone numbers**. A free download page told to show a **price**. We named twelve false positives before touching a threshold, and got to **205**." *(the phone/price sentence is cut-ladder step 3; otherwise give it a beat, it's the laugh)* |
-| `Ctrl+G 320`, highlight **320–335** | `DESIGN.md:324, :334 · rewritten: dom.py:56 NOSCRIPT_JS_NOTICE · pinned: tests/test_regressions.py R1–R12` | "Worse: our empty-page detector fired **zero times** · even on a docs site with **sixteen words**. It was tuned to our own fixture. A fixture proves a check does what you wrote · **not that you wrote the right thing.**" |
-| `Ctrl+P` → type `geo-methods.md:56` → `Enter` | `geo-methods.md:56` | "Our own code puts it best: a citation you can't check is worse than none · **because it looks like evidence.** So don't trust us. · **Watch.**" |
+| 12a | `Ctrl+PgDn` → tab 12, on line 369. Click **369**, Shift+click **374**. | "Then the real web **humbled** us. Five live sites · **365 findings** · which was itself the finding." |
+| 12b | Click **377**, Shift+click **378**: phone numbers, a price. | "File sizes read as **phone numbers**. A free download page told to show a **price**." *(cut-ladder step 3; otherwise give it a beat, it's the laugh)* |
+| 12c | Click **374**, Shift+click **379**: twelve false positives … **205**. | "We named twelve false positives before touching a threshold, and got to **205**." |
+
+**Tab 12 `DESIGN.md`, the zero-recall story** · CAPTION `DESIGN.md:324, :334 · rewritten: dom.py:56 NOSCRIPT_JS_NOTICE · pinned: tests/test_regressions.py R1–R12`
+
+| step | DO | SAY |
+|---|---|---|
+| 12d | `Ctrl+G` → type `322` → `Enter`. Click **322**, Shift+click **325**: "fired **zero times** … **16 words**". | "Worse: our empty-page detector fired **zero times** · even on a docs site with **sixteen words**." |
+| 12e | `Ctrl+G` → type `332` → `Enter`. Click **332**, Shift+click **335**: "A fixture proves a check does what you wrote". | "It was tuned to our own fixture. A fixture proves a check does what you wrote · **not that you wrote the right thing.**" |
+
+**Closing, back in tab 5** · CAPTION `geo-methods.md:56`
+
+| step | DO | SAY |
+|---|---|---|
+| 13 | `Ctrl+P` → type `geo-methods.md:56` → `Enter`: tab 5, on line 56. Click **56**, Shift+click **57**. | "Our own code puts it best: a citation you can't check is worse than none · **because it looks like evidence.** So don't trust us. · **Watch.**" |
 
 *Hard cut to Part 2 on "Watch."*
 
 ### Cut ladder: only if the timed read is over 2:50, and only in this order
-1. Cut the GEO line and tab 5's first shot (−14 words → about 2:43).
-2. Cut "Our golden: one critical…" and tab 8 (−11 words → about 2:39).
-3. Cut "File sizes read as phone numbers… show a price." (−15 words → about 2:32).
+1. Skip steps 5a–5b, the GEO line (−14 words → about 2:43). From tab 4, press `Ctrl+PgDn` **twice** to reach tab 6. Step 13's `Ctrl+P` still finds tab 5.
+2. Skip step 8, "Our golden: one critical…" (−11 words → about 2:39). From tab 7, press `Ctrl+PgDn` **twice** to reach tab 9.
+3. Skip step 12b, "File sizes read as phone numbers… show a price." (−15 words → about 2:32). Go from 12a straight to 12c.
 
 **Never cut:**
 - the cold open
@@ -317,10 +405,15 @@ Part 1 may be recorded in several takes.
 - the closing quote
 
 ### Bonus lines: only if the read is under 2:35
-1. After "…got in.": `Ctrl+PgUp` back to Tab 2 `gate-rules.md`, `Ctrl+G 54`. Caption `gate-rules.md:54–57 · Rule 0b`.
-   SAY: "And if we never saw the page a visitor sees, those findings aren't softened, they're **suppressed**. Capping asserts a weaker claim. Suppression asserts **none**."
-2. After "…the right thing.": open `tests\test_regressions.py` at line 2 and scroll the `# R1.` … `# R12.` headers.
-   SAY: "Tests R1 to R12 keep fixed bugs fixed."
+Add them in this order.
+
+| step | DO | SAY |
+|---|---|---|
+| B1, after 7c | `Ctrl+P` → type `gate-rules.md:54` → `Enter`: tab 2, on line 54. Click **54**, Shift+click **57**. CAPTION `gate-rules.md:54–57 · Rule 0b` | "And if we never saw the page a visitor sees, those findings aren't softened, they're **suppressed**. Capping asserts a weaker claim. Suppression asserts **none**." |
+| back to 8 | `Ctrl+P` → type `site_b.report.md:58` → `Enter`: tab 8, on line 58. Then step 8 as usual; its `Ctrl+PgDn` carries on to tab 9. | *(step 8's line)* |
+| B2, after 12e | `Ctrl+P` → type `test_regressions.py:2` → `Enter`: it opens in a new tab. Click **2**. CAPTION `tests/test_regressions.py:2` | "Tests R1 to R12 keep fixed bugs fixed." |
+
+After B2, step 13's `Ctrl+P` works from the new tab.
 
 ---
 

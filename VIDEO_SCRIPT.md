@@ -68,14 +68,17 @@ the agent re-checks **every** row. Rehearse it once before the take (run sheet �
 `trust.integrity.prompt_injection` false positive, which the verdict column should mark *not supported*.
 
 **VS Code for Part 1:** open the **unzipped submission** (`demo/`, never another copy). Zen mode
-(`Ctrl+K Z`), font 20, minimap off, high-contrast theme. Pre-open these tabs **in this order**
-so `Ctrl+PgDn` walks the script. Each is already scrolled to its first line:
+(`Ctrl+K Z`) **with line numbers on** (`zenMode.hideLineNumbers` off; Zen hides them by default),
+font 20, minimap off, word wrap on, high-contrast theme. Pre-open these tabs **in this order**
+so `Ctrl+PgDn` walks the script. Each is already scrolled to its first line; "then" is each
+`Ctrl+G` jump. [`RECORDING_FLOW.md`](RECORDING_FLOW.md) Stage 2 splits every line at its jump,
+key by key:
 
 | tab | file (relative to the marketplace root) | first line | then |
 |---|---|---|---|
 | 1 | `skills/answerability-audit/references/chunking-model.md` | 40 | |
 | 2 | `skills/ai-readiness-orchestrator/references/gate-rules.md` | 10 | |
-| 3 | `skills/crawl-access-audit/references/ai-bots.json` | 12 | → 71 |
+| 3 | `skills/crawl-access-audit/references/ai-bots.json` | 12 | → 71 → 26 |
 | 4 | `skills/crawl-access-audit/scripts/check_robots.py` | 286 | → 318 |
 | 5 | `skills/answerability-audit/references/geo-methods.md` | 14 | → 24 |
 | 6 | `skills/ai-readiness-orchestrator/references/severity-model.md` | 43 | → 56 |
@@ -84,7 +87,7 @@ so `Ctrl+PgDn` walks the script. Each is already scrolled to its first line:
 | 9 | `skills/ai-readiness-orchestrator/scripts/orchestrate.py` | 242 | |
 | 10 | `skills/structured-data-audit/scripts/extract_markup.py` | 203 | |
 | 11 | `skills/ai-readiness-orchestrator/scripts/severity.py` | 26 | → 13 → 68 |
-| 12 | `DESIGN.md` | 369 | → 322 |
+| 12 | `DESIGN.md` | 369 | → 322 → 332 |
 | — | the closing shot: `Ctrl+P`, type `geo-methods.md:56`, `Enter` (jumps tab 5 straight to line 56) | | |
 
 **Highlight the line you're talking about** (click its line number) so the viewer's eye lands
@@ -122,7 +125,8 @@ Everything else is direction, not speech.*
 > And the steps come **in order**, so each of our 66 checks has a stage: reach, read, extract, trust · and act, for visitors.
 
 **SCREEN:** Tab 3 `ai-bots.json`, lines **12–14** ("we need to know what blocking each one COSTS"),
-then scroll to line **71** (`"GPTBot" … "category": "training"`).
+then `Ctrl+G 71` (`"GPTBot" … "category": "training"`) for GPTBot, then `Ctrl+G 26` for the retrieval
+bot ("Blocking one of these removes the brand from that assistant's answers").
 **CAPTION:** `ai-bots.json:12–14 · 29 crawlers: 14 retrieval, 10 training, 5 contested`
 
 > Reach taught us rule one: lists say which AI bots to **block**; we asked what blocking each **costs**, and sorted 29 by role.
@@ -190,8 +194,8 @@ then line **56** ("A clean report and a report that could not look are different
 
 *Let "phone numbers" and "price" land. It's the one laugh in Part 1, so give it a beat.*
 
-**SCREEN:** same tab, scroll up to lines **320–335** ("fired **zero times** … **16 words**";
-"A fixture proves a check does what you wrote").
+**SCREEN:** same tab, `Ctrl+G 322`, lines **322–325** ("fired **zero times** … **16 words**"), then
+`Ctrl+G 332`, lines **332–335** ("A fixture proves a check does what you wrote").
 **CAPTION:** `DESIGN.md:324, :334 · rewritten: dom.py:56 NOSCRIPT_JS_NOTICE · pinned: tests/test_regressions.py R1–R12`
 
 > Worse: our empty-page detector fired **zero times** · even on a docs site with **sixteen words**. It was tuned to our own fixture.
@@ -213,8 +217,8 @@ and only in this order.** Cut the shot with the words.
 | step | cut | words | total after | ≈ at 145 wpm |
 |---|---|---|---|---|
 | — | full script | | 389 | 2:49 |
-| 1 | the GEO line (skip tab 5's first shot; the closing `Ctrl+P` still works) | −14 | 375 | 2:43 |
-| 2 | "Our golden: one critical…" (tab 8) | −11 | 364 | 2:39 |
+| 1 | the GEO line (skip tab 5's first shot: `Ctrl+PgDn` twice from tab 4; the closing `Ctrl+P` still works) | −14 | 375 | 2:43 |
+| 2 | "Our golden: one critical…" (tab 8: `Ctrl+PgDn` twice from tab 7) | −11 | 364 | 2:39 |
 | 3 | "File sizes read as phone numbers… show a price." | −15 | 349 | 2:32 |
 
 *(Times at 145 wpm plus ~8 s for the title card and beat pauses. `tools/check_script_anchors.py`
@@ -228,9 +232,10 @@ recounts the full cut every run and fails if it would pass 3:00 even at a slow 1
 
 Add in this order, each with its shot:
 
-1. **After "never gated…"**, Tab 2 `gate-rules.md` `Ctrl+G 54`. CAPTION `gate-rules.md:54–57 · Rule 0b`
+1. **After "never gated…"**, `Ctrl+P` → `gate-rules.md:54` (tab 2). CAPTION `gate-rules.md:54–57 · Rule 0b`.
+   Afterwards `Ctrl+P` → `site_b.report.md:58` puts you back on tab 8.
    > And if we never saw the page a visitor sees, those findings aren't softened, they're **suppressed**. Capping asserts a weaker claim. Suppression asserts **none**.
-2. **After "…the right thing."**, the caption's `tests/test_regressions.py` open at line 2, scroll the `# R1.` … `# R12.` headers.
+2. **After "…the right thing."**, `Ctrl+P` → `test_regressions.py:2` (the caption's `tests/test_regressions.py`, a new tab); highlight line 2.
    > Tests R1 to R12 keep fixed bugs fixed.
 
 ---
