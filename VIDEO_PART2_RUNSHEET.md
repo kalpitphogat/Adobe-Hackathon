@@ -25,15 +25,18 @@ only pre-screened for robots.txt and homepage links with `tools/prescreen.py`.
 1. **Fresh folder, exactly as REPLAY step 1** (Windows PowerShell, at the repo root of any
    machine's clone). Stop before `claude`; that part happens on camera:
    ```powershell
-   Remove-Item -Recurse -Force demo-live -ErrorAction SilentlyContinue
-   mkdir demo-live; Copy-Item round3-frozen\submission.zip demo-live\; cd demo-live
-   ..\.venv\Scripts\Activate.ps1
-   python --version            # must print Python 3.11.15
-   python -m zipfile -e submission.zip brand-ai-readiness-audit
-   cd brand-ai-readiness-audit
-   python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
-   $env:DISABLE_AUTOUPDATER = "1"   # keep Claude Code on the disclosed version in this terminal
-   $env:PYTHONUTF8 = "1"            # UTF-8 for every python the agent runs (no cp1252 crashes)
+   if (Test-Path REPLAY_IT_Professionals.txt) {
+     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+     Remove-Item -Recurse -Force demo-live -ErrorAction SilentlyContinue
+     mkdir demo-live; Copy-Item round3-frozen\submission.zip demo-live\; cd demo-live
+     ..\.venv\Scripts\Activate.ps1
+     python --version            # must print Python 3.11.15
+     python -m zipfile -e submission.zip brand-ai-readiness-audit
+     cd brand-ai-readiness-audit
+     python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
+     $env:DISABLE_AUTOUPDATER = "1"   # keep Claude Code on the disclosed version in this terminal
+     $env:PYTHONUTF8 = "1"            # UTF-8 for every python the agent runs (no cp1252 crashes)
+   } else { Write-Host "Wrong folder: cd into your Adobe-Hackathon clone (the folder with REPLAY_IT_Professionals.txt), then paste this block again." -ForegroundColor Red }
    ```
    `demo-live/` is new, so there is no leftover `audit-output/`. It's git-ignored.
 1b. **Rehearse the prompt once on this machine, on a *seen* site**:

@@ -9,6 +9,11 @@ This file works unchanged on **any Windows PC** with PowerShell, whoever's machi
 Nothing below names a user, a drive or a folder outside this repo:
 - **Every command runs at the repo root:** the folder of your clone that holds `REPLAY_IT_Professionals.txt`.
   To open PowerShell there, open that folder in File Explorer, click the address bar, type `powershell`, and press Enter.
+  A VS Code terminal opens in your home folder unless VS Code has the repo folder open, so check that
+  the prompt ends in `Adobe-Hackathon>` before you paste.
+- **Blocks that must not run anywhere else are wrapped** in `if (Test-Path REPLAY_IT_Professionals.txt) { … }`.
+  Paste the whole block, and press `Enter` once more if nothing happens. Outside the repo root it prints one
+  red `Wrong folder` line and runs nothing, instead of creating or deleting folders in the wrong place.
 - **The venv is `.venv` in the repo root,** the name the REPLAY uses. Stage 0.2 checks it, and
   builds it only if it's missing or wrong.
 - `python tools\check_replay.py` fails if a machine-specific path ever gets into this file, the
@@ -45,16 +50,18 @@ git log -1 --oneline
 Run this at the repo root. On a machine that is already set up, every line prints what's expected
 and nothing needs installing.
 ```powershell
-[Environment]::SetEnvironmentVariable("DISABLE_AUTOUPDATER", "1", "User")
-$env:DISABLE_AUTOUPDATER = "1"
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-Test-Path .venv\Scripts\python.exe
-.venv\Scripts\Activate.ps1
-python --version
-python -c "from importlib.metadata import version; print('playwright', version('playwright'))"
-python -c "from playwright.sync_api import sync_playwright as s; p = s().start(); b = p.chromium.launch(); print('chromium', b.version); b.close(); p.stop()"
-claude --version
-(Get-Command claude).Source
+if (Test-Path REPLAY_IT_Professionals.txt) {
+  [Environment]::SetEnvironmentVariable("DISABLE_AUTOUPDATER", "1", "User")
+  $env:DISABLE_AUTOUPDATER = "1"
+  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+  Test-Path .venv\Scripts\python.exe
+  .venv\Scripts\Activate.ps1
+  python --version
+  python -c "from importlib.metadata import version; print('playwright', version('playwright'))"
+  python -c "from playwright.sync_api import sync_playwright as s; p = s().start(); b = p.chromium.launch(); print('chromium', b.version); b.close(); p.stop()"
+  claude --version
+  (Get-Command claude).Source
+} else { Write-Host "Wrong folder: cd into your Adobe-Hackathon clone (the folder with REPLAY_IT_Professionals.txt), then paste this block again." -ForegroundColor Red }
 ```
 The first line stops Claude Code from updating itself, in every new window from now on. That
 matters: 2.1.283 came out on 2026-09-25, and the REPLAY says 2.1.282. When the video is done,
@@ -82,18 +89,20 @@ Fix only the lines that differ, then run the block again:
 | `claude` isn't recognised | 1. `node --version` must print v18 or newer. If it doesn't, run `winget install OpenJS.NodeJS.LTS` and open a new PowerShell at the repo root.<br>2. Run `npm install -g @anthropic-ai/claude-code@2.1.282`.<br>3. Open a new PowerShell at the repo root, run `claude` once to sign in, then type `/exit`. |
 | claude isn't **2.1.282**. An install that updated itself after 2026-09-25 shows 2.1.283. | If the path on the last line contains `npm`, run `npm install -g @anthropic-ai/claude-code@2.1.282`. Otherwise run `claude install 2.1.282`. Then open a new PowerShell at the repo root and check again. |
 
-**Building `.venv`.** These are the REPLAY's own Windows lines. An existing wrong `.venv` is
+**Building `.venv`.** These are the REPLAY's own Windows lines, wrapped so they run only at the repo root. An existing wrong `.venv` is
 renamed, not deleted; `.venv-*` folders are git-ignored. If `uv --version` isn't recognised, run
 `winget install --id astral-sh.uv -e` (or `pip install uv`) first, then open a new PowerShell at
 the repo root.
 ```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-if (Test-Path .venv) { Rename-Item .venv (".venv-old-" + (Get-Date -Format "yyyyMMdd-HHmmss")) }
-uvx --from "uv>=0.11" uv python install 3.11.15
-uv venv --python 3.11.15 .venv
-.venv\Scripts\Activate.ps1
-uv pip install playwright==1.63.0
-python -m playwright install chromium
+if (Test-Path REPLAY_IT_Professionals.txt) {
+  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+  if (Test-Path .venv) { Rename-Item .venv (".venv-old-" + (Get-Date -Format "yyyyMMdd-HHmmss")) }
+  uvx --from "uv>=0.11" uv python install 3.11.15
+  uv venv --python 3.11.15 .venv
+  .venv\Scripts\Activate.ps1
+  uv pip install playwright==1.63.0
+  python -m playwright install chromium
+} else { Write-Host "Wrong folder: cd into your Adobe-Hackathon clone (the folder with REPLAY_IT_Professionals.txt), then paste this block again." -ForegroundColor Red }
 ```
 
 ### 0.3 Pre-flight checks (both must print `0 problem(s)`)
@@ -146,22 +155,24 @@ each at its first line.
 
 At the repo root:
 ```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.venv\Scripts\Activate.ps1
-if (Test-Path demo) { Rename-Item demo ("demo-old-" + (Get-Date -Format "yyyyMMdd-HHmmss")) }
-python -m zipfile -e round3-frozen\submission.zip demo
-python tools\verify_engine.py round3-frozen\submission.zip demo
-code demo
-code -g demo\skills\answerability-audit\references\chunking-model.md:40
-code -g demo\skills\ai-readiness-orchestrator\references\gate-rules.md:10
-code -g demo\skills\crawl-access-audit\references\ai-bots.json:12
-code -g demo\skills\crawl-access-audit\scripts\check_robots.py:286
-code -g demo\skills\ai-readiness-orchestrator\references\severity-model.md:43
-code -g demo\skills\ai-readiness-orchestrator\scripts\gate_model.py:117
-code -g demo\skills\ai-readiness-orchestrator\scripts\orchestrate.py:242
-code -g demo\skills\structured-data-audit\scripts\extract_markup.py:203
-code -g demo\skills\ai-readiness-orchestrator\scripts\severity.py:26
-code -g demo\DESIGN.md:369
+if (Test-Path REPLAY_IT_Professionals.txt) {
+  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+  .venv\Scripts\Activate.ps1
+  if (Test-Path demo) { Rename-Item demo ("demo-old-" + (Get-Date -Format "yyyyMMdd-HHmmss")) }
+  python -m zipfile -e round3-frozen\submission.zip demo
+  python tools\verify_engine.py round3-frozen\submission.zip demo
+  code demo
+  code -g demo\skills\answerability-audit\references\chunking-model.md:40
+  code -g demo\skills\ai-readiness-orchestrator\references\gate-rules.md:10
+  code -g demo\skills\crawl-access-audit\references\ai-bots.json:12
+  code -g demo\skills\crawl-access-audit\scripts\check_robots.py:286
+  code -g demo\skills\ai-readiness-orchestrator\references\severity-model.md:43
+  code -g demo\skills\ai-readiness-orchestrator\scripts\gate_model.py:117
+  code -g demo\skills\ai-readiness-orchestrator\scripts\orchestrate.py:242
+  code -g demo\skills\structured-data-audit\scripts\extract_markup.py:203
+  code -g demo\skills\ai-readiness-orchestrator\scripts\severity.py:26
+  code -g demo\DESIGN.md:369
+} else { Write-Host "Wrong folder: cd into your Adobe-Hackathon clone (the folder with REPLAY_IT_Professionals.txt), then paste this block again." -ForegroundColor Red }
 ```
 - `verify_engine.py` must end with `RESULT : ENGINE UNCHANGED`.
 - You should see 10 tabs. More than 10 means VS Code reopened tabs from an earlier session: press
@@ -185,20 +196,22 @@ This is a fresh folder, exactly as in REPLAY step 1 and run sheet §A.1.
 
 At the repo root:
 ```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-Remove-Item -Recurse -Force demo-live -ErrorAction SilentlyContinue
-mkdir demo-live
-Copy-Item round3-frozen\submission.zip demo-live\
-cd demo-live
-..\.venv\Scripts\Activate.ps1
-python --version
-python -m zipfile -e submission.zip brand-ai-readiness-audit
-cd brand-ai-readiness-audit
-python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
-$env:DISABLE_AUTOUPDATER = "1"
-$env:PYTHONUTF8 = "1"
-python ..\..\tools\verify_engine.py ..\submission.zip .
-claude
+if (Test-Path REPLAY_IT_Professionals.txt) {
+  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+  Remove-Item -Recurse -Force demo-live -ErrorAction SilentlyContinue
+  mkdir demo-live
+  Copy-Item round3-frozen\submission.zip demo-live\
+  cd demo-live
+  ..\.venv\Scripts\Activate.ps1
+  python --version
+  python -m zipfile -e submission.zip brand-ai-readiness-audit
+  cd brand-ai-readiness-audit
+  python -c "import shutil; shutil.copytree('skills', '.claude/skills')"
+  $env:DISABLE_AUTOUPDATER = "1"
+  $env:PYTHONUTF8 = "1"
+  python ..\..\tools\verify_engine.py ..\submission.zip .
+  claude
+} else { Write-Host "Wrong folder: cd into your Adobe-Hackathon clone (the folder with REPLAY_IT_Professionals.txt), then paste this block again." -ForegroundColor Red }
 ```
 - `python --version` must print Python 3.11.15.
 - The `verify_engine.py` run is a dry run of the on-camera command and must end with `RESULT : ENGINE UNCHANGED`.
@@ -206,7 +219,7 @@ claude
   - If it asks whether you trust the files in this folder, answer **Yes**.
   - Don't send it a prompt: type `/exit`, then `Clear-Host`.
 - Leave this window open: Part 2 starts here, and the venv and both `$env:` settings belong to this window.
-  If you close it, run this whole block again.
+  If you close it, open a new PowerShell at the repo root and run this whole block again.
 
 ### 1.3 Clipboard, screen and recorder
 Do this last, just before recording, in the Stage 1.1 PowerShell window (at the repo root). Keep
