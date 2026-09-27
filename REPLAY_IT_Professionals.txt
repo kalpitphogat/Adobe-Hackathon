@@ -1,7 +1,7 @@
 TEST_SITE_URLS: https://docs.pytest.org/, https://www.theguardian.com/
 LLM_MODEL: Claude Opus 5.5 (API model id: claude-opus-5-5), runs of 2026-09
 AGENT_HARNESS: Claude Code v2.1.282
-ENV_SETUP: uv python install 3.11.15 && uv venv --python 3.11.15 .venv && . .venv/bin/activate && uv pip install playwright==1.63.0 && python -m playwright install chromium && npm install -g @anthropic-ai/claude-code@2.1.282 && export DISABLE_AUTOUPDATER=1
+ENV_SETUP: uvx --from "uv>=0.11" uv python install 3.11.15 && uv venv --python 3.11.15 .venv && . .venv/bin/activate && uv pip install playwright==1.63.0 && python -m playwright install chromium && npm install -g @anthropic-ai/claude-code@2.1.282 && export DISABLE_AUTOUPDATER=1
 TEST_STEPS:
  1. From the folder that holds submission.zip and the activated .venv, unpack the Round 3 submission, enter the marketplace root, make its skills discoverable to Claude Code (an unchanged copy in .claude/skills; the agent still runs the scripts in skills/), and start Claude Code. The first three commands are the same in bash, PowerShell and cmd:
       python -m zipfile -e submission.zip brand-ai-readiness-audit
@@ -119,13 +119,14 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #   macOS / Linux:  curl -LsSf https://astral.sh/uv/install.sh | sh
 #   Windows:        winget install --id astral-sh.uv -e
 #   Any platform:   pip install uv
+# uv 0.11 or newer is needed for Python 3.11.15; ENV_SETUP runs it via uvx, so an older uv also works
 # uv is used only to get the exact interpreter: the checked-in golden reports
 # record Python 3.11.15, so tests/run_offline.py matches byte for byte on that
 # version. The engine itself runs on any Python 3.9+.
 #
 # ---- WINDOWS (PowerShell), which is what the video was recorded on ----------
 #   $env:PYTHONUTF8 = "1"
-#   uv python install 3.11.15
+#   uvx --from "uv>=0.11" uv python install 3.11.15
 #   uv venv --python 3.11.15 .venv
 #   .venv\Scripts\Activate.ps1
 #   uv pip install playwright==1.63.0

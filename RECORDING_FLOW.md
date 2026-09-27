@@ -87,7 +87,7 @@ the repo root.
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 if (Test-Path .venv) { Rename-Item .venv (".venv-old-" + (Get-Date -Format "yyyyMMdd-HHmmss")) }
-uv python install 3.11.15
+uvx --from "uv>=0.11" uv python install 3.11.15
 uv venv --python 3.11.15 .venv
 .venv\Scripts\Activate.ps1
 uv pip install playwright==1.63.0

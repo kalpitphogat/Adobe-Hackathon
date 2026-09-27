@@ -90,7 +90,7 @@ structured-data price mismatch on IKEA. The agent's evidence check caught both i
 ## Local setup (Windows, PowerShell)
 
 ```powershell
-uv python install 3.11.15
+uvx --from "uv>=0.11" uv python install 3.11.15
 uv venv --python 3.11.15 .venv
 uv pip install --python .venv\Scripts\python.exe playwright==1.63.0
 .venv\Scripts\python.exe -m playwright install chromium
