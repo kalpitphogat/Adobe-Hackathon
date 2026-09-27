@@ -5,7 +5,7 @@ Only the DO and the SAY, one step per block, separated by rules. Generated from 
 wording here is identical to it.
 
 - **Bold** = lean on the word. `·` = a half-beat pause.
-- 10 tabs, 12 spoken beats, 386 words, about 2:53 at 140 words a minute (cap 3:00).
+- 10 tabs, fourteen spoken beats, 391 words, about 2:55 at 140 words a minute (cap 3:00).
 - Say nothing while you press keys: every split falls on a pause or between two sentences.
 - A `>` note under a step is direction, not speech.
 
@@ -29,9 +29,11 @@ wording here is identical to it.
 
 **SAY** — "Ask an AI assistant about a brand, and it either **quotes** the site or acts as if it **doesn't exist**. The handout explains why: unless a page is easy to **reach, read and quote**, it never reaches the answer. Our agent finds **which step fails**."
 
+> *Slow down on "doesn't exist", and smile on the last sentence.*
+
 ---
 
-## 0:21–1:00 · Act I · What separates the cited from the ignored
+## 0:21–0:56 · Act I · What separates the cited from the ignored
 
 *Tab 2 `gate-rules.md` · CAPTION `gate-rules.md:10 · 66 checks: DESIGN.md:108 (count generated from the code)`*
 
@@ -39,7 +41,7 @@ wording here is identical to it.
 
 **DO** — `Ctrl+PgDn` → tab 2, on line 10. Click **10**, Shift+click **14**.
 
-**SAY** — "Those steps happen **in order**, so each of our 66 checks belongs to a stage: reach, read, extract, trust · and act, which is the visitor who arrives."
+**SAY** — "Those steps happen **in order**, so each of our 66 checks belongs to a stage: reach, read, extract, trust · and act, the visitor who arrives."
 
 ---
 
@@ -49,7 +51,7 @@ wording here is identical to it.
 
 **DO** — `Ctrl+PgDn` → tab 3, on line 12. Click **12**, Shift+click **14**.
 
-**SAY** — "Reach taught us our first rule. Lists tell you which AI crawlers to **block**; we asked what blocking each one **costs**, and sorted 29 by role."
+**SAY** — "Lists tell you which AI crawlers to **block**; we asked what blocking each one **costs**, and sorted 29 by role."
 
 ---
 
@@ -69,7 +71,9 @@ wording here is identical to it.
 
 ---
 
-*Tab 4 `check_robots.py` · CAPTION `check_robots.py:286 critical · :318 info` · *cut-ladder step 1 skips 4a–4b**
+*Tab 4 `check_robots.py` · CAPTION `check_robots.py:286 critical · :318 info`*
+
+> *cut-ladder step 1 skips 4a–4b*
 
 ### Step 4a
 
@@ -87,25 +91,15 @@ wording here is identical to it.
 
 ---
 
-## 1:00–1:35 · Act II · How bad, how sure
+## 0:56–1:33 · Act II · How bad, how sure
 
-*Tab 5 `severity-model.md` · CAPTION `severity-model.md:43 · :56`*
+*Tab 5 `severity-model.md` · CAPTION `severity-model.md:43`*
 
-### Step 5a
+### Step 5
 
 **DO** — `Ctrl+PgDn` → tab 5, on line 43. Click **43**.
 
-**SAY** — "Severity asks **how bad this is if true**; confidence is separate, asking **how sure we are**."
-
----
-
-### Step 5b
-
-**DO** — `Ctrl+G` → type `56` → `Enter`. Click **56**, Shift+click **57**.
-
-**SAY** — "A check that cannot run says so, because a clean report and one that **couldn't look** are different things."
-
-> cut-ladder step 2 drops this row
+**SAY** — "Severity asks **how bad this is if true**; confidence asks **how sure we are**."
 
 ---
 
@@ -131,19 +125,41 @@ wording here is identical to it.
 
 **DO** — `Ctrl+G` → type `128` → `Enter`. Click **128**, Shift+click **129**.
 
-**SAY** — "Engagement is never gated, because a visitor from an ad doesn't care whether a crawler got in."
+**SAY** — "Engagement is never gated: a visitor from an ad doesn't care whether a crawler got in."
 
 ---
 
-## 1:35–2:05 · Act III · Every fix earns its place
+*Rule 0b, back in `gate-rules.md` (tab 2) · CAPTION `gate-rules.md:54–57 · Rule 0b`*
+
+### Step 6d
+
+**DO** — `Ctrl+P` → type `gate-rules.md:54` → `Enter`. This is tab 2 again, no new tab. Click **54**, Shift+click **55**.
+
+**SAY** — "And when we never even saw the page a visitor sees, those findings aren't capped, they're **suppressed**."
+
+---
+
+### Step 6e
+
+**DO** — Click **56**, Shift+click **57**: "Capping asserts a weaker claim. Suppression asserts none."
+
+**SAY** — "A cap still claims something · suppression claims **nothing**."
+
+> *cut-ladder step 3 drops this row*
+
+> *Capping says "real, but moot"; suppression says "we never looked". You are now on tab 2, so step 7 uses `Ctrl+P`, not `Ctrl+PgDn`.*
+
+---
+
+## 1:33–1:59 · Act III · Every fix earns its place
 
 *Tab 7 `orchestrate.py` · CAPTION `orchestrate.py:242 validate_finding · rejection logged at :695`*
 
 ### Step 7
 
-**DO** — `Ctrl+PgDn` → tab 7, on line 242. Click **242**, Shift+click **253**.
+**DO** — `Ctrl+P` → type `orchestrate.py:242` → `Enter` (**not** `Ctrl+PgDn`: 6d left you on tab 2). Click **242**, Shift+click **253**.
 
-**SAY** — "Every fix must say **why** it works, so `validate_finding` rejects any finding without a mechanism and logs the rejection."
+**SAY** — "Every fix must say **why** it works, so `validate_finding` rejects any finding without a mechanism."
 
 ---
 
@@ -153,7 +169,7 @@ wording here is identical to it.
 
 **DO** — `Ctrl+PgDn` → tab 8, on line 203. Click **203**, Shift+click **204**: `Never invented.`
 
-**SAY** — "Our patches reuse values we saw on the page and **never invent one**;"
+**SAY** — "Our patches reuse values from the page and **never invent one**;"
 
 ---
 
@@ -187,15 +203,15 @@ wording here is identical to it.
 
 **DO** — `Ctrl+G` → type `68` → `Enter`. Click **68**, Shift+click **71**.
 
-**SAY** — "and the order is total: **the same evidence always ranks the same way**."
+**SAY** — "and **the same evidence always ranks the same way**."
 
-> cut-ladder step 3 drops this row; end 9b on "blocker."
+> *cut-ladder step 2 drops this row; end 9b on "blocker."*
 
 ---
 
-## 2:05–2:37 · Act IV · The day the real web proved us wrong
+## 1:59–2:39 · Act IV · The day the real web proved us wrong
 
-*Tab 10 `DESIGN.md`, the field test · CAPTION `DESIGN.md:374–379 · field test on five live sites`*
+*Tab 10 `DESIGN.md`, the field test · CAPTION `DESIGN.md:374–379 · field test on five live sites`, then `DESIGN.md:377–378`*
 
 ### Step 10a
 
@@ -213,25 +229,39 @@ wording here is identical to it.
 
 ---
 
-*Tab 10 `DESIGN.md`, the zero-recall story · CAPTION `DESIGN.md:324, :334 · rewritten: dom.py:56 NOSCRIPT_JS_NOTICE · pinned: tests/test_regressions.py R1–R12`*
-
 ### Step 10c
 
-**DO** — `Ctrl+G` → type `322` → `Enter`. Click **322**, Shift+click **325**: "fired **zero times** … **16 words**".
+**DO** — Click **377**, Shift+click **378**, already on screen: file sizes as phone numbers, a free download page asked for a price.
 
-**SAY** — "Worse, our empty-page detector fired **zero times**, even on a docs site of **sixteen words**, because we had tuned it to our own fixture."
+**SAY** — "Two of them: we were reading file sizes as **phone numbers**, and telling a free download page to publish a **price**."
+
+> *cut-ladder step 4 drops this row*
+
+> *Let 10c breathe. It is the one laugh in Part 1, and it turns "twelve false positives" into something a judge can picture.*
 
 ---
 
+*Tab 10 `DESIGN.md`, the zero-recall story · CAPTION `DESIGN.md:324, :334 · rewritten: dom.py:56 NOSCRIPT_JS_NOTICE · pinned: tests/test_regressions.py R1–R12`*
+
 ### Step 10d
+
+**DO** — `Ctrl+G` → type `322` → `Enter`. Click **322**, Shift+click **325**: "fired **zero times** … **16 words**".
+
+**SAY** — "Worse, our empty-page detector fired **zero times**, even on a docs site of **sixteen words**, because we'd tuned it to our own fixture."
+
+---
+
+### Step 10e
 
 **DO** — `Ctrl+G` → type `332` → `Enter`. Click **332**, Shift+click **335**: "A fixture proves a check does what you wrote".
 
 **SAY** — "A fixture proves a check does what you wrote · **not that you wrote the right thing**."
 
+> *Don't rush 10d–10e. The admission is what earns the closing line.*
+
 ---
 
-## 2:37–2:47 · Close
+## 2:39–2:50 · Close
 
 *`geo-methods.md`, opened fresh · CAPTION `geo-methods.md:56`*
 
@@ -240,5 +270,7 @@ wording here is identical to it.
 **DO** — `Ctrl+P` → type `geo-methods.md:56` → `Enter`. Click **56**, Shift+click **57**.
 
 **SAY** — "Our own code puts it best: a citation you can't check is worse than none, **because it looks like evidence**. So don't trust us. · **Watch.**"
+
+> *Hard cut to Part 2 on "Watch."*
 
 ---

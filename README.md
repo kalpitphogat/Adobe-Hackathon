@@ -101,7 +101,7 @@ cd demo; ..\.venv\Scripts\python.exe tests\run_offline.py   # PASS on 3.11.15
 ## Deliverables
 
 - [x] `REPLAY_IT_Professionals.txt`, rehearsed from clean unzips, with three tested fallbacks
-- [x] `VIDEO_SCRIPT.md`: Part 1 389 words (~2:49 incl. title card, cut ladder to 2:32) and Part 2
+- [x] `VIDEO_SCRIPT.md`: Part 1 391 words (~2:50 incl. title card, cut ladder to 2:32) and Part 2
   lines with a drill-down card per likely finding; every claim tied to a file and line, machine-checked
 - [x] `VIDEO_PART2_RUNSHEET.md`: live run on https://docs.pytest.org/
 - [ ] The video: Part 1 ≤ 3:00, Part 2 ≤ 2:00, total ≤ 5:00
