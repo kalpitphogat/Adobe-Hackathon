@@ -101,6 +101,10 @@ how a judge traces the claim, even if the code is small on their screen.
 *Spoken lines are the `>` blockquotes. **Bold** = lean on the word. `·` = a half-beat pause.
 Everything else is direction, not speech.*
 
+Ten tabs, twelve spoken beats. Every line is a complete sentence: a viewer who looks at the caption
+instead of the code still hears an argument that finishes. `tools/check_script_anchors.py` counts
+these words and fails if the full cut cannot fit 3:00 at a careful 140 words a minute.
+
 ### Title card (0:00–0:02)
 
 **SCREEN:** black card, white text, 2 seconds, no voice:
@@ -111,134 +115,136 @@ Everything else is direction, not speech.*
 **SCREEN:** Tab 1 `chunking-model.md`, lines **40–43** highlighted (the handout's own sentence).
 **CAPTION:** `chunking-model.md:40–43 · the handout, quoted in our code`
 
-> Ask an AI assistant about a brand: it either **quotes** the site · or acts like it **doesn't exist**.
-> The handout says why: if nothing is easy to **reach, read, and quote**, it won't make the answer.
-> We're IT_Professionals, and our agent finds **which step fails**.
+> Ask an AI assistant about a brand, and it either **quotes** the site or acts as if it **doesn't exist**.
+> The handout explains why: unless a page is easy to **reach, read and quote**, it never reaches the answer.
+> Our agent finds **which step fails**.
 
 *Deliver it like a question you're dying to answer: slower on "doesn't exist", a smile on the last line.*
 
-### Act I · What separates the cited from the ignored (0:21–0:58)
+### Act I · What separates the cited from the ignored (0:21–1:00)
 
 **SCREEN:** Tab 2 `gate-rules.md`, lines **10–14** ("three things have to succeed in order").
 **CAPTION:** `gate-rules.md:10 · 66 checks: DESIGN.md:108 (count generated from the code)`
 
-> And the steps come **in order**, so each of our 66 checks has a stage: reach, read, extract, trust · and act, for visitors.
+> Those steps happen **in order**, so each of our 66 checks belongs to a stage: reach, read, extract, trust · and act, which is the visitor who arrives.
 
 **SCREEN:** Tab 3 `ai-bots.json`, lines **12–14** ("we need to know what blocking each one COSTS"),
-then `Ctrl+G 71` (`"GPTBot" … "category": "training"`) for GPTBot, then `Ctrl+G 26` for the retrieval
-bot ("Blocking one of these removes the brand from that assistant's answers").
+then `Ctrl+G 71` (`"GPTBot" … "category": "training"`), then `Ctrl+G 26` (the retrieval bot:
+"Blocking one of these removes the brand from that assistant's answers").
 **CAPTION:** `ai-bots.json:12–14 · 29 crawlers: 14 retrieval, 10 training, 5 contested`
 
-> Reach taught us rule one: lists say which AI bots to **block**; we asked what blocking each **costs**, and sorted 29 by role.
-> Block GPTBot: you've opted out of **training**. Block a retrieval bot: you **vanish from its answers**.
+> Reach taught us our first rule. Lists tell you which AI crawlers to **block**; we asked what blocking each one **costs**, and sorted 29 by role.
+> Block GPTBot and you have opted out of **training**. Block a retrieval crawler and you **vanish from that assistant's answers**.
 
 **SCREEN:** Tab 4 `check_robots.py`, line **286** (`severity="critical"`), then line **318** (`severity="info"`).
 **CAPTION:** `check_robots.py:286 critical · :318 info`
 
-> Same rule · **critical** for one, line 286 · **info** for the other, line 318.
+> So one robots.txt rule is **critical** against a retrieval crawler, and merely **informational** against a training one.
 
-**SCREEN:** Tab 5 `geo-methods.md`, lines **14–19**, then line **24** ("fires at **low** severity").
-**CAPTION:** `geo-methods.md:14–24 · GEO (KDD 2024): a benchmark gain, not a defect`
+*This is the payoff of the line before it: the same rule, two severities, chosen by what blocking costs.*
 
-> Quote: GEO research says statistics help · **in a benchmark** · so their absence scores **low**.
+### Act II · How bad, how sure (1:00–1:35)
 
-### Act II · How bad, how sure (0:58–1:35)
-
-**SCREEN:** Tab 6 `severity-model.md`, line **43** ("Severity answers 'how bad if true'. Confidence answers 'how sure'"),
-then line **56** ("A clean report and a report that could not look are different things").
+**SCREEN:** Tab 5 `severity-model.md`, line **43** ("Severity answers 'how bad if true'. Confidence answers 'how sure'"),
+then lines **56–57** ("A clean report and a report that could not look are different things").
 **CAPTION:** `severity-model.md:43 · :56`
 
-> Severity asks: **how bad, if true?** Confidence is a separate field: **how sure?**
-> A check that couldn't run says so: a clean report and one that couldn't look are **different things**.
+> Severity asks **how bad this is if true**; confidence is separate, asking **how sure we are**.
+> A check that cannot run says so, because a clean report and one that **couldn't look** are different things.
 
-**SCREEN:** Tab 7 `gate_model.py`, line **117** (`def apply_cascade`), then line **128–129**
-(`# Rule 0: gates never touch engagement`).
-**CAPTION:** `gate_model.py:117 apply_cascade · :42 ceiling "medium" · :129 Rule 0`
+**SCREEN:** Tab 6 `gate_model.py`, lines **117–118** (`def apply_cascade`), then line **120**
+(`Rule 3: cap, never delete.`), then lines **128–129** (`# Rule 0: gates never touch engagement`).
+**CAPTION:** `gate_model.py:117 apply_cascade · :42 ceiling "medium" · :120 cap, never delete · :129 Rule 0`
 
-> A flat checklist gives a site blocking AI crawlers **fifteen criticals**, fourteen of them moot.
-> `apply_cascade` caps those at medium and tags the **one** blocker. **Capped · never deleted.**
-> Line 128: engagement is **never** gated. A visitor from an ad doesn't care if a crawler got in.
+> A flat checklist hands a site that blocks AI crawlers **fifteen criticals**, and fourteen are moot.
+> `apply_cascade` caps those at medium and tags the **one** blocker that matters: **capped, never deleted**.
+> Engagement is never gated, because a visitor from an ad doesn't care whether a crawler got in.
 
-**SCREEN:** Tab 8 `tests/golden/site_b.report.md`, lines **58–60**
-("11 finding(s) are recorded but capped at medium because F-001 … blocks them").
-**CAPTION:** `tests/golden/site_b.report.md:60 · same in site_b.audit-report.json:109 ("blocked_by": "F-001")`
+### Act III · Every fix earns its place (1:35–2:05)
 
-> Our golden: **one** critical, **eleven** findings waiting on F-001, engagement untouched.
-
-### Act III · Every fix earns its place (1:35–2:01)
-
-**SCREEN:** Tab 9 `orchestrate.py`, lines **242–253** (`validate_finding`, line 252 `mechanism`).
+**SCREEN:** Tab 7 `orchestrate.py`, lines **242–253** (`validate_finding`, line 253 the rejection).
 **CAPTION:** `orchestrate.py:242 validate_finding · rejection logged at :695`
 
-> Every fix must say **why** it works: `validate_finding` rejects any finding without a mechanism, and logs it.
+> Every fix must say **why** it works, so `validate_finding` rejects any finding without a mechanism and logs the rejection.
 
-**SCREEN:** Tab 10 `extract_markup.py`, lines **203–210** (`"""… Never invented."""`).
+**SCREEN:** Tab 8 `extract_markup.py`, lines **203–204** ("… Never invented."), then lines **209–210** (`__FILL_IN__`).
 **CAPTION:** `extract_markup.py:204 · "__FILL_IN__" when a value is absent (94 places in the engine)`
 
-> Patches reuse values seen on the page · **never invented**. Anything missing stays **FILL_IN**.
+> Our patches reuse values we saw on the page and **never invent one**; whatever we couldn't find stays **FILL_IN**.
 
-**SCREEN:** Tab 11 `severity.py`, lines **26–29** (the three lookup tables), then **13–15**, then **68–71** (`sort_key`).
+**SCREEN:** Tab 9 `severity.py`, lines **26–29** (the three lookup tables), then **13–15**, then **68–71** (`sort_key`).
 **CAPTION:** `severity.py:27–29 lookups · :13 impact from post-gate severity · :68 total order`
 
-> Priority is **ICE**: impact, confidence, ease, from fixed lookups. Impact uses the **capped** severity, so a moot defect can't outrank its blocker.
-> A total sort order: **same evidence, same ranking.**
+> Priority is **ICE**: impact, confidence, ease. Impact uses the **capped** severity, so a moot defect cannot outrank its blocker, and the order is total: **the same evidence always ranks the same way**.
 
-### Act IV · The day the real web proved us wrong (2:01–2:47)
+### Act IV · The day the real web proved us wrong (2:05–2:37)
 
-**SCREEN:** Tab 12 `DESIGN.md`, lines **369–380** (five sites, 365 findings, the false positives, 205).
+**SCREEN:** Tab 10 `DESIGN.md`, lines **369–374** (five sites, 365 findings), then lines **374–379**
+(twelve false positives, 205).
 **CAPTION:** `DESIGN.md:374–379 · field test on five live sites`
 
-> Then the real web **humbled** us. Five live sites · **365 findings** · which was itself the finding.
-> File sizes read as **phone numbers**. A free download page told to show a **price**.
-> We named twelve false positives before touching a threshold, and got to **205**.
-
-*Let "phone numbers" and "price" land. It's the one laugh in Part 1, so give it a beat.*
+> Then the real web **humbled** us. Five live sites produced **365 findings**, and that number was itself the finding.
+> We named twelve false positives before touching a threshold, and came down to **205**.
 
 **SCREEN:** same tab, `Ctrl+G 322`, lines **322–325** ("fired **zero times** … **16 words**"), then
 `Ctrl+G 332`, lines **332–335** ("A fixture proves a check does what you wrote").
 **CAPTION:** `DESIGN.md:324, :334 · rewritten: dom.py:56 NOSCRIPT_JS_NOTICE · pinned: tests/test_regressions.py R1–R12`
 
-> Worse: our empty-page detector fired **zero times** · even on a docs site with **sixteen words**. It was tuned to our own fixture.
-> A fixture proves a check does what you wrote · **not that you wrote the right thing.**
+> Worse, our empty-page detector fired **zero times**, even on a docs site of **sixteen words**, because we had tuned it to our own fixture.
+> A fixture proves a check does what you wrote · **not that you wrote the right thing**.
 
-**SCREEN:** `Ctrl+P` → `geo-methods.md:56` → `Enter` ("A citation that cannot be checked is worse than no citation, because it looks like evidence.").
+*This is the beat that wins Part 1. Don't rush the admission; it buys the closing line.*
+
+### Close (2:37–2:47)
+
+**SCREEN:** `Ctrl+P` → `geo-methods.md:56` → `Enter`, lines **56–57** ("A citation that cannot be
+checked is worse than no citation, because it looks like evidence.").
 **CAPTION:** `geo-methods.md:56`
 
-> Our own code puts it best: a citation you can't check is worse than none · **because it looks like evidence.**
+> Our own code puts it best: a citation you can't check is worse than none, **because it looks like evidence**.
 > So don't trust us. · **Watch.**
 
 *Hard cut to Part 2 on "Watch."*
 
 ### If the timed run is long: the cut ladder
 
-Time a full read-through with a stopwatch (tab switches included). **Over 2:50 → cut, in this order,
-and only in this order.** Cut the shot with the words.
+The full cut is 386 words, about 2:53 at 140 words a minute. Only if your own timed read goes over
+2:50, cut in this order. Each step removes a whole sentence, so nothing is left dangling.
 
-| step | cut | words | total after | ≈ at 145 wpm |
-|---|---|---|---|---|
-| — | full script | | 389 | 2:49 |
-| 1 | the GEO line (skip tab 5's first shot: `Ctrl+PgDn` twice from tab 4; the closing `Ctrl+P` still works) | −14 | 375 | 2:43 |
-| 2 | "Our golden: one critical…" (tab 8: `Ctrl+PgDn` twice from tab 7) | −11 | 364 | 2:39 |
-| 3 | "File sizes read as phone numbers… show a price." | −15 | 349 | 2:32 |
+1. The `check_robots.py` beat, "So one robots.txt rule is critical…" (−17 words → about 2:46).
+   Tab 4 is then skipped: from tab 3, press `Ctrl+PgDn` **twice** to reach tab 5.
+2. "A check that cannot run says so…" (−19 words → about 2:38). Keep the severity/confidence
+   sentence before it; only the second sentence goes.
+3. "…and the order is total: the same evidence always ranks the same way" (−13 words → about 2:32).
+   End the ICE beat on "cannot outrank its blocker."
 
-*(Times at 145 wpm plus ~8 s for the title card and beat pauses. `tools/check_script_anchors.py`
-recounts the full cut every run and fails if it would pass 3:00 even at a slow 140 wpm.)*
-
-**Never cut:** the cold open, the crawler-roles lines, `apply_cascade`, "never gated",
-`validate_finding`, ICE, the zero-recall story, the closing quote. Together they are the rubric's
-*discovery, severity, fixes*.
+**Never cut:**
+- the cold open
+- the crawler-roles beat (block GPTBot / block a retrieval crawler)
+- `apply_cascade` and "engagement is never gated"
+- `validate_finding`
+- "never invent one" / FILL_IN
+- ICE's first two sentences
+- the 365 → 205 field test
+- the zero-recall story
+- the closing quote
 
 ### If the timed run is short (under 2:35): bonus lines
 
-Add in this order, each with its shot:
+These are the beats cut from the main read to make room for complete sentences. Every one is still
+in the anchor ledger, so it is safe to put back. Add them in this order, using `Ctrl+P` to reach a
+file that is not one of the ten tabs.
 
-1. **After "never gated…"**, `Ctrl+P` → `gate-rules.md:54` (tab 2). CAPTION `gate-rules.md:54–57 · Rule 0b`.
-   Afterwards `Ctrl+P` → `site_b.report.md:58` puts you back on tab 8.
-   > And if we never saw the page a visitor sees, those findings aren't softened, they're **suppressed**. Capping asserts a weaker claim. Suppression asserts **none**.
-2. **After "…the right thing."**, `Ctrl+P` → `test_regressions.py:2` (the caption's `tests/test_regressions.py`, a new tab); highlight line 2.
-   > Tests R1 to R12 keep fixed bugs fixed.
+| # | SCREEN and CAPTION | SAY |
+|---|---|---|
+| B1 | `Ctrl+P` → `geo-methods.md:14` → `Enter`, lines **14–19**, then `Ctrl+G 24`. CAPTION `geo-methods.md:14–24 · GEO (KDD 2024): a benchmark gain, not a defect` | "We calibrate against research, not instinct: the GEO paper shows that adding statistics helps **in a benchmark**, so a page without them scores **low**." |
+| B2 | `Ctrl+P` → `site_b.report.md:58` → `Enter`, lines **58–60**. CAPTION `tests/golden/site_b.report.md:60 · same in site_b.audit-report.json:109 ("blocked_by": "F-001")` | "You can see the cascade in our golden report: **one** critical, **eleven** findings waiting on it, and engagement untouched." |
+| B3 | In tab 10 `DESIGN.md`, click **377**, Shift+click **378**. CAPTION `DESIGN.md:377–378` | "We were reading file sizes as **phone numbers**, and telling a free download page to publish a **price**." |
+| B4 | `Ctrl+P` → `gate-rules.md:54` → `Enter`, lines **54–57**. CAPTION `gate-rules.md:54–57 · Rule 0b` | "And when we never saw the page a visitor sees, those findings aren't softened, they're **suppressed**: capping asserts a weaker claim, suppression asserts **none**." |
 
----
+B3 is the one laugh in Part 1, so if only one goes back, make it that one. Put B1 after the
+`check_robots.py` beat, B2 after `apply_cascade`, B3 between the two `DESIGN.md` shots, and B4 after
+"engagement is never gated".
 
 ## 2 · PART 2 · Live trial run (hard cap 2:00 after trimming, target 1:55)
 
