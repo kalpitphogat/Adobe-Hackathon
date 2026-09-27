@@ -633,13 +633,20 @@ def v_alt(f: dict) -> tuple[str, str]:
     status, p, _ = page(url)
     results = []
     for src in srcs:
-        img = next((i for i in p.imgs if i.get("src") and (urljoin(url, i["src"]) == urljoin(url, src)
-                                                           or i["src"].endswith(src.rsplit("/", 1)[-1]))), None)
-        if img is None:
+        # As the engine reads an <img>: src, else data-src. It flags every copy without alt text,
+        # so an image used twice (one copy with alt text, one without) still counts: check every copy.
+        found = [(i.get("src") or i.get("data-src") or "", i) for i in p.imgs]
+        imgs = [i for s, i in found if s and urljoin(url, s) == urljoin(url, src)] \
+            or [i for s, i in found if s and s.endswith(src.rsplit("/", 1)[-1])]
+        if not imgs:
             results.append((src, False, "not on the page now"))
-        else:
-            alt = img.get("alt")
-            results.append((src, not (alt or "").strip(), f"alt {alt!r}" if alt is not None else "no alt attribute"))
+            continue
+        bare = [i for i in imgs if not (i.get("alt") or "").strip()]
+        alt = (bare or imgs)[0].get("alt")
+        detail = f"alt {alt!r}" if alt is not None else "no alt attribute"
+        if len(imgs) > 1:
+            detail += f" (no alt text on {len(bare)} of its {len(imgs)} copies on the page)"
+        results.append((src, bool(bare), detail))
     if not srcs:
         return "hand", f"no image sources in the evidence; check {url} by hand"
     verdict, detail = tally(results, "no alt text", "quoted image(s)")
