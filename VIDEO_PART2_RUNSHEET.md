@@ -27,6 +27,9 @@ only pre-screened for robots.txt and homepage links with `tools/prescreen.py`.
    ```powershell
    if (Test-Path REPLAY_IT_Professionals.txt) {
      Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+     $memory = "$env:USERPROFILE\.claude\projects\" + ((Get-Location).Path -replace '[^A-Za-z0-9]', '-') + "\memory"
+     if (Test-Path $memory) { Rename-Item $memory ("memory-old-" + (Get-Date -Format "yyyyMMdd-HHmmss")); Write-Host "Moved Claude Code's saved notes for this clone aside" -ForegroundColor Yellow }
+     if (Test-Path $env:USERPROFILE\.claude\CLAUDE.md) { Write-Host "Rename your own .claude\CLAUDE.md until the video is done: every Claude Code session reads it, the take too." -ForegroundColor Yellow }
      Remove-Item -Recurse -Force demo-live -ErrorAction SilentlyContinue
      mkdir demo-live; Copy-Item round3-frozen\submission.zip demo-live\; cd demo-live
      ..\.venv\Scripts\Activate.ps1
@@ -39,6 +42,9 @@ only pre-screened for robots.txt and homepage links with `tools/prescreen.py`.
    } else { Write-Host "Wrong folder: cd into your Adobe-Hackathon clone (the folder with REPLAY_IT_Professionals.txt), then paste this block again." -ForegroundColor Red }
    ```
    `demo-live/` is new, so there is no leftover `audit-output/`. It's git-ignored.
+   The memory lines give the take the same start as a judge's fresh folder: Claude Code keeps one
+   auto-memory folder per git repository and loads it into every session inside it, so notes from
+   earlier sessions in this clone are renamed `memory-old-…` (not deleted). `RECORDING_FLOW.md` 1.2 has the details.
 1b. **Rehearse the prompt once on this machine, on a *seen* site**:
    `powershell -File tools\rehearse.ps1 -Url https://www.docker.com/ -Label docker_confirmed`.
    The two passes were rehearsed 10 times on Linux (`rehearsal/2026-09-25_twopass_*`), and the

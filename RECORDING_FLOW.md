@@ -198,6 +198,9 @@ At the repo root:
 ```powershell
 if (Test-Path REPLAY_IT_Professionals.txt) {
   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+  $memory = "$env:USERPROFILE\.claude\projects\" + ((Get-Location).Path -replace '[^A-Za-z0-9]', '-') + "\memory"
+  if (Test-Path $memory) { Rename-Item $memory ("memory-old-" + (Get-Date -Format "yyyyMMdd-HHmmss")); Write-Host "Moved Claude Code's saved notes for this clone aside" -ForegroundColor Yellow }
+  if (Test-Path $env:USERPROFILE\.claude\CLAUDE.md) { Write-Host "Rename your own .claude\CLAUDE.md until the video is done: every Claude Code session reads it, the take too." -ForegroundColor Yellow }
   Remove-Item -Recurse -Force demo-live -ErrorAction SilentlyContinue
   mkdir demo-live
   Copy-Item round3-frozen\submission.zip demo-live\
@@ -213,6 +216,12 @@ if (Test-Path REPLAY_IT_Professionals.txt) {
   claude
 } else { Write-Host "Wrong folder: cd into your Adobe-Hackathon clone (the folder with REPLAY_IT_Professionals.txt), then paste this block again." -ForegroundColor Red }
 ```
+- **The take starts with no saved notes, as a judge's fresh folder does.** Claude Code keeps one
+  auto-memory folder per git repository and loads it into every session inside it, and `demo-live`
+  is inside this clone. So the block renames any notes saved by earlier sessions here to `memory-old-…`
+  (nothing is deleted). Close every other Claude Code session in this clone before the take, so none adds new ones.
+- A yellow line about `CLAUDE.md` means your personal instructions file would shape the take too.
+  Rename it (for example to `CLAUDE.md.off`), and rename it back after the video.
 - `python --version` must print Python 3.11.15.
 - The `verify_engine.py` run is a dry run of the on-camera command and must end with `RESULT : ENGINE UNCHANGED`.
 - The last line starts Claude Code once, **off camera**, so its first-run questions don't land in the take.

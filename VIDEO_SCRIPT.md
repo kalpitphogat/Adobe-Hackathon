@@ -365,11 +365,13 @@ longer in the table; they only appear if fewer than five findings are confirmed.
 
 ### If it goes sideways
 
-Run sheet **§E** has the full table. The three that matter on camera:
+Run sheet **§E** has the full table. The ones that matter on camera:
 
 - **Permission prompt:** approve it on camera ("yes"), trim the pause. It is part of the real run.
-- **"no evidence bundle was produced":** wrong folder. Stop; new take on `https://www.sphinx-doc.org/`
-  after updating the REPLAY and run sheet (§E). Never splice.
+- **"no evidence bundle was produced"** after `python .claude/skills/...`: keep going. The agent ran
+  the copy made for the Skill tool and reruns `skills/...` by itself; trim only the waiting.
+- **"no evidence bundle was produced"** after `python skills/...`: wrong folder. Stop; new take on
+  `https://www.sphinx-doc.org/` after updating the REPLAY and run sheet (§E). Never splice.
 - **Output too long for 2:00:** scroll faster and trim the agent's thinking. **Never cut** the typed URL,
   the `Skill(...)` call, the pass-2 line, the priority table, the evidence check or the drill-down.
 
