@@ -110,7 +110,7 @@ or the REPLAY names a machine-specific path.
 This uses Claude usage from the signed-in account and takes about 3 minutes. Run it at the repo root.
 ```powershell
 powershell -ExecutionPolicy Bypass -File tools\rehearse.ps1 -Url https://www.docker.com/ -Label docker_confirmed
-Get-ChildItem rehearsal\*_docker_confirmed.md | Get-Content
+Get-ChildItem rehearsal\*_docker_confirmed.md | Get-Content -Encoding UTF8
 ```
 Paste the output to Claude for checking. What it should show:
 - The header shows `harness: 2.1.282` and `playwright: yes`.

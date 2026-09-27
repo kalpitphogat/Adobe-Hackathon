@@ -85,8 +85,36 @@ def read_text(path: str) -> str:
     return raw.decode("utf-8-sig", errors="replace")
 
 
+def unmangle(line: str) -> str:
+    """Undo UTF-8 read back through a Windows code page. Windows PowerShell 5.1 decodes a program's
+    output with the console code page, so a long dash in the agent's answer is logged as three wrong
+    characters. Text that was never mangled does not survive the round trip and is left alone."""
+    for _ in range(3):  # text captured twice is mangled twice
+        if line.isascii():
+            break
+        for codec in ("cp437", "cp1252"):
+            try:
+                fixed = line.encode(codec).decode("utf-8")
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                continue
+            if fixed != line:
+                line = fixed
+                break
+        else:
+            break
+    return line
+
+
+def repaired(text: str) -> str:
+    return "\n".join(unmangle(ln) for ln in text.splitlines())
+
+
 def answer_from(path: str) -> str:
     """The agent's answer: from a transcript or stream-json log, or the file itself if it is text."""
+    return repaired(_answer_from(path))
+
+
+def _answer_from(path: str) -> str:
     text = read_text(path)
     events = []
     for line in text.splitlines():
@@ -259,11 +287,17 @@ def check_answer(report: dict, answer: str) -> tuple[list[dict], dict, str | Non
         say(tag, f"audit_status {m.group(1)!r}, report {report['audit_status']!r}")
     else:
         say("WARN", "audit_status not found above the table")
-    sev_after = {s: re.search(rf"\b{s}\b\W{{0,3}}(\d+)", before, re.I) for s in SEVERITIES}
-    sev_before = {s: re.search(rf"(\d+)\W{{0,3}}\b{s}\b", before, re.I) for s in SEVERITIES}
-    use = sev_after if sum(map(bool, sev_after.values())) >= sum(map(bool, sev_before.values())) else sev_before
-    got = {s: int(m.group(1)) for s, m in use.items() if m}
-    if got:
+    # a number goes with a severity word only when nothing but a space, a colon, "=" or a table bar
+    # separates them: "1 critical, 4 high" and "critical 1 · high 4" both read right
+    flat = plain(before)
+    word_first = {s: re.search(rf"\b{s}\b\s*[:=|]?\s*(\d+)", flat, re.I) for s in SEVERITIES}
+    number_first = {s: re.search(rf"(\d+)\s+{s}\b", flat, re.I) for s in SEVERITIES}
+    a = {s: int(m.group(1)) for s, m in word_first.items() if m}
+    b = {s: int(m.group(1)) for s, m in number_first.items() if m}
+    got = a if len(a) > len(b) else b if len(b) > len(a) else (a if a == b else None)
+    if got is None:
+        say("WARN", "can't tell which number goes with which severity above the table; compare by eye")
+    elif got:
         wrong = {s: (n, report["summary"].get(s)) for s, n in got.items() if n != report["summary"].get(s)}
         if wrong:
             say("FAIL", "counts by severity differ from the report: "
@@ -640,12 +674,20 @@ def v_plain_http(f: dict) -> tuple[str, str]:
 def v_quote(f: dict) -> tuple[str, str]:
     """Checks a person must judge (prompt injection, wording): show the quoted text in its context."""
     u = (f.get("affected_urls") or [""])[0]
-    status, p, _ = page(u)
-    text = p.plain_text
+    status, _, _, body = fetch(u)
+    p = Page()
+    if status:
+        p.feed(body)
+    text, html = p.plain_text, re.sub(r"\s+", " ", body)
     out = []
-    for q in re.findall(r'["“]([^"”]{12,120})["”]', f.get("evidence", ""))[:2]:
-        i = text.lower().find(q.lower())
-        out.append(f"{q!r} {'in context: …' + text[max(0, i - 120):i + len(q) + 120] + '…' if i >= 0 else 'is not on the page now'}")
+    for q in re.findall('["\u201c]([^"\u201d]{12,120})["\u201d]', f.get("evidence", ""))[:2]:
+        i, j = text.lower().find(q.lower()), html.lower().find(q.lower())
+        if i >= 0:
+            out.append(f"{q!r} on the page: ...{text[max(0, i - 120):i + len(q) + 120]}...")
+        elif j >= 0:
+            out.append(f"{q!r} in the page's HTML, not its text: ...{html[max(0, j - 100):j + len(q) + 100]}...")
+        else:
+            out.append(f"{q!r} is not in the page: the engine's own wording, or the page changed")
     return "hand", f"{u} ({status}): " + (" | ".join(out) or "judge the evidence by eye") \
         + f". Engine's verification step: {(f.get('suggested_action') or {}).get('verification', '-')}"
 
@@ -727,6 +769,13 @@ def faithful_answer(report: dict, verdicts: list[str] | None = None) -> str:
     return "\n".join(out) + "\n"
 
 
+def number_first(answer: str, add_to_high: int) -> str:
+    """The severity counts rewritten as "1 critical, 2 high, ..." (adding add_to_high to high)."""
+    return re.sub(r"(critical|high|medium|low|info) (\d+)( · )?",
+                  lambda m: f"{int(m.group(2)) + add_to_high * (m.group(1) == 'high')} {m.group(1)}"
+                            + (", " if m.group(3) else ""), answer)
+
+
 def self_test() -> int:
     """A faithful answer to the golden report passes; every tampered copy of it fails."""
     global QUIET
@@ -747,12 +796,15 @@ def self_test() -> int:
         "the blocked_by count changed": (re.sub(r"(\d+) have `blocked_by`", lambda m: f"{int(m.group(1)) + 2} have `blocked_by`", good), 1),
         "an id the report lacks, named in passing": (good + "\nF-042 also looks bad.\n", 1),
         "the severity counts changed": (re.sub(r"medium (\d+)", lambda m: f"medium {int(m.group(1)) + 1}", good), 1),
+        "counts written '1 critical, 2 high, ...'": (number_first(good, 0), 0),
+        "counts written '1 critical, 2 high, ...', one wrong": (number_first(good, 1), 1),
+        "the answer read back through code page 437 (PowerShell 5.1)": (good.encode("utf-8").decode("cp437"), 0),
     }
     bad = 0
     for name, (answer, want_fail) in cases.items():
         counts.update({"FAIL": 0, "WARN": 0, "HAND": 0})
         QUIET = True
-        check_answer(report, answer)
+        check_answer(report, repaired(answer))
         QUIET = False
         caught = counts["FAIL"] > 0
         ok = caught == bool(want_fail)

@@ -16,6 +16,10 @@ param(
     [string]$Venv = ".venv"
 )
 $ErrorActionPreference = "Stop"
+# Read what claude and python print as UTF-8. Windows PowerShell 5.1 otherwise decodes it with the
+# console code page, and a long dash in the agent's answer is logged as three wrong characters.
+$consoleEncoding = [Console]::OutputEncoding
+[Console]::OutputEncoding = New-Object Text.UTF8Encoding $false
 $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
 $repo = Split-Path -Parent $PSScriptRoot
 
@@ -70,4 +74,5 @@ $engine
 "@
 $body = $header + $answer + "`n## Finding check (tools/check_findings.py)`n`n" + '```' + "`n" + $check + '```' + "`n"
 [IO.File]::WriteAllText($out, $body, (New-Object Text.UTF8Encoding $false))
+[Console]::OutputEncoding = $consoleEncoding
 "rehearsal $Label -> exit $code, $secs s, report=$report, finding check: $(($check.Trim() -split "`n")[-1]), saved $out"
