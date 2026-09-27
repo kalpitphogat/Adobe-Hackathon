@@ -574,6 +574,10 @@ Reading the result:
 - `[WARN]`: read it; it doesn't mean a retake. Example: a row that holds only in part.
 - `[FAIL]`: **don't submit this take.** Paste the output to Claude. A new take uses the backup
   URL (see "If it goes sideways"), never a splice.
+- The table shows confirmed findings only, so a "likely" critical or high finding is counted under
+  it, not re-checked. Add `--severe` to re-check those too, in a part 3:
+  `python tools\check_findings.py recorded-run --severe`. To list every finding, highest first:
+  `python tools\summarize.py recorded-run\audit-report.json --top 15`.
 
 Then commit the run, as run sheet §F says:
 `git add recorded-run`, then `git commit -m "Recorded run: docs.pytest.org"`, then `git push origin final-3`.

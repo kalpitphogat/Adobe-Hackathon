@@ -22,7 +22,9 @@ unaudited until the take.
 Usage: python tools/check_findings.py recorded-run
            (reads recorded-run/audit-report.json and recorded-run/session.jsonl,
             writes recorded-run/finding-check.md)
-       python tools/check_findings.py --report audit-report.json --answer session.jsonl [--offline]
+       python tools/check_findings.py --report audit-report.json --answer session.jsonl [--offline] [--severe]
+           (--severe also re-checks every other critical and high finding, in a part 3: the video's
+            table shows confirmed findings only, so the likely ones are counted there, not shown)
            (--answer takes a Claude Code transcript, a claude -p stream-json log, or the answer as
             text; "--answer auto" writes the answer a faithful agent would give, to test part 2)
        python tools/check_findings.py --self-test
@@ -709,6 +711,19 @@ VERIFIERS = {
 }
 
 
+def verify(f: dict) -> tuple[str, str]:
+    """Re-check one finding on the live site with this file's own code: (verdict, detail)."""
+    cid = f["check_id"]
+    if cid.startswith("read.render."):
+        hint = ("python tools/count_links.py " + (f.get("affected_urls") or [""])[0]
+                if cid == "read.render.nav_links_js_only" else "compare the raw and rendered counts yourself")
+        return "hand", f"needs a browser: {hint}. Engine's verification step: " \
+                       f"{(f.get('suggested_action') or {}).get('verification', '-')}"
+    if cid in VERIFIERS:
+        return VERIFIERS[cid](f)
+    return v_quote(f)
+
+
 def check_live(rows: list[dict], by_id: dict, drill_id: str | None) -> None:
     note("\n== 2. What was shown, re-checked on the live site now (independent of the engine and the agent) ==")
     note(f"   fetched {dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M} UTC with the engine's user agent; "
@@ -718,15 +733,7 @@ def check_live(rows: list[dict], by_id: dict, drill_id: str | None) -> None:
         if not f:
             continue
         cid = f["check_id"]
-        if cid.startswith("read.render."):
-            hint = ("python tools/count_links.py " + (f.get("affected_urls") or [""])[0]
-                    if cid == "read.render.nav_links_js_only" else "compare the raw and rendered counts yourself")
-            verdict, detail = "hand", f"needs a browser: {hint}. Engine's verification step: " \
-                                      f"{(f.get('suggested_action') or {}).get('verification', '-')}"
-        elif cid in VERIFIERS:
-            verdict, detail = VERIFIERS[cid](f)
-        else:
-            verdict, detail = v_quote(f)
+        verdict, detail = verify(f)
         label = f"{row['id']} {cid}" + (" (the drill-down)" if row["id"] == drill_id else "")
         agent = row["verdict"]
         if verdict == "hand":
@@ -741,6 +748,27 @@ def check_live(rows: list[dict], by_id: dict, drill_id: str | None) -> None:
         else:
             tag = "FAIL" if agent in ("supported", "partly", "?") or row["id"] == drill_id else " OK "
             say(tag, f"{label}: does NOT hold on the live site; the agent said {agent}. {detail}")
+
+
+def check_severe(report: dict, shown: set[str]) -> None:
+    """Part 3 (--severe): every critical and high finding the table did not show, re-checked live."""
+    note("\n== 3. Every other critical and high finding, re-checked on the live site now ==")
+    note("   not in the video's table, which shows confirmed findings only: the video counts these "
+         "under the table and names the top likely one")
+    others = [f for f in report["findings"]
+              if f.get("severity") in ("critical", "high") and f["id"] not in shown]
+    if not others:
+        note("   none: every critical and high finding is in the table")
+    for f in others:
+        verdict, detail = verify(f)
+        label = f"{f['id']} {f['check_id']} [{f['severity']}/{f.get('confidence')}]"
+        if verdict == "holds":
+            say(" OK ", f"{label}: holds. {detail}")
+        elif verdict == "hand":
+            say("HAND", f"{label}: no automatic re-check. {detail}")
+        else:
+            say("WARN", f"{label}: {'holds only in part' if verdict == 'partly' else 'does NOT hold'} on "
+                        f"the live site (not in the video's table, so not a claim the video makes). {detail}")
 
 
 def faithful_answer(report: dict, verdicts: list[str] | None = None) -> str:
@@ -820,8 +848,9 @@ def main() -> int:
     args = sys.argv[1:]
     if args == ["--self-test"]:
         return self_test()
-    offline = "--offline" in args
-    args = [a for a in args if a != "--offline"]
+    flags = {a for a in args if a in ("--offline", "--severe")}
+    args = [a for a in args if a not in flags]
+    offline, severe = "--offline" in flags, "--severe" in flags
     out_file = None
     if "--report" in args and "--answer" in args:
         report_path, answer_path = args[args.index("--report") + 1], args[args.index("--answer") + 1]
@@ -839,6 +868,8 @@ def main() -> int:
     rows, by_id, drill_id = check_answer(report, answer)
     if not offline and rows:
         check_live(rows, by_id, drill_id)
+        if severe:
+            check_severe(report, {r["id"] for r in rows})
     note(f"\n{counts['FAIL']} problem(s), {counts['WARN']} warning(s), {counts['HAND']} to check by hand")
     if out_file:
         out_file.write_text("```\n" + "\n".join(lines_out) + "\n```\n", encoding="utf-8")
