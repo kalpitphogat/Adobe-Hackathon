@@ -115,6 +115,17 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #   claude install 2.1.282
 # then check with: claude --version   ->  2.1.282 (Claude Code)
 #
+# ---- REASONING EFFORT --------------------------------------------------------
+# The claude command sets no effort level, so Claude Code uses the one in the
+# user's settings. On the recording machine, settings.json sets effortLevel
+# "medium", plus a per-model entry of "high" for claude-opus-5 (a different
+# model id from the claude-opus-5-5 the run uses). To match, set the same
+# effortLevel, or add  --effort medium  where your Claude Code version has
+# that flag. It does not change the findings:
+# severities, ICE scores and order come from the engine (Sonnet 5, Haiku 4.5
+# and Opus 5.5 all gave the same 24 findings, Fallback B); only the agent's
+# wording and its evidence-check verdicts can differ.
+#
 # ---- INSTALLING uv (only needed if you do not have it) ----------------------
 #   macOS / Linux:  curl -LsSf https://astral.sh/uv/install.sh | sh
 #   Windows:        winget install --id astral-sh.uv -e

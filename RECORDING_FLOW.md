@@ -59,6 +59,8 @@ claude --version
 The first line stops Claude Code from updating itself, in every new window from now on. That
 matters: 2.1.283 came out on 2026-09-25, and the REPLAY says 2.1.282. When the video is done,
 `[Environment]::SetEnvironmentVariable("DISABLE_AUTOUPDATER", $null, "User")` turns updates back on.
+Leave Claude Code's `effortLevel` setting at `"medium"` until the video is done: the REPLAY discloses
+that value (section REASONING EFFORT).
 
 Expected output:
 ```
