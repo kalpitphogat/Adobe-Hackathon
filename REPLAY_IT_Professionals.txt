@@ -161,7 +161,11 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 # 1-3 (with claude -p) were rehearsed end to end in an empty folder on that
 # machine on 2026-09-24. The two-pass TEST_STEPS were rehearsed on 2026-09-25
 # with claude -p (Claude Code 2.1.282) on Linux, 10 runs, every one followed
-# by the file-by-file engine check (ENGINE UNCHANGED).
+# by the file-by-file engine check (ENGINE UNCHANGED). On 2026-09-27 they were
+# rehearsed on that Windows machine too, with claude -p and the prompt exactly
+# as above, on https://www.nasa.gov/: exit 0 in 155 s, 49 findings, ENGINE
+# UNCHANGED after the run, and every row, ICE and count the agent gave matched
+# audit-report.json.
 # The one-line ENV_SETUP above is the macOS/Linux form of the same commands.
 # It was run exactly as written (read from this file) on GitHub-hosted
 # ubuntu-latest and macos-latest runners on 2026-09-24, followed by the unzip,
@@ -324,7 +328,10 @@ EXPECTED_OUTPUT: brand-ai-readiness-audit/audit-output/audit-report.json
 #  * reach.index.noindex_on_content rates one noindex page critical even where
 #    the noindex looks deliberate: a package page on pub.dev
 #    (built_collection), packagist.org/statistics, a ubuntu.com blog post whose
-#    canonical is on canonical.com.
+#    canonical is on canonical.com. A search results page is exempt only when
+#    "search" is in its path, not its query: on nasa.gov (2026-09-27) four
+#    /?search= pages made this the top finding, and the agent's evidence check
+#    said not supported in both runs that day.
 #  * act.blocker.not_mobile_ready also fires on URLs that are not pages: an
 #    Atom feed (pub.dev/feed.atom) and a 162-byte redirect stub
 #    (gradle.org/install).

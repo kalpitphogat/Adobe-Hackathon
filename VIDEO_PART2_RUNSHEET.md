@@ -42,8 +42,10 @@ only pre-screened for robots.txt and homepage links with `tools/prescreen.py`.
    confirmed-only table twice on Windows on 2026-09-27 (docker.com with this script; nasa.gov in
    judge mode, interactive). On nasa.gov the agent first ran the `.claude/skills` copy of the
    script, and it misstated the confirmed and likely counts (30 and 19; the report had 24 and 25).
-   So the prompt now names the script path and asks for those counts by code: rehearse the revised
-   prompt once. Check that the agent runs `python skills/...` (not `.claude/skills/...`) for pass 1
+   So the prompt now names the script path and asks for those counts by code. The revised prompt
+   was rehearsed on nasa.gov on 2026-09-27 (`rehearse.ps1 -Label nasa_v2`): `python skills/...`
+   first time, counts 24 and 25 as in the report, finding check `0 problem(s)`. Check that the
+   agent runs `python skills/...` (not `.claude/skills/...`) for pass 1
    with `--no-render --out ./audit-precheck`, prints the count and picks pass 2 by it; that its
    table holds only confirmed findings, with the likely count underneath (and a `python -c` that
    counted it); and that it gives every row a verdict. The file must end with the finding check at
