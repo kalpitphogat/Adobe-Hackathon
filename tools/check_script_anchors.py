@@ -8,8 +8,8 @@ the zip's hash is wrong, a file is missing, or a line no longer says what the sc
 
 It also recomputes the numbers the script speaks or captions (29 crawlers and their roles,
 155 files, 11 findings blocked by F-001 in the site_b golden, the __FILL_IN__ count) and
-counts Part 1's spoken words, failing if the full cut is too long to fit in 3:00 at a
-conservative 140 words per minute.
+counts Part 1's spoken words, failing if the full cut is too long to fit in 3:00 at 150 words
+per minute, a normal speaking pace (the timed read in RECORDING_FLOW 0.5 has the last word).
 
 Usage: python tools/check_script_anchors.py [VIDEO_SCRIPT.md] [round3-frozen/submission.zip]
 """
@@ -23,7 +23,7 @@ from pathlib import Path
 ZIP_SHA256 = "1c872c598dcac741c712cbf9e671f024881a9ba251e2b4da66995f81b6cf8dcf"
 ROW = re.compile(r"^\|\s*(A\d+)\s*\|[^|]*\|\s*`([^`]+):(\d+)`\s*\|\s*`(.+)`\s*\|\s*$")
 
-PART1_WPM_FLOOR = 140     # a careful, non-rushed pace
+PART1_WPM_FLOOR = 150     # a normal speaking pace
 PART1_CAP_SECONDS = 180   # brief: Part 1 hard cap 3:00
 PART1_TAB_SECONDS = 8     # title card plus pauses the narration doesn't cover
 
@@ -115,7 +115,7 @@ def main() -> int:
         problems.append(verdict + ", over the 3:00 cap: apply the cut ladder in the script")
 
     print(f"[ OK ] {ok} anchor(s) and fact(s) match the submitted zip ({len(rows)} ledger rows)")
-    print(f"[ -- ] {verdict}; at 145 wpm {words / 145 * 60:.0f} s")
+    print(f"[ -- ] {verdict}; at 155 wpm {words / 155 * 60 + PART1_TAB_SECONDS:.0f} s")
     for p in problems:
         print(f"[FAIL] {p}")
     print(f"\n{len(problems)} problem(s)")

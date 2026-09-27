@@ -10,7 +10,7 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 |---|---|---|---|
 | 1.1 | Show the Round 3 engine works live, and prove it's reproducible | ✅ | Live run in the video + `REPLAY_IT_Professionals.txt`; rehearsed from empty folders (`rehearsal/`) |
 | 1.2 | No GUI needed; a CLI session where an agent runs the marketplace is what they want | ✅ | Claude Code in a terminal (`VIDEO_PART2_RUNSHEET.md`) |
-| 2.1 | Submit a recorded video, **≤ 5:00 hard cap** | 🎬 | `VIDEO_SCRIPT.md`: Part 1 ≈ 2:50 incl. title card (cut ladder to 2:35), Part 2 ≤ 2:00 after trimming (target 1:55); total ≈ 4:44 |
+| 2.1 | Submit a recorded video, **≤ 5:00 hard cap** | 🎬 | `VIDEO_SCRIPT.md`: Part 1 ≈ 2:59 at 150 wpm incl. title card (cut ladder to 2:44), Part 2 ≤ 2:00 after trimming (target 1:55); total ≈ 4:54 |
 | 2.2 | Submit a plain-text file named exactly `REPLAY_YourTeamName.txt` | ✅ | `REPLAY_IT_Professionals.txt` (team name IT_Professionals); name checked by `tools/check_replay.py` |
 | 2.3 | Don't resubmit Round 3; they reuse that exact package | ✅ | Nothing in this repo changes it; `round3-frozen/submission.zip` + `SHA256SUMS` |
 | 2.4 | **Live run must exercise the same submitted marketplace**, or it fails on integrity | ✅ 🎬 | Demo runs from a fresh unzip of the frozen zip; hash `1c872c59…8dcf` printed in REPLAY; `tools/verify_engine.py` proves the unzipped folder is byte-identical, file by file (155/155), and fails on any changed, missing or extra file (tested) |
@@ -20,7 +20,7 @@ with how we meet it and the evidence. **Re-check this file after every change.**
 
 | # | rule | status | how we meet it · evidence |
 |---|---|---|---|
-| 3.1 | Part 1 methodology **≤ 3:00** | ✅ 🎬 | `VIDEO_SCRIPT.md` Part 1: 392 spoken words ≈ 2:50 at 145 wpm incl. title card and pauses; `tools/check_script_anchors.py` fails if the full cut would pass 3:00 even at 140 wpm; a fixed cut ladder (GEO line, golden line, phone/price line) brings it to 349 words ≈ 2:32 |
+| 3.1 | Part 1 methodology **≤ 3:00** | ✅ 🎬 | `VIDEO_SCRIPT.md` Part 1: 429 spoken words, every line a complete sentence, ≈ 2:59 at 150 wpm incl. title card and pauses (2:54 at 155); `tools/check_script_anchors.py` fails if the full cut would pass 3:00 at 150 wpm; a fixed two-step cut ladder (the `check_robots.py` beat, then the phone/price line) brings it to 390 words ≈ 2:44. The timed read (RECORDING_FLOW 0.5) decides which steps to take |
 | 3.2 | Part 2 trial run **≤ 2:00** | 🎬 | Run sheet timeline ends 1:50; agent output is one table (top 5 confirmed findings, a verdict on every row, the likely count under it) and one drill-down |
 | 3.3 | May crop idle waits; **may not splice** a run that didn't happen | 🎬 | One continuous take; raw file kept; "⏩ trimmed" captions; retake = new URL, never a splice |
 | 3.4 | Part 1: how we discovered the findings (field research, what separates cited vs ignored sites, distilled into repeatable checks) | ✅ | `VIDEO_SCRIPT.md` cold open + Act I answer "what separates them" directly: the handout's reach/read/quote sentence (`chunking-model.md:40–43`), crawler roles and what blocking each costs (`ai-bots.json:12–14, :71`, `check_robots.py:286/318`), the llms.txt null result we refuse to over-rate (`suppression-rules.md:22–27`, enforced at `check_agent_files.py:24, :62`), the GEO finding (`geo-methods.md:14–24`); Act IV: the five-site field test (`DESIGN.md:374–379`) and the zero-recall miss (`DESIGN.md:322–335`) |

@@ -123,9 +123,10 @@ Paste the output to Claude for checking. What it should show:
 ### 0.5 Time Part 1
 Set up VS Code as in Stage 1.1 first. Then do Stage 2 once with a stopwatch, reading aloud and
 pressing every key in it: tab switches, `Ctrl+G` jumps and highlights.
-- **Over 2:50** → apply the cut ladder (end of Stage 2), in order.
-- **Under 2:45** → you have room for a restore line (end of Stage 2). Only 13 words fit under the
-  3:00 cap without also taking a cut-ladder step, so read that table's arithmetic before adding one.
+- **Over 2:55** → apply the cut ladder (end of Stage 2), in order. The full read is 2:59 at 150 words
+  a minute, so a careful reader will need step 1.
+- **Under 2:45** → you read faster than that, so there is room for a restore line (end of Stage 2).
+  Add one at a time and time it again.
 - Every highlight must fit on screen, and every highlighted line must be readable to its end.
   If one doesn't, set the font to 18 and check again.
 
@@ -264,24 +265,24 @@ Set-Clipboard -Value $prompt.Substring(0, $prompt.Length - 5)
 
 ---
 
-## Stage 2 · PART 1 · Thought process (cap 3:00, target 2:50)
+## Stage 2 · PART 1 · Thought process (cap 3:00; the full read is 2:59 at 150 words a minute)
 
 Part 1 may be recorded in several takes.
 - Every shot needs its file on screen, its lines highlighted, and a lower-third caption.
 - Captions are added in the editor. Each tab's caption is written above its table.
-- **Ten tabs plus the llms.txt file, thirteen spoken beats.** Every SAY line is a complete sentence, so if you fluff one you
-  restart that sentence, not the paragraph.
+- **Ten tabs, plus two files opened with `Ctrl+P`:** `suppression-rules.md` (step 4c) and `geo-methods.md` (step 11).
+- **Every SAY is one or more complete sentences, and the lines you highlight show what it claims.**
+  If you fluff one, restart that sentence, not the paragraph.
 
 **Moving around in VS Code.** Each row below is one screen: do the DO, then say the SAY.
 - `Ctrl+PgDn`: the next tab. Each tab opens on the first line it needs.
 - `Ctrl+G`, type the line number, `Enter`: go to another line in the same file. VS Code puts that line mid-screen.
 - `Ctrl+P`, type `file:line`, `Enter`: jump straight to a line in any file, open or not. Steps 4c,
-  6d, 7 and 11 use it, and so do the restore lines.
+  6c, 7 and 11 use it, and so do the restore lines.
 - **Highlight:** click the line number in the left margin. For several lines, click the first number, then **Shift+click** the last.
   - A row that says only "click" needs no jump: that line is already on screen, a few lines away.
   - If a line you need is ever off screen, scroll to it.
-- **When a sentence carries on in the next row:** say the row's words, stop, press the keys, then carry on.
-  Every split falls on a `·` pause or between two sentences, so you never talk while you type.
+- **Press keys only between rows.** Every row ends on a full stop, so you never talk while you type.
   The silent key presses can be trimmed in the edit.
 - **Retake:**
   1. In VS Code press `Ctrl+K Ctrl+W` to close every tab, then run the 10 `code -g` lines again in the
@@ -300,103 +301,105 @@ Part 1 may be recorded in several takes.
 
 | step | DO | SAY |
 |---|---|---|
-| 1 | Tab 1 is on screen, on line 40. Click **40**, Shift+click **43**. | "Ask an AI assistant about a brand, and it either **quotes** the site or acts as if it **doesn't exist**. The handout says why: a page that isn't easy to **reach, read and quote** never reaches the answer. Our agent finds **which step fails**." |
+| 1 | Tab 1 is on screen, on line 40. Click **40**, Shift+click **43**. | "Ask an AI assistant about a brand, and it either **quotes** the site or acts as if it **doesn't exist**. The handout says why: a page that isn't easy to **reach, read and quote** never makes it into the answer. Our agent finds **which step fails**." |
 
 *Slow down on "doesn't exist", and smile on the last sentence.*
 
-### 0:21–0:56 · Act I · What separates the cited from the ignored
-**Tab 2 `gate-rules.md`** · CAPTION `gate-rules.md:10 · 66 checks: DESIGN.md:108 (count generated from the code)`
+### 0:21–1:17 · Act I · What separates the cited from the ignored
+**Tab 2 `gate-rules.md`** · CAPTION `gate-rules.md:10–19 · 66 checks by stage: DESIGN.md:108–111 (reach 18, read 5, extract 16, trust 10, act 17)`
 
 | step | DO | SAY |
 |---|---|---|
-| 2 | `Ctrl+PgDn` → tab 2, on line 10. Click **10**, Shift+click **14**. | "Those steps happen **in order**, so each of our 66 checks belongs to a stage: reach, read, extract, trust · and act, the visitor who arrives." |
+| 2a | `Ctrl+PgDn` → tab 2, on line 10. Click **10**, Shift+click **14**: "three things have to succeed in order". | "Those steps have to succeed **in order**, so we group our **66 checks** into stages in the same order." |
+| 2b | Click **16**, Shift+click **19**, a few lines down: "fifteen criticals … Fourteen of them are real defects that currently change nothing." | "A flat checklist ignores that order: a site blocking AI crawlers gets **fifteen critical** findings, and **fourteen** don't matter yet." |
 
 **Tab 3 `ai-bots.json`** · CAPTION `ai-bots.json:12–14 · 29 crawlers: 14 retrieval, 10 training, 5 contested`
 
 | step | DO | SAY |
 |---|---|---|
-| 3a | `Ctrl+PgDn` → tab 3, on line 12. Click **12**, Shift+click **14**. | "Lists tell you which AI crawlers to **block**; we asked what blocking each one **costs**, and sorted 29 by role." |
-| 3b | `Ctrl+G` → type `71` → `Enter`. Click **71**: `"GPTBot"` … `"category": "training"`. | "Block GPTBot and you have opted out of **training**." |
-| 3c | `Ctrl+G` → type `26` → `Enter`. Click **26**: "Blocking one of these removes the brand from that assistant's answers." | "Block a retrieval crawler and you **vanish from that assistant's answers**." |
+| 3a | `Ctrl+PgDn` → tab 3, on line 12. Click **12**, Shift+click **14**. | "Most lists tell you which AI crawlers to **block**. We asked what blocking each one **costs**, and sorted 29 by role." |
+| 3b | `Ctrl+G` → type `71` → `Enter`. Click **71**, Shift+click **72**: `"GPTBot"` … `"category": "training"`, then "Blocking it does not remove a site from ChatGPT search results". | "Block GPTBot, and you have only opted out of **training**." |
+| 3c | `Ctrl+G` → type `26` → `Enter`. Click **26**: "Blocking one of these removes the brand from that assistant's answers." | "Block a **retrieval** crawler, and you **vanish from that assistant's answers**." |
 
-**Tab 4 `check_robots.py`** · CAPTION `check_robots.py:286 critical · :318 info` · *cut-ladder step 1 skips 4a–4b*
+**Tab 4 `check_robots.py`** · CAPTION `check_robots.py:285–286 critical · :317–318 info` · *cut-ladder step 1 skips 4a–4b*
 
 | step | DO | SAY |
 |---|---|---|
-| 4a | `Ctrl+PgDn` → tab 4, on line 286. Click **286**: `severity="critical"`. | "So one robots.txt rule is **critical** against a retrieval crawler," |
-| 4b | `Ctrl+G` → type `318` → `Enter`. Click **318**: `severity="info"`. | "**info** against a training one." |
+| 4a | `Ctrl+PgDn` → tab 4, on line 286. Click **285**, Shift+click **286**: "AI retrieval crawler(s) that cite sources at answer time", `severity="critical"`. | "So one robots.txt rule is **critical** against a retrieval crawler." |
+| 4b | `Ctrl+G` → type `317` → `Enter`. Click **317**, Shift+click **318**: "recorded as an observation, not a defect", `severity="info"`. | "Against a training crawler, the same rule is only **info**." |
 
 **`suppression-rules.md`, opened with `Ctrl+P`** · CAPTION `suppression-rules.md:22–27 · enforced: check_agent_files.py:24 docs sites only, :62 severity="low" · tests/test_suppression.py`
 
 | step | DO | SAY |
 |---|---|---|
-| 4c | `Ctrl+P` → type `suppression-rules.md:22` → `Enter`. Click **22**, Shift+click **27**. It opens as a new tab just right of tab 4, so the next `Ctrl+PgDn` still reaches tab 5. | "Hype inflates severity: Google says llms.txt neither helps nor harms, and nearly **300,000 domains** showed no link to citations. Ours: **low**." |
+| 4c | `Ctrl+P` → type `suppression-rules.md:22` → `Enter`. Click **22**, Shift+click **27**. It opens as a new tab just right of tab 4, so the next `Ctrl+PgDn` still reaches tab 5. | "Hype doesn't set our severity. Google says llms.txt neither helps nor harms visibility, and a study of nearly **300,000 domains** found no link to AI citations. Most tools rate a missing llms.txt **high**; we rate it **low**." |
 
-### 0:56–1:33 · Act II · How bad, how sure
+### 1:17–1:47 · Act II · How bad, how sure
 **Tab 5 `severity-model.md`** · CAPTION `severity-model.md:43`
 
 | step | DO | SAY |
 |---|---|---|
-| 5 | `Ctrl+PgDn` → tab 5, on line 43. Click **43**. | "Severity asks **how bad this is if true**; confidence asks **how sure we are**." |
+| 5 | `Ctrl+PgDn` → tab 5, on line 43. Click **43**. | "Each finding has two ratings: **severity**, how bad if true, and **confidence**, how sure we are." |
 
-**Tab 6 `gate_model.py`** · CAPTION `gate_model.py:117 apply_cascade · :42 ceiling "medium" · :120 cap, never delete · :129 Rule 0`
+**Tab 6 `gate_model.py`** · CAPTION `gate_model.py:117–122 apply_cascade · :42 ceiling "medium" · :120 cap, never delete · :129 Rule 0, why: gate-rules.md:31–32`
 
 | step | DO | SAY |
 |---|---|---|
-| 6a | `Ctrl+PgDn` → tab 6, on line 117. Click **117**, Shift+click **118**. | "A flat checklist hands a site that blocks AI crawlers **fifteen criticals**, and fourteen are moot." |
-| 6b | Click **120**, two lines down: `Rule 3: cap, never delete.` | "`apply_cascade` caps those at medium and tags the **one** blocker that matters: **capped, never deleted**." |
-| 6c | `Ctrl+G` → type `128` → `Enter`. Click **128**, Shift+click **129**. | "Engagement is never gated: a visitor from an ad doesn't care whether a crawler got in." |
+| 6a | `Ctrl+PgDn` → tab 6, on line 117. Click **117**, Shift+click **122**: `apply_cascade` … `Rule 3: cap, never delete.` … "The finding stays in the report". | "Our `apply_cascade` function fixes the flat checklist: it caps findings behind the **one** blocker at **medium**, and never deletes them." |
+| 6b | `Ctrl+G` → type `128` → `Enter`. Click **128**, Shift+click **129**: `# Rule 0: gates never touch engagement`. | "Engagement is **never** capped: a visitor from an ad doesn't care whether a crawler got in." |
 
 **Rule 0b, back in `gate-rules.md` (tab 2)** · CAPTION `gate-rules.md:54–57 · Rule 0b`
 
 | step | DO | SAY |
 |---|---|---|
-| 6d | `Ctrl+P` → type `gate-rules.md:54` → `Enter`. This is tab 2 again, no new tab. Click **54**, Shift+click **55**. | "And when we never even saw the page a visitor sees, those findings aren't capped, they're **suppressed**." |
+| 6c | `Ctrl+P` → type `gate-rules.md:54` → `Enter`. This is tab 2 again, no new tab. Click **54**, Shift+click **57**: "`read` failures suppress engagement findings because the evidence is absent." | "But if we never saw the page a visitor sees, we **suppress** its engagement findings, because we have no evidence." |
+
 *Capping says "real, but moot"; suppression says "we never looked". You are now on tab 2, so step 7
 uses `Ctrl+P`, not `Ctrl+PgDn`.*
 
-### 1:33–1:59 · Act III · Every fix earns its place
+### 1:47–2:10 · Act III · Every fix earns its place
 **Tab 7 `orchestrate.py`** · CAPTION `orchestrate.py:242 validate_finding · rejection logged at :695`
 
 | step | DO | SAY |
 |---|---|---|
-| 7 | `Ctrl+P` → type `orchestrate.py:242` → `Enter` (**not** `Ctrl+PgDn`: 6d left you on tab 2). Click **242**, Shift+click **253**. | "Every fix must say **why** it works, so `validate_finding` rejects any finding without a mechanism." |
+| 7 | `Ctrl+P` → type `orchestrate.py:242` → `Enter` (**not** `Ctrl+PgDn`: 6c left you on tab 2). Click **242**, Shift+click **253**. | "Every fix must say **why** it works, so `validate_finding` rejects any finding without a mechanism." |
 
 **Tab 8 `extract_markup.py`** · CAPTION `extract_markup.py:204 · "__FILL_IN__" when a value is absent (94 places in the engine)`
 
 | step | DO | SAY |
 |---|---|---|
-| 8a | `Ctrl+PgDn` → tab 8, on line 203. Click **203**, Shift+click **204**: `Never invented.` | "Our patches reuse values from the page and **never invent one**;" |
-| 8b | Click **209**, Shift+click **210**, five lines down: `__FILL_IN__`. | "whatever we couldn't find stays **FILL_IN**." |
+| 8a | `Ctrl+PgDn` → tab 8, on line 203. Click **203**, Shift+click **204**: `Never invented.` | "Our patches reuse values from the page; we **never invent** one." |
+| 8b | Click **209**, Shift+click **210**, five lines down: `__FILL_IN__`. | "Whatever we couldn't find is left as **FILL_IN**." |
 
 **Tab 9 `severity.py`** · CAPTION `severity.py:27–29 lookups · :13 impact from post-gate severity · :68 total order`
 
 | step | DO | SAY |
 |---|---|---|
-| 9a | `Ctrl+PgDn` → tab 9, on line 26. Click **26**, Shift+click **29**. | "Priority is **ICE**: impact, confidence, ease." |
-| 9b | `Ctrl+G` → type `13` → `Enter`. Click **13**, Shift+click **15**. | "Impact uses the **capped** severity, so a moot defect cannot outrank its blocker." |
-### 1:59–2:39 · Act IV · The day the real web proved us wrong
+| 9a | `Ctrl+PgDn` → tab 9, on line 26. Click **26**, Shift+click **29**. | "We rank fixes by **ICE**: impact, confidence and ease." |
+| 9b | `Ctrl+G` → type `13` → `Enter`. Click **13**, Shift+click **15**. | "Impact uses the **capped** severity, so a blocked finding never outranks its blocker." |
+
+### 2:10–2:48 · Act IV · The day the real web proved us wrong
 **Tab 10 `DESIGN.md`, the field test** · CAPTION `DESIGN.md:374–379 · field test on five live sites`, then `DESIGN.md:377–378`
 
 | step | DO | SAY |
 |---|---|---|
 | 10a | `Ctrl+PgDn` → tab 10, on line 369. Click **369**, Shift+click **374**. | "Then the real web **humbled** us. Five live sites produced **365 findings**, and that number was itself the finding." |
-| 10b | Click **374**, Shift+click **379**: twelve false positives … **205**. | "We named twelve false positives before touching a threshold, and came down to **205**." |
-| 10c | Click **377**, Shift+click **378**, already on screen: file sizes as phone numbers, a free download page asked for a price. | "Two of them: we were reading file sizes as **phone numbers**, and telling a free download page to publish a **price**." *(cut-ladder step 2 drops this row)* |
+| 10b | Click **374**, Shift+click **379**: twelve false positives … **205**. | "We named **twelve false positives** before touching any threshold, and fixing them cut the count to **205**." |
+| 10c | Click **377**, Shift+click **378**, already on screen: file sizes as phone numbers, a free download page asked for a price. | "Two were embarrassing: we read file sizes as **phone numbers**, and asked a free download page for a **price**." *(cut-ladder step 2 drops this row)* |
 
 *Let 10c breathe. It is the one laugh in Part 1, and it turns "twelve false positives" into something
 a judge can picture.*
 
-**Tab 10 `DESIGN.md`, the zero-recall story** · CAPTION `DESIGN.md:324, :334 · rewritten: dom.py:56 NOSCRIPT_JS_NOTICE · pinned: tests/test_regressions.py R1–R12`
+**Tab 10 `DESIGN.md`, the zero-recall story** · CAPTION `DESIGN.md:324, :332–334 · rewritten: dom.py:56 NOSCRIPT_JS_NOTICE · pinned: tests/test_regressions.py R1–R12`
 
 | step | DO | SAY |
 |---|---|---|
-| 10d | `Ctrl+G` → type `322` → `Enter`. Click **322**, Shift+click **325**: "fired **zero times** … **16 words**". | "Worse, our empty-page detector fired **zero times**, even on a docs site of **sixteen words**, because we'd tuned it to our own fixture." |
-| 10e | `Ctrl+G` → type `332` → `Enter`. Click **332**, Shift+click **335**: "A fixture proves a check does what you wrote". | "A fixture proves a check does what you wrote · **not that you wrote the right thing**." |
+| 10d | `Ctrl+G` → type `322` → `Enter`. Click **322**, Shift+click **325**: "fired **zero times** … **16 words**". | "Worse, our empty-page detector fired **zero times**, even on a **sixteen-word** docs site." |
+| 10e | `Ctrl+G` → type `332` → `Enter`. Click **332**, Shift+click **335**: "tuned to a synthetic Next.js fixture" … "A fixture proves a check does what you wrote". | "We'd tuned it to our own fixture, and a fixture proves a check does what you wrote · **not that you wrote the right thing**." |
 
 *Don't rush 10d–10e. The admission is what earns the closing line.*
 
-### 2:39–2:50 · Close
+### 2:48–3:00 · Close
 **`geo-methods.md`, opened fresh** · CAPTION `geo-methods.md:56`
 
 | step | DO | SAY |
@@ -405,21 +408,22 @@ a judge can picture.*
 
 *Hard cut to Part 2 on "Watch."*
 
-### Cut ladder: only if your timed read is over 2:50, and only in this order
-The full cut is 392 words: **2:56** at the cautious 140 words a minute the checker uses, 2:50 at 145.
-Each step drops a whole sentence.
+### Cut ladder: only if your timed read is over 2:55, and only in this order
+The full read is 429 words: **2:59** at 150 words a minute, the pace the checker uses, and 2:54 at 155.
+Each step drops whole sentences.
 
-1. Skip steps 4a–4b, the `check_robots.py` beat (−15 words → about 2:49). From tab 3, do 4c,
+1. Skip steps 4a–4b, the `check_robots.py` beat (−20 words → about 2:51). From tab 3, do 4c,
    then press `Ctrl+PgDn` **twice** to reach tab 5.
-2. Skip step 10c, the phone-numbers line (−21 words → about 2:40). It is the one laugh in Part 1, so
+2. Skip step 10c, the phone-numbers line (−19 words → about 2:44). It is the one laugh in Part 1, so
    it goes last, not first.
 
 **Never cut:**
 - the cold open
+- the order and the flat checklist (steps 2a–2b)
 - the crawler-roles beat (steps 3a–3c)
 - the llms.txt beat (step 4c)
-- `apply_cascade` and "engagement is never gated"
-- step 6d, Rule 0b's first sentence
+- `apply_cascade` and "engagement is never capped" (steps 6a–6b)
+- Rule 0b (step 6c)
 - `validate_finding`
 - "never invent one" and FILL_IN
 - steps 9a–9b (ICE)
@@ -428,24 +432,25 @@ Each step drops a whole sentence.
 - the closing quote
 
 ### Restore lines: only if your timed read is under 2:45
-The phone-numbers laugh (10c) and Rule 0b (6d) are **already in the main read**. These six are
-the lines that did not fit. Each is still in the anchor ledger, so it is safe to put back.
+These are the lines that did not fit. Each is a complete sentence and is still in the anchor ledger,
+so it is safe to put back.
 
-**Mind the cap.** 392 words is 2:56 at 140 words a minute, so only **9 more words** fit under 3:00.
-Any one of R1, R5, R6 or R7 fits alone (+6, +4, +9, +8 words); R1 and R5 together need a 1-word trim. R2, R3 or R4 needs a cut-ladder step to pay for it. Re-run
+**Mind the cap.** The full read is already 2:59 at 150 words a minute. A timed read under 2:45 means
+you speak faster than that: add one line at a time and time it again, staying at 2:55 or under. At
+150 words a minute, any restore line needs a cut-ladder step to pay for it. Re-run
 `python tools\check_script_anchors.py` after any restore: it must still print `0 problem(s)`.
 
 | step | DO | SAY |
 |---|---|---|
 | R1, before 3a (+6 words) | No new shot: tab 3, lines **12–14**, as in 3a. | "Reach taught us our first rule." |
-| R5, at the end of 7 (+4 words) | No new shot: the caption already cites `:695`. | "…and logs the rejection." |
-| R6, after 9b (+9 words) | `Ctrl+G` → type `68` → `Enter`. Click **68**, Shift+click **71**. End 9b on "blocker," instead. | "and **the same evidence always ranks the same way**." |
-| R7, after 6d (+8 words) | Click **56**, Shift+click **57**: "Capping asserts a weaker claim. Suppression asserts none." | "A cap still claims something · suppression claims **nothing**." |
+| R5, after 7 (+5 words) | No new shot: the caption already cites `:695`. | "It also logs every rejection." |
+| R6, after 9b (+8 words) | `Ctrl+G` → type `68` → `Enter`. Click **68**, Shift+click **71**. | "The same evidence always ranks the **same way**." |
+| R7, after 6c (+8 words) | No new shot: lines **56–57** are already highlighted: "Capping asserts a weaker claim. Suppression asserts none." | "A cap still claims something; suppression claims **nothing**." |
 | R2, after 5 (+19 words) | In tab 5, `Ctrl+G` → type `56` → `Enter`. Click **56**, Shift+click **57**. CAPTION `severity-model.md:56` | "A check that cannot run says so, because a clean report and one that **couldn't look** are different things." |
 | R3, after 4c (+24 words) | `Ctrl+P` → type `geo-methods.md:14` → `Enter`. Click **14**, Shift+click **19**, then `Ctrl+G 24`, click **24**. CAPTION `geo-methods.md:14–24 · GEO (KDD 2024): a benchmark gain, not a defect` | "We calibrate against research, not instinct: the GEO paper shows that adding statistics helps **in a benchmark**, so a page without them scores **low**." |
-| R4, after 6d (+19 words) | `Ctrl+P` → type `site_b.report.md:58` → `Enter`. Click **58**, Shift+click **60**. CAPTION `tests/golden/site_b.report.md:60 · same in site_b.audit-report.json:109 ("blocked_by": "F-001")` | "You can see the cascade in our golden report: **one** critical, **eleven** findings waiting on it, and engagement untouched." |
+| R4, after 6c (+19 words) | `Ctrl+P` → type `site_b.report.md:58` → `Enter`. Click **58**, Shift+click **60**. CAPTION `tests/golden/site_b.report.md:60 · same in site_b.audit-report.json:109 ("blocked_by": "F-001")` | "You can see the cascade in our golden report: **one** critical, **eleven** findings waiting on it, and engagement untouched." |
 
-- **R2 says in plain words what 6d now says precisely.** Restore it only if Rule 0b landed badly.
+- **R2 says in plain words what 6c says precisely.** Restore it only if Rule 0b landed badly.
 - **R4 is last:** Part 2's Card B already shows the same cascade on a live site.
 - R3 and R4 open a file that is **not** one of the ten tabs, so afterwards come back with `Ctrl+P` and
   the `file:line` of the step you were on, not `Ctrl+PgDn`.

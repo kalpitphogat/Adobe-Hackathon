@@ -10,11 +10,11 @@ for *what you say*; the run sheet wins for *what you type*.
 [`RECORDING_FLOW.md`](RECORDING_FLOW.md) puts the two side by side, step by step: each command or
 click next to the line you say with it.
 
-| | hard cap | target | spoken words | at 145 wpm |
+| | hard cap | target | spoken words | timing |
 |---|---|---|---|---|
-| **Part 1**: thought process | 3:00 | **2:50** | 392 (cut ladder → 356) | 2:50 incl. title card and pauses (→ 2:35); 2:56 at the checker's cautious 140 |
+| **Part 1**: thought process | 3:00 | **2:55** | 429 (cut ladder → 390) | 2:59 at 150 wpm incl. title card and pauses, 2:54 at 155; cut ladder → 2:44 |
 | **Part 2**: live trial run | 2:00 | **1:55** after trimming idle waits | ~230, incl. one drill-down card | ~1:35 of talk, over the screen action |
-| **Total** | 5:00 | **4:44** | | 16 s of headroom |
+| **Total** | 5:00 | **4:50** | | 10 s of headroom |
 
 `python tools/check_script_anchors.py` re-checks every file:line in this script against
 `round3-frozen/submission.zip` and re-counts the Part 1 words. **It must print `0 problem(s)`
@@ -77,9 +77,9 @@ key by key:
 | tab | file (relative to the marketplace root) | first line | then |
 |---|---|---|---|
 | 1 | `skills/answerability-audit/references/chunking-model.md` | 40 | |
-| 2 | `skills/ai-readiness-orchestrator/references/gate-rules.md` | 10 | → 54 (Act II, reached with `Ctrl+P`) |
+| 2 | `skills/ai-readiness-orchestrator/references/gate-rules.md` | 10 | → 16 → 54 (Act II, reached with `Ctrl+P`) |
 | 3 | `skills/crawl-access-audit/references/ai-bots.json` | 12 | → 71 → 26 |
-| 4 | `skills/crawl-access-audit/scripts/check_robots.py` | 286 | → 318 |
+| 4 | `skills/crawl-access-audit/scripts/check_robots.py` | 286 | → 317 |
 | — | `Ctrl+P` → `suppression-rules.md:22` opens a new tab just right of tab 4 (the llms.txt beat) | | |
 | 5 | `skills/ai-readiness-orchestrator/references/severity-model.md` | 43 | |
 | 6 | `skills/ai-readiness-orchestrator/scripts/gate_model.py` | 117 | → 128 |
@@ -87,7 +87,7 @@ key by key:
 | 8 | `skills/structured-data-audit/scripts/extract_markup.py` | 203 | → 209 |
 | 9 | `skills/ai-readiness-orchestrator/scripts/severity.py` | 26 | → 13 → 68 |
 | 10 | `DESIGN.md` | 369 | → 377 → 322 → 332 |
-| — | two shots come from a file already open, reached with `Ctrl+P` and a `file:line`: `gate-rules.md:54` (Rule 0b, at the end of Act II) and `geo-methods.md:56` (the closing line, a file that is **not** one of the ten tabs) | | |
+| — | two more shots are reached with `Ctrl+P` and a `file:line`: `gate-rules.md:54` (Rule 0b at the end of Act II, tab 2 again) and `geo-methods.md:56` (the closing line, a file that is **not** one of the ten tabs) | | |
 
 **Highlight the line you're talking about** (click its line number) so the viewer's eye lands
 on it. Every shot also gets a **lower-third caption** with `file:line` (see §3). That caption is
@@ -95,14 +95,15 @@ how a judge traces the claim, even if the code is small on their screen.
 
 ---
 
-## 1 · PART 1 · Thought process (hard cap 3:00, target 2:50)
+## 1 · PART 1 · Thought process (hard cap 3:00; the full read is 2:59 at 150 words a minute)
 
 *Spoken lines are the `>` blockquotes. **Bold** = lean on the word. `·` = a half-beat pause.
 Everything else is direction, not speech.*
 
-Ten tabs plus the llms.txt file, thirteen spoken beats. Every line is a complete sentence: a viewer who looks at the caption
-instead of the code still hears an argument that finishes. `tools/check_script_anchors.py` counts
-these words and fails if the full cut cannot fit 3:00 at a careful 140 words a minute.
+Ten tabs, plus two files opened with `Ctrl+P`. Every spoken line is one or more complete sentences,
+and the lines highlighted while you say it show what it claims, so a viewer who reads the code or the
+caption instead of listening still gets an argument that finishes. `tools/check_script_anchors.py`
+counts these words and fails if the full read cannot fit 3:00 at 150 words a minute.
 
 ### Title card (0:00–0:02)
 
@@ -114,66 +115,67 @@ these words and fails if the full cut cannot fit 3:00 at a careful 140 words a m
 **SCREEN:** Tab 1 `chunking-model.md`, lines **40–43** highlighted (the handout's own sentence).
 **CAPTION:** `chunking-model.md:40–43 · the handout, quoted in our code`
 
-> Ask an AI assistant about a brand, and it either **quotes** the site or acts as if it **doesn't exist**.
-> The handout says why: a page that isn't easy to **reach, read and quote** never reaches the answer.
-> Our agent finds **which step fails**.
+> Ask an AI assistant about a brand, and it either **quotes** the site or acts as if it **doesn't exist**. The handout says why: a page that isn't easy to **reach, read and quote** never makes it into the answer. Our agent finds **which step fails**.
 
 *Deliver it like a question you're dying to answer: slower on "doesn't exist", a smile on the last line.*
 
-### Act I · What separates the cited from the ignored (0:21–0:56)
+### Act I · What separates the cited from the ignored (0:21–1:17)
 
-**SCREEN:** Tab 2 `gate-rules.md`, lines **10–14** ("three things have to succeed in order").
-**CAPTION:** `gate-rules.md:10 · 66 checks: DESIGN.md:108 (count generated from the code)`
+**SCREEN:** Tab 2 `gate-rules.md`, lines **10–14** ("three things have to succeed in order"), then lines
+**16–19** ("fifteen criticals … Fourteen of them are real defects that currently change nothing").
+**CAPTION:** `gate-rules.md:10–19 · 66 checks by stage: DESIGN.md:108–111 (reach 18, read 5, extract 16, trust 10, act 17)`
 
-> Those steps happen **in order**, so each of our 66 checks belongs to a stage: reach, read, extract, trust · and act, the visitor who arrives.
+> Those steps have to succeed **in order**, so we group our **66 checks** into stages in the same order.
+> A flat checklist ignores that order: a site blocking AI crawlers gets **fifteen critical** findings, and **fourteen** don't matter yet.
 
 **SCREEN:** Tab 3 `ai-bots.json`, lines **12–14** ("we need to know what blocking each one COSTS"),
-then `Ctrl+G 71` (`"GPTBot" … "category": "training"`), then `Ctrl+G 26` (the retrieval bot:
-"Blocking one of these removes the brand from that assistant's answers").
+then `Ctrl+G 71`, lines **71–72** (`"GPTBot" … "category": "training"`; "Blocking it does not remove a site
+from ChatGPT search results"), then `Ctrl+G 26` (the retrieval bot: "Blocking one of these removes the
+brand from that assistant's answers").
 **CAPTION:** `ai-bots.json:12–14 · 29 crawlers: 14 retrieval, 10 training, 5 contested`
 
-> Lists tell you which AI crawlers to **block**; we asked what blocking each one **costs**, and sorted 29 by role.
-> Block GPTBot and you have opted out of **training**. Block a retrieval crawler and you **vanish from that assistant's answers**.
+> Most lists tell you which AI crawlers to **block**. We asked what blocking each one **costs**, and sorted 29 by role.
+> Block GPTBot, and you have only opted out of **training**. Block a **retrieval** crawler, and you **vanish from that assistant's answers**.
 
-**SCREEN:** Tab 4 `check_robots.py`, line **286** (`severity="critical"`), then line **318** (`severity="info"`).
-**CAPTION:** `check_robots.py:286 critical · :318 info`
+**SCREEN:** Tab 4 `check_robots.py`, lines **285–286** ("AI retrieval crawler(s) that cite sources at answer
+time", `severity="critical"`), then lines **317–318** ("recorded as an observation, not a defect", `severity="info"`).
+**CAPTION:** `check_robots.py:285–286 critical · :317–318 info`
 
-> So one robots.txt rule is **critical** against a retrieval crawler, **info** against a training one.
+> So one robots.txt rule is **critical** against a retrieval crawler. Against a training crawler, the same rule is only **info**.
 
-*This is the payoff of the line before it: the same rule, two severities, chosen by what blocking costs.*
+*This is the payoff of the lines before it: the same rule, two severities, chosen by what blocking costs.*
 
 **SCREEN:** `Ctrl+P` → `suppression-rules.md:22` → `Enter` (opens next to tab 4), lines **22–27** ("**llms.txt.** Reported at LOW" … "nearly 300,000 domains with no correlation to AI citations. Most tools fire this as high severity.").
 **CAPTION:** `suppression-rules.md:22–27 · enforced: check_agent_files.py:24 docs sites only, :62 severity="low" · tests/test_suppression.py`
 
-> Hype inflates severity: Google says llms.txt neither helps nor harms, and nearly **300,000 domains** showed no link to citations. Ours: **low**.
+> Hype doesn't set our severity. Google says llms.txt neither helps nor harms visibility, and a study of nearly **300,000 domains** found no link to AI citations. Most tools rate a missing llms.txt **high**; we rate it **low**.
 
 *The research half of severity: what we refuse to over-rate. A measured null result, enforced in code (`check_agent_files.py:24` limits it to docs sites, `:62` sets `severity="low"`), not just written down.*
 
-### Act II · How bad, how sure (0:56–1:33)
+### Act II · How bad, how sure (1:17–1:47)
 
 **SCREEN:** Tab 5 `severity-model.md`, line **43** ("Severity answers 'how bad if true'. Confidence answers 'how sure'").
 **CAPTION:** `severity-model.md:43`
 
-> Severity asks **how bad this is if true**; confidence asks **how sure we are**.
+> Each finding has two ratings: **severity**, how bad if true, and **confidence**, how sure we are.
 
-**SCREEN:** Tab 6 `gate_model.py`, lines **117–118** (`def apply_cascade`), then line **120**
-(`Rule 3: cap, never delete.`), then lines **128–129** (`# Rule 0: gates never touch engagement`).
-**CAPTION:** `gate_model.py:117 apply_cascade · :42 ceiling "medium" · :120 cap, never delete · :129 Rule 0`
+**SCREEN:** Tab 6 `gate_model.py`, lines **117–122** (`def apply_cascade` … `Rule 3: cap, never delete.` …
+"The finding stays in the report"), then lines **128–129** (`# Rule 0: gates never touch engagement`).
+**CAPTION:** `gate_model.py:117–122 apply_cascade · :42 ceiling "medium" · :120 cap, never delete · :129 Rule 0, why: gate-rules.md:31–32`
 
-> A flat checklist hands a site that blocks AI crawlers **fifteen criticals**, and fourteen are moot.
-> `apply_cascade` caps those at medium and tags the **one** blocker that matters: **capped, never deleted**.
-> Engagement is never gated: a visitor from an ad doesn't care whether a crawler got in.
+> Our `apply_cascade` function fixes the flat checklist: it caps findings behind the **one** blocker at **medium**, and never deletes them.
+> Engagement is **never** capped: a visitor from an ad doesn't care whether a crawler got in.
 
-**SCREEN:** `Ctrl+P` → `gate-rules.md:54` → `Enter` (this is tab 2 again), lines **54–55**, then
-lines **56–57** ("Capping asserts a weaker claim. Suppression asserts none.").
+**SCREEN:** `Ctrl+P` → `gate-rules.md:54` → `Enter` (this is tab 2 again), lines **54–57** ("`read` failures
+suppress engagement findings because the evidence is absent. Capping asserts a weaker claim. Suppression asserts none.").
 **CAPTION:** `gate-rules.md:54–57 · Rule 0b`
 
-> And when we never even saw the page a visitor sees, those findings aren't capped, they're **suppressed**.
+> But if we never saw the page a visitor sees, we **suppress** its engagement findings, because we have no evidence.
 
 *Rule 0b is the cascade's other half: capping says "real, but moot", suppression says "we never looked".
 This shot leaves you on tab 2, so open Act III with `Ctrl+P` → `orchestrate.py:242`, not `Ctrl+PgDn`.*
 
-### Act III · Every fix earns its place (1:33–1:59)
+### Act III · Every fix earns its place (1:47–2:10)
 
 **SCREEN:** Tab 7 `orchestrate.py`, lines **242–253** (`validate_finding`, line 253 the rejection).
 **CAPTION:** `orchestrate.py:242 validate_finding · rejection logged at :695`
@@ -183,95 +185,97 @@ This shot leaves you on tab 2, so open Act III with `Ctrl+P` → `orchestrate.py
 **SCREEN:** Tab 8 `extract_markup.py`, lines **203–204** ("… Never invented."), then lines **209–210** (`__FILL_IN__`).
 **CAPTION:** `extract_markup.py:204 · "__FILL_IN__" when a value is absent (94 places in the engine)`
 
-> Our patches reuse values from the page and **never invent one**; whatever we couldn't find stays **FILL_IN**.
+> Our patches reuse values from the page; we **never invent** one. Whatever we couldn't find is left as **FILL_IN**.
 
-**SCREEN:** Tab 9 `severity.py`, lines **26–29** (the three lookup tables), then **13–15**, then **68–71** (`sort_key`).
+**SCREEN:** Tab 9 `severity.py`, lines **26–29** (the three lookup tables), then **13–15**.
 **CAPTION:** `severity.py:27–29 lookups · :13 impact from post-gate severity · :68 total order`
 
-> Priority is **ICE**: impact, confidence, ease. Impact uses the **capped** severity, so a moot defect cannot outrank its blocker.
+> We rank fixes by **ICE**: impact, confidence and ease. Impact uses the **capped** severity, so a blocked finding never outranks its blocker.
 
-### Act IV · The day the real web proved us wrong (1:59–2:39)
+### Act IV · The day the real web proved us wrong (2:10–2:48)
 
 **SCREEN:** Tab 10 `DESIGN.md`, lines **369–374** (five sites, 365 findings), then lines **374–379**
 (twelve false positives, 205), then lines **377–378** (the two we name out loud).
 **CAPTION:** `DESIGN.md:374–379 · field test on five live sites` · then `DESIGN.md:377–378`
 
 > Then the real web **humbled** us. Five live sites produced **365 findings**, and that number was itself the finding.
-> We named twelve false positives before touching a threshold, and came down to **205**.
-> Two of them: we were reading file sizes as **phone numbers**, and telling a free download page to publish a **price**.
+> We named **twelve false positives** before touching any threshold, and fixing them cut the count to **205**.
+> Two were embarrassing: we read file sizes as **phone numbers**, and asked a free download page for a **price**.
 
 *Let the phone-numbers line breathe. It is the one laugh in Part 1, and it makes "twelve false
 positives" concrete instead of a number.*
 
 **SCREEN:** same tab, `Ctrl+G 322`, lines **322–325** ("fired **zero times** … **16 words**"), then
-`Ctrl+G 332`, lines **332–335** ("A fixture proves a check does what you wrote").
-**CAPTION:** `DESIGN.md:324, :334 · rewritten: dom.py:56 NOSCRIPT_JS_NOTICE · pinned: tests/test_regressions.py R1–R12`
+`Ctrl+G 332`, lines **332–335** ("tuned to a synthetic Next.js fixture" … "A fixture proves a check does what you wrote").
+**CAPTION:** `DESIGN.md:324, :332–334 · rewritten: dom.py:56 NOSCRIPT_JS_NOTICE · pinned: tests/test_regressions.py R1–R12`
 
-> Worse, our empty-page detector fired **zero times**, even on a docs site of **sixteen words**, because we'd tuned it to our own fixture.
-> A fixture proves a check does what you wrote · **not that you wrote the right thing**.
+> Worse, our empty-page detector fired **zero times**, even on a **sixteen-word** docs site.
+> We'd tuned it to our own fixture, and a fixture proves a check does what you wrote · **not that you wrote the right thing**.
 
 *This is the beat that wins Part 1. Don't rush the admission; it buys the closing line.*
 
-### Close (2:39–2:50)
+### Close (2:48–3:00)
 
 **SCREEN:** `Ctrl+P` → `geo-methods.md:56` → `Enter`, lines **56–57** ("A citation that cannot be
 checked is worse than no citation, because it looks like evidence.").
 **CAPTION:** `geo-methods.md:56`
 
-> Our own code puts it best: a citation you can't check is worse than none, **because it looks like evidence**.
-> So don't trust us. · **Watch.**
+> Our own code puts it best: a citation you can't check is worse than none, **because it looks like evidence**. So don't trust us. · **Watch.**
 
 *Hard cut to Part 2 on "Watch."*
 
 ### If the timed run is long: the cut ladder
 
-The full cut is 392 words: **2:56** at the checker's conservative 140 words a minute, 2:50 at 145.
-Only if your own timed read goes over 2:50, cut in this order. Each step removes a whole sentence,
+The full read is 429 words: **2:59** at the 150 words a minute the checker uses, 2:54 at 155.
+Only if your own timed read goes over 2:55, cut in this order. Each step removes whole sentences,
 so nothing is left dangling.
 
-1. The `check_robots.py` beat, "So one robots.txt rule is critical…" (−15 words → about 2:49).
-   Tab 4 is then skipped: from tab 3, do the `suppression-rules.md` shot, then press `Ctrl+PgDn`
-   **twice** to reach tab 5.
-2. The phone-numbers line, "Two of them:…" (−21 words → about 2:40). It is the one laugh in Part 1,
-   so it is the last thing to go, not the first.
+1. The `check_robots.py` beat, "So one robots.txt rule is critical…" and "Against a training crawler…"
+   (−20 words → about 2:51). Tab 4 is then skipped: from tab 3, do the `suppression-rules.md` shot,
+   then press `Ctrl+PgDn` **twice** to reach tab 5.
+2. The phone-numbers line, "Two were embarrassing:…" (−19 words → about 2:44). It is the one laugh in
+   Part 1, so it is the last thing to go, not the first.
 
 **Never cut:**
 - the cold open
+- the order and the flat checklist (tab 2)
 - the crawler-roles beat (block GPTBot / block a retrieval crawler)
 - the llms.txt beat (`suppression-rules.md:22–27`)
-- `apply_cascade` and "engagement is never gated"
-- Rule 0b's first sentence ("aren't capped, they're suppressed")
+- `apply_cascade` and "engagement is never capped"
+- Rule 0b ("we suppress its engagement findings")
 - `validate_finding`
 - "never invent one" / FILL_IN
-- ICE's first two sentences
+- ICE's two sentences
 - the 365 → 205 field test
 - the zero-recall story
 - the closing quote
 
 ### If the timed run is short: lines you can put back
 
-The phone-numbers laugh, Rule 0b and the llms.txt beat are now **in the main read**. These six are the
-lines that did not fit, in the order they are worth restoring. Every one still has its row in the anchor ledger, so
-it is safe to put back.
+These are the lines that did not fit, in the order they are worth restoring. Each is a complete
+sentence and still has its row in the anchor ledger, so it is safe to put back.
 
-Mind the arithmetic: 392 words is 2:56 at 140 words a minute, so only **9 more words** fit under the
-3:00 cap. Any one of R1, R5, R6 or R7 fits alone (+6, +4, +9, +8 words); R1 and R5 together need a 1-word trim. R2, R3 or R4 needs a cut-ladder step to pay for it — and
+Mind the arithmetic: the full read is already 2:59 at 150 words a minute. A timed read under 2:45
+means you speak faster than that, so add one line at a time and time it again, staying at 2:55 or
+under. At 150 words a minute, any restore line needs a cut-ladder step to pay for it, and
 `python tools/check_script_anchors.py` must still print `0 problem(s)` afterwards.
 
 | # | +words | SCREEN and CAPTION | SAY |
 |---|---|---|---|
-| R1 | +6 | No new shot: stay on tab 3, lines **12–14**. Say it before "Lists tell you which AI crawlers…" | "Reach taught us our first rule." |
-| R5 | +4 | No new shot: the caption already cites `:695`. Add it to the end of the `validate_finding` line. | "…and logs the rejection." |
-| R6 | +9 | No new shot: tab 9, `Ctrl+G 68`, lines **68–71**, at the end of the ICE line. CAPTION `severity.py:68 total order` | \"…and **the same evidence always ranks the same way**." |
-| R7 | +8 | No new shot: in `gate-rules.md`, lines **56–57**, after Rule 0b. CAPTION `gate-rules.md:56–57` | \"A cap still claims something · suppression claims **nothing**." |
+| R1 | +6 | No new shot: stay on tab 3, lines **12–14**. Say it before "Most lists tell you which AI crawlers…" | "Reach taught us our first rule." |
+| R5 | +5 | No new shot: the caption already cites `:695`. Say it after the `validate_finding` line. | "It also logs every rejection." |
+| R6 | +8 | Tab 9, `Ctrl+G 68`, lines **68–71**, after the ICE lines. CAPTION `severity.py:68 total order` | "The same evidence always ranks the **same way**." |
+| R7 | +8 | No new shot: in `gate-rules.md`, lines **56–57** are already highlighted, after Rule 0b. CAPTION `gate-rules.md:56–57` | "A cap still claims something; suppression claims **nothing**." |
 | R2 | +19 | Tab 5 `severity-model.md`, `Ctrl+G 56`, lines **56–57**, after the severity/confidence line. CAPTION `severity-model.md:56` | "A check that cannot run says so, because a clean report and one that **couldn't look** are different things." |
-| R3 | +24 | `Ctrl+P` → `geo-methods.md:14` → `Enter`, lines **14–19**, then `Ctrl+G 24`, after the `check_robots.py` beat. CAPTION `geo-methods.md:14–24 · GEO (KDD 2024): a benchmark gain, not a defect` | "We calibrate against research, not instinct: the GEO paper shows that adding statistics helps **in a benchmark**, so a page without them scores **low**." |
+| R3 | +24 | `Ctrl+P` → `geo-methods.md:14` → `Enter`, lines **14–19**, then `Ctrl+G 24`, after the llms.txt beat. CAPTION `geo-methods.md:14–24 · GEO (KDD 2024): a benchmark gain, not a defect` | "We calibrate against research, not instinct: the GEO paper shows that adding statistics helps **in a benchmark**, so a page without them scores **low**." |
 | R4 | +19 | `Ctrl+P` → `site_b.report.md:58` → `Enter`, lines **58–60**, after Rule 0b. CAPTION `tests/golden/site_b.report.md:60 · same in site_b.audit-report.json:109 ("blocked_by": "F-001")` | "You can see the cascade in our golden report: **one** critical, **eleven** findings waiting on it, and engagement untouched." |
 
 R2 says in plain words what Rule 0b now says precisely, so restore it only if the Rule 0b beat
 landed badly. R4 is last because Part 2's Card B already shows the same cascade on a live site.
 After any `Ctrl+P` restore line, come back with `Ctrl+P` and the `file:line` of the beat you were on,
 not `Ctrl+PgDn`.
+
+---
 
 ## 2 · PART 2 · Live trial run (hard cap 2:00 after trimming, target 1:55)
 
@@ -396,9 +400,9 @@ the voice should be **the person at the keyboard**, since it's their live run.
 
 | brief requirement (Round 4, §3) | where in the video |
 |---|---|
-| Part 1: how you discovered the findings (field research, what separates cited from ignored, distilled into repeatable checks) | Cold open + Act I (handout's reach/read/quote, crawler roles, GEO) and Act IV (five-site field test, zero-recall miss) |
-| Part 1: how you assigned severities | Act I (critical vs info by crawler role, GEO → low) + Act II (severity vs confidence, cascade, Rule 0, golden) |
-| Part 1: how you derived the suggested actions (mechanism-sound, prioritised) | Act III (`validate_finding`, patches never invented, ICE, total order) |
+| Part 1: how you discovered the findings (field research, what separates cited from ignored, distilled into repeatable checks) | Cold open + Act I (handout's reach/read/quote, why the order matters, crawler roles, the llms.txt research) and Act IV (five-site field test, zero-recall miss) |
+| Part 1: how you assigned severities | Act I (critical vs info by crawler role, llms.txt → low) + Act II (severity vs confidence, the cascade caps and never deletes, Rule 0, Rule 0b) |
+| Part 1: how you derived the suggested actions (mechanism-sound, prioritised) | Act III (`validate_finding`, patches never invented, FILL_IN, ICE on the capped severity) |
 | Part 1: anchor every claim to code | every shot: tab + highlighted line + `file:line` caption; §5 ledger, machine-checked |
 | Part 2: unseen URL, typed on camera, real and continuous | 0:18–0:28, one take, trims badged |
 | Part 2: agent invokes the entrypoint skill, fetches, reasons, produces findings | 0:28–0:50 (`Skill(ai-readiness-orchestrator)`, two passes, the agent's pass-2 reasoning) |
@@ -432,17 +436,17 @@ row against the zip itself.
 | A11 | restore line R3: …so their absence scores low | `skills/answerability-audit/references/geo-methods.md:24` | `three markers, and it fires at **low** severity.` |
 | A12 | how bad if true / how sure | `skills/ai-readiness-orchestrator/references/severity-model.md:43` | `Severity answers "how bad if true". Confidence answers "how sure".` |
 | A13 | restore line R2: a clean report vs one that couldn't look | `skills/ai-readiness-orchestrator/references/severity-model.md:56` | `A clean report and a report that could not look are` |
-| A14 | a flat checklist: fifteen criticals, fourteen moot | `skills/ai-readiness-orchestrator/references/gate-rules.md:18` | `fifteen criticals and no indication which one to fix first. Fourteen of them are` |
+| A14 | a flat checklist: fifteen critical findings, fourteen don't matter yet | `skills/ai-readiness-orchestrator/references/gate-rules.md:18` | `fifteen criticals and no indication which one to fix first. Fourteen of them are` |
 | A15 | apply_cascade | `skills/ai-readiness-orchestrator/scripts/gate_model.py:117` | `def apply_cascade(findings: list[dict], id_of)` |
 | A16 | caps at medium | `skills/ai-readiness-orchestrator/scripts/gate_model.py:42` | `BLOCKED_SEVERITY_CEILING = "medium"` |
-| A17 | capped, never deleted | `skills/ai-readiness-orchestrator/scripts/gate_model.py:120` | `Rule 3: cap, never delete.` |
-| A18 | line 128: engagement is never gated | `skills/ai-readiness-orchestrator/scripts/gate_model.py:128` | `if finding.get("category") != "discoverability":` |
+| A17 | caps them, never deletes them | `skills/ai-readiness-orchestrator/scripts/gate_model.py:120` | `Rule 3: cap, never delete.` |
+| A18 | line 128: engagement is never capped | `skills/ai-readiness-orchestrator/scripts/gate_model.py:128` | `if finding.get("category") != "discoverability":` |
 | A19 | (same) | `skills/ai-readiness-orchestrator/scripts/gate_model.py:129` | `# Rule 0: gates never touch engagement` |
 | A20 | restore line R4: eleven findings waiting on F-001 | `tests/golden/site_b.report.md:60` | `11 finding(s) are recorded but capped at medium because F-001` |
 | A21 | restore line R4: blocked_by F-001 | `tests/golden/site_b.audit-report.json:109` | `"blocked_by": "F-001",` |
 | A22 | validate_finding | `skills/ai-readiness-orchestrator/scripts/orchestrate.py:242` | `def validate_finding(finding: dict)` |
 | A23 | …rejects a finding without a mechanism | `skills/ai-readiness-orchestrator/scripts/orchestrate.py:253` | `return "suggested_action has no mechanism"` |
-| A24 | …and logs the rejection | `skills/ai-readiness-orchestrator/scripts/orchestrate.py:695` | `was rejected as malformed` |
+| A24 | restore line R5: it also logs every rejection | `skills/ai-readiness-orchestrator/scripts/orchestrate.py:695` | `was rejected as malformed` |
 | A25 | patches never invented | `skills/structured-data-audit/scripts/extract_markup.py:204` | `A JSON-LD block built from values observed on the page. Never invented.` |
 | A58 | llms.txt: reported low, docs sites only | `skills/ai-readiness-orchestrator/references/suppression-rules.md:22` | `**llms.txt.** Reported at LOW, and only on documentation and developer-platform` |
 | A59 | Google: neither helps nor harms | `skills/ai-readiness-orchestrator/references/suppression-rules.md:24` | `are not used by Google Search and neither help nor harm visibility` |
@@ -450,13 +454,22 @@ row against the zip itself.
 | A61 | no link to citations; most tools rate it high | `skills/ai-readiness-orchestrator/references/suppression-rules.md:27` | `correlation to AI citations. Most tools fire this as high severity.` |
 | A62 | enforced: docs and developer sites only | `skills/crawl-access-audit/scripts/check_agent_files.py:24` | `AGENT_FACING = {"docs", "developer-platform"}` |
 | A63 | enforced: severity low | `skills/crawl-access-audit/scripts/check_agent_files.py:62` | `severity="low", confidence="confirmed", stage="reach",` |
+| A64 | blocking GPTBot does not remove you from ChatGPT search | `skills/crawl-access-audit/references/ai-bots.json:72` | `Blocking it does not remove a site from ChatGPT search results` |
+| A65 | the retrieval-crawler finding, on screen with :286 | `skills/crawl-access-audit/scripts/check_robots.py:285` | `AI retrieval crawler(s) that cite sources at answer time` |
+| A66 | the training-crawler finding: an observation, not a defect | `skills/crawl-access-audit/scripts/check_robots.py:317` | `recorded as an observation, not a defect` |
+| A67 | 66 checks grouped by stage, in order (caption) | `DESIGN.md:111` | `By stage: reach 18, read 5, extract 16, trust 10, act 17.` |
+| A68 | fourteen of the fifteen don't matter yet | `skills/ai-readiness-orchestrator/references/gate-rules.md:19` | `real defects that currently change nothing.` |
+| A69 | a capped finding stays in the report | `skills/ai-readiness-orchestrator/scripts/gate_model.py:120` | `The finding stays in the report` |
+| A70 | a visitor from an ad doesn't care whether a crawler got in (caption) | `skills/ai-readiness-orchestrator/references/gate-rules.md:32` | `email or a shared link does not care whether a crawler was let in` |
+| A71 | Rule 0b: read failures suppress engagement findings | `skills/ai-readiness-orchestrator/references/gate-rules.md:55` | `failures suppress engagement findings because` |
+| A72 | FILL_IN, on screen in the patch builder | `skills/structured-data-audit/scripts/extract_markup.py:209` | `"__FILL_IN__:name"` |
 | A26 | FILL_IN when a value is absent | `skills/structured-data-audit/scripts/check_hierarchy.py:211` | `__FILL_IN__:organisation_name` |
 | A27 | ICE: confidence lookup | `skills/ai-readiness-orchestrator/scripts/severity.py:27` | `CONFIDENCE_TO_ICE = {"confirmed": 9.0, "likely": 6.0, "hypothesis": 3.0}` |
 | A28 | ICE: impact lookup | `skills/ai-readiness-orchestrator/scripts/severity.py:28` | `SEVERITY_TO_IMPACT = {"critical": 10.0, "high": 8.0, "medium": 5.0` |
 | A29 | ICE: ease lookup | `skills/ai-readiness-orchestrator/scripts/severity.py:29` | `EFFORT_TO_EASE = {"low": 9.0, "medium": 5.0, "high": 2.0}` |
 | A30 | impact uses the capped severity | `skills/ai-readiness-orchestrator/scripts/severity.py:13` | `Impact derives from post-gate severity` |
 | A31 | total sort order | `skills/ai-readiness-orchestrator/scripts/severity.py:68` | `def sort_key(finding: dict):` |
-| A32 | same evidence, same ranking | `skills/ai-readiness-orchestrator/scripts/severity.py:71` | `the ordering is total and therefore deterministic` |
+| A32 | restore line R6: same evidence, same ranking | `skills/ai-readiness-orchestrator/scripts/severity.py:71` | `the ordering is total and therefore deterministic` |
 | A33 | five live sites, architectural variance | `DESIGN.md:370` | `sites chosen for **architectural variance**` |
 | A34 | 365 findings, itself the finding | `DESIGN.md:374` | `That run produced **365 findings**, which was itself the finding.` |
 | A35 | file sizes flagged as phone numbers | `DESIGN.md:377` | `file sizes being reported as inconsistent phone` |
@@ -510,7 +523,7 @@ The checker also recomputes three numbers the script speaks: **29** crawlers in 
 - [ ] `python tools/check_script_anchors.py` → `0 problem(s)`
 - [ ] `python tools/check_replay.py` → `0 problem(s)` (harness still 2.1.282)
 - [ ] The 2026-09-26 step-2 prompt rehearsed once on a seen site (run sheet §A 1b), transcript in `rehearsal/`: table of confirmed findings, a verdict on every row
-- [ ] Part 1 timed read-through ≤ 2:50 (cut ladder applied if not)
+- [ ] Part 1 timed read-through ≤ 2:55 (cut ladder applied if not)
 - [ ] VS Code shows the **unzipped submission**, tabs 1–12 in order, captions prepared in the editor
 - [ ] Run sheet §A done: fresh `demo-live/`, `ENGINE UNCHANGED`, prompt on the clipboard **without** the URL
 - [ ] docs.pytest.org **not** audited by anyone before the take
