@@ -7,10 +7,12 @@ with it. The spoken lines are copied word for word from [`VIDEO_SCRIPT.md`](VIDE
 
 This file works unchanged on **any Windows PC** with PowerShell, whoever's machine records.
 Nothing below names a user, a drive or a folder outside this repo:
-- **Every command runs at the repo root:** the folder of your clone that holds `REPLAY_IT_Professionals.txt`.
-  To open PowerShell there, open that folder in File Explorer, click the address bar, type `powershell`, and press Enter.
+- **Every command runs at the repo root:** the folder of your clone that holds `REPLAY_IT_Professionals.txt`,
+  whatever the folder is called. The one exception is Part 2's on-camera commands (Stage 3): they run in
+  `demo-live\brand-ai-readiness-audit`, where the Stage 1.2 block leaves you.
+  To open PowerShell at the repo root, open that folder in File Explorer, click the address bar, type `powershell`, and press Enter.
   A VS Code terminal opens in your home folder unless VS Code has the repo folder open, so check that
-  the prompt ends in `Adobe-Hackathon>` before you paste.
+  `Test-Path REPLAY_IT_Professionals.txt` prints `True` before you paste.
 - **Blocks that must not run anywhere else are wrapped** in `if (Test-Path REPLAY_IT_Professionals.txt) { … }`.
   Paste the whole block, and press `Enter` once more if nothing happens. Outside the repo root it prints one
   red `Wrong folder` line and runs nothing, instead of creating or deleting folders in the wrong place.
@@ -488,6 +490,11 @@ next row's keys still work; skipping B1 means doing its keys in 3a, as 3a says.
 Start in the terminal window from Stage 1.2:
 - folder `demo-live\brand-ai-readiness-audit` inside the repo;
 - venv active, and the screen cleared.
+
+**Before you press record,** the prompt must end in `demo-live\brand-ai-readiness-audit>`. The on-camera
+commands reach the repo through `..\..\tools` and `..\submission.zip`, so from anywhere else they fail
+(from the repo root, `..\..\tools` points outside the clone: "can't open file"). If the prompt shows
+anything else, paste the Stage 1.2 block again at the repo root.
 
 ### 0:00–0:02 · Title strip
 | | |
